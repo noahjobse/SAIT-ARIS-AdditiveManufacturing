@@ -1,0 +1,13 @@
+# Obsidian files and directories
+.obsidian/
+.obsidian.vault
+.obsidian-workspace
+*.obsidian
+
+# Obsidian cache files
+.obsidian/cache/
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Keep .md files (explicitly allow them)
+!*.md
