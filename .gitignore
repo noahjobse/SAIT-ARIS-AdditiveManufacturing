@@ -11,3 +11,23 @@
 
 # Keep .md files (explicitly allow them)
 !*.md
+
+# RobotStudio files and directories
+# Rule: Local experimentation only - no shared live editing
+# .rsstation files are local, disposable, never merged
+*.rsstation
+*.rsstation.bak
+*.rsstation.tmp
+
+# RobotStudio temporary files
+Backup/
+*.log
+*.tmp
+*.bak
+
+# Exception: Baseline station (versioned explicitly)
+# Only baseline_station_v*.rsstation files should be tracked
+!phase-1/baseline-station/baseline_station_v*.rsstation
+
+# Note: RAPID .mod files and STL files are tracked by default
+# (No ignore patterns needed - they are shared artifacts)
