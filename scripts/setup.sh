@@ -19,41 +19,42 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
+if ! command -v poetry &> /dev/null; then
+    echo "❌ poetry not found. Installing poetry..."
+    pip install poetry
+fi
+
+if ! command -v pnpm &> /dev/null; then
+    echo "❌ pnpm not found. Installing pnpm..."
+    npm install -g pnpm
+fi
+
 echo "✓ Node.js $(node --version)"
 echo "✓ Python $(python3 --version)"
+echo "✓ poetry $(poetry --version)"
+echo "✓ pnpm $(pnpm --version)"
 echo ""
 
 # Backend setup
 echo "Setting up backend..."
 cd backend
 
-if [ ! -d "venv" ]; then
-    echo "Creating Python virtual environment..."
-    python3 -m venv venv
-fi
-
-echo "Activating virtual environment..."
-source venv/bin/activate || source venv/Scripts/activate
-
-echo "Installing Python dependencies..."
-pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
+echo "Installing Python dependencies with poetry..."
+poetry install --with dev
 
 echo "✓ Backend setup complete"
+cd ..
 echo ""
 
 # Frontend setup
 echo "Setting up frontend..."
-cd ../frontend
+cd frontend
 
-if [ ! -d "node_modules" ]; then
-    echo "Installing npm dependencies..."
-    npm install --silent
-else
-    echo "✓ node_modules already exists (skipping npm install)"
-fi
+echo "Installing pnpm dependencies..."
+pnpm install
 
 echo "✓ Frontend setup complete"
+cd ..
 echo ""
 
 # Success message
@@ -65,12 +66,11 @@ echo "To start development:"
 echo ""
 echo "  Backend:"
 echo "    cd backend"
-echo "    source venv/bin/activate"
-echo "    uvicorn app.main:app --reload"
+echo "    poetry run uvicorn app.main:app --reload"
 echo ""
 echo "  Frontend:"
 echo "    cd frontend"
-echo "    npm run dev"
+echo "    pnpm dev"
 echo ""
 echo "  Access:"
 echo "    Frontend: http://localhost:5173"

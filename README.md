@@ -50,19 +50,49 @@ See [docs/architecture/system-design.md](docs/architecture/system-design.md) for
 
 ### Prerequisites
 
-- **Node.js** 20+ and npm
+- **Node.js** 20+
 - **Python** 3.11+
 - **Git**
 
+### Package Managers
+
+- **Frontend:** pnpm (faster, efficient)
+- **Backend:** poetry (modern Python package manager with lock files)
+
 ### Installation
 
+**Automated Setup (All Platforms):**
+
+Linux/macOS:
 ```bash
-# Clone repository
 git clone <repo-url>
 cd SAIT-ARIS-AdditiveManufacturing
+bash scripts/setup.sh
+```
 
-# Run automated setup
-./scripts/setup.sh
+Windows (PowerShell):
+```powershell
+git clone <repo-url>
+cd SAIT-ARIS-AdditiveManufacturing
+powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
+```
+
+Windows (Command Prompt):
+```cmd
+git clone <repo-url>
+cd SAIT-ARIS-AdditiveManufacturing
+scripts\setup.bat
+```
+
+**Manual Setup:**
+```bash
+# Backend (requires Poetry)
+cd backend
+poetry install --with dev
+
+# Frontend (requires Node.js + pnpm)
+cd frontend
+pnpm install
 ```
 
 ### Development
@@ -72,12 +102,11 @@ cd SAIT-ARIS-AdditiveManufacturing
 ```bash
 # Terminal 1: Backend
 cd backend
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-uvicorn app.main:app --reload
+poetry run uvicorn app.main:app --reload
 
 # Terminal 2: Frontend
 cd frontend
-npm run dev
+pnpm dev
 ```
 
 **Option 2: Docker**
