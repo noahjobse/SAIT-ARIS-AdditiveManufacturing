@@ -5,7 +5,8 @@
       "Bash(file:*)",
       "Bash(git restore:*)",
       "Bash(ls:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(find frontend backend models docs scripts .github -type d ! -path '*/.*' -exec bash -c 'touch \"\"$1/.gitkeep\"\"' _ {} ;)"
     ]
   }
 }
