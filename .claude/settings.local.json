@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(file:*)",
+      "Bash(git restore:*)",
+      "Bash(ls:*)",
+      "Bash(chmod:*)"
+    ]
+  }
+}

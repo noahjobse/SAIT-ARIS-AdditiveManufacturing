@@ -1,4 +1,47 @@
-# Obsidian files and directories
+# === Archived Project ===
+archive-*/
+
+# === Python Backend ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+
+# === Node.js Frontend ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+.DS_Store
+dist/
+build/
+.vite/
+.env.local
+.env.*.local
+
+# === IDEs ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === User Uploads (local testing) ===
+models/obstacles/uploads/
+
+# === Legacy Obsidian files and directories ===
 .obsidian/
 .obsidian.vault
 .obsidian-workspace
@@ -12,7 +55,7 @@
 # Keep .md files (explicitly allow them)
 !*.md
 
-# RobotStudio files and directories
+# === Legacy RobotStudio files and directories ===
 # Rule: Local experimentation only - no shared live editing
 # .rsstation files are local, disposable, never merged
 *.rsstation
