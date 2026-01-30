@@ -140,30 +140,28 @@ scripts/         - Development utilities (setup, conversion tools)
 
 ---
 
-## Development Roadmap
+## Development Strategy: MVP-First Approach
 
-**11-Week Plan** (see [docs/roadmap/11-week-plan.md](docs/roadmap/11-week-plan.md)):
+**Commitment:** Focus on **Student View MVP** (Weeks 1-8) with high polish and reliability.
+**Stretch Goals:** Engineer View and Production Readiness as Phase 2 (Weeks 9-11) if time permits.
 
-**Phase 1 (Weeks 1-3): Foundation**
-- [x] Repository setup and scaffolding
-- [ ] RAPID parser (lexer, AST for MoveJ/MoveL/MoveC)
-- [ ] Forward kinematics for IRB 4600
-- [ ] Basic Babylon.js scene and robot visualization
+See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete scope and success criteria.
 
-**Phase 2 (Weeks 4-6): Kinematics & Trajectory**
-- [ ] PyBullet inverse kinematics integration
-- [ ] Trajectory interpolation and smooth motion
-- [ ] Real-time 3D visualization with playback controls
+### 11-Week Staged Roadmap
 
-**Phase 3 (Weeks 7-9): Collision & Interactivity**
-- [ ] Obstacle import (STL/OBJ) and positioning
-- [ ] Mesh-to-mesh collision detection during simulation
-- [ ] Interactive trajectory editor and path adjustments
+| Phase | Duration | Focus | MVP Status |
+|-------|----------|-------|-----------|
+| **1: Visualization** | Weeks 1-3 | Babylon.js/TS setup, Robot rigging, STL Uploader | **Foundation** |
+| **2: The Brain** | Weeks 4-6 | RAPID parser, PyBullet kinematics, Batch execution | **Critical** |
+| **3: Student MVP** | Weeks 7-8 | Playback engine, Collision detection, UI polish | **GOAL: MVP LAUNCH** |
+| **4: Expansion** | Weeks 9-10 | Line-linked logs, Multi-robot support, Advanced overlays | *As Time Permits* |
+| **5: Finalization** | Week 11 | Docs, testing, deployment, final presentation | **Critical** |
 
-**Phase 4 (Weeks 10-11): Multi-Robot & Deployment**
-- [ ] Support for IRB 2600 and IRB 6700 models
-- [ ] RAPID export for validated programs
-- [ ] Cloud deployment and performance optimization
+**Key Milestones:**
+- ✅ Week 3: Robot rigging + STL uploader working
+- ✅ Week 6: End-to-end RAPID → trajectory pipeline
+- 🎯 Week 8: MVP Demo-ready (Student View complete)
+- ⭐ Week 11: Production delivery + documentation
 
 ---
 

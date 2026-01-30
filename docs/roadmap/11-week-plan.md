@@ -1,247 +1,330 @@
-# 11-Week Development Roadmap
+# 11-Week Development Roadmap - Student View MVP Strategy
 
 ## Overview
 
-Detailed week-by-week plan for building the ABB Online Simulation Platform.
+Detailed week-by-week plan for building the ABB Online Simulation Platform with focus on **Student View MVP by Week 8**.
 
 **Total Duration:** 11 weeks
-**Start Date:** [Specify]
-**End Date:** [Specify]
+**Strategy:** Staged commitment to MVP, with Phase 2 extensions as time permits
+**Target:** Polished, working Student View by end of Week 8
+
+See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete specification.
 
 ---
 
-## Phase 1: Foundation (Weeks 1-3)
+## Phase 1: Visualization Foundation (Weeks 1-3)
 
-### Week 1: Project Setup & RAPID Parser Foundation
+### Week 1: TypeScript Setup & 3D Scene Foundation
 
 **Goals:**
-- Complete repository reorganization
-- Implement RAPID lexer (tokenization)
-- Begin AST structure design for MoveJ, MoveL, MoveC
+- Finalize TypeScript/Vite frontend setup
+- Initialize Babylon.js 3D scene
+- Begin STL uploader implementation
 
 **Deliverables:**
-- [x] Clean repository structure
-- [ ] RAPID tokenizer (keywords, literals, operators)
-- [ ] Basic AST node classes
-- [ ] Unit tests for lexer
+- [x] Repository structure finalized
+- [x] TypeScript + Babylon.js + React configured
+- [ ] Babylon.js scene with camera/lighting
+- [ ] File upload API endpoint (backend)
+- [ ] React upload UI component
 
 **Backend Focus:**
-- RAPID language specification research
-- Lexer implementation (Python)
-- Test suite for tokenization
+- FastAPI project setup
+- STL/OBJ file parsing library selection
+- `/api/upload` endpoint scaffolding
 
 **Frontend Focus:**
-- React project setup with TypeScript
-- Basic Babylon.js scene initialization
-- Camera controls and lighting
+- Babylon.js scene initialization
+- React component hierarchy
+- File upload UI in Tailwind
 
 ---
 
-### Week 2: Forward Kinematics & Robot Visualization
+### Week 2: Robot Rigging & Forward Kinematics
 
 **Goals:**
-- Implement forward kinematics for ABB IRB 4600
-- Load and render 3D robot model in Babylon.js
-- Display joint angles in real-time
+- Implement forward kinematics for IRB 4600
+- Load and render rigged 3D robot model
+- Validate FK with visual feedback
 
 **Deliverables:**
-- [ ] DH parameter definitions for IRB 4600
+- [ ] DH parameters for IRB 4600, 2600, 6700
 - [ ] Forward kinematics solver (NumPy)
 - [ ] GLB model loader in Babylon.js
 - [ ] Joint angle visualization UI
+- [ ] `/api/forward-kinematics` endpoint
 
 **Backend Focus:**
-- DH parameter research for ABB robots
-- Forward kinematics math implementation
-- API endpoint: `/api/forward-kinematics`
+- DH parameter research for all 3 robots
+- Forward kinematics implementation
+- Test suite with known joint positions
 
 **Frontend Focus:**
-- GLB model import (IRB 4600)
-- Articulated robot renderer
-- Joint angle control panel
+- GLB model import (all 3 robots)
+- Articulated skeleton binding
+- Joint slider controls for testing FK
 
 ---
 
-### Week 3: Basic Trajectory Execution
+### Week 3: Transform Gizmo & Obstacle Positioning
 
 **Goals:**
-- Parse simple RAPID programs (MoveJ, MoveL)
-- Convert RAPID to trajectory points
-- Animate robot executing trajectory
+- Implement 3D transform gizmo for obstacles
+- Enable obstacle positioning (X, Y, Z, rotation)
+- Finalize STL upload and rendering
 
 **Deliverables:**
-- [ ] RAPID parser for MoveJ and MoveL
-- [ ] Linear interpolation for MoveL
-- [ ] Trajectory animation in 3D
-- [ ] Playback controls (play, pause, step)
+- [ ] Babylon.js transform gizmo (move/rotate)
+- [ ] Obstacle rendering in scene
+- [ ] Save/load obstacle positions (JSON)
+- [ ] Gizmo snap-to-grid option
+- [ ] `/api/obstacles` endpoint for persistence
 
 **Backend Focus:**
-- AST → trajectory point conversion
-- Linear interpolation algorithm
-- API endpoint: `/api/parse-rapid`
+- STL mesh loading and validation
+- Obstacle persistence (in-memory for MVP)
+- Coordinate transformation utilities
 
 **Frontend Focus:**
-- Trajectory playback engine
-- Animation timeline UI
-- Real-time robot state display
+- Gizmo implementation (3D handles)
+- Obstacle mesh rendering
+- UI for obstacle list and properties
 
 ---
 
-## Phase 2: Inverse Kinematics & Trajectory (Weeks 4-6)
+## Phase 2: The Brain - Logic Engine & Kinematics (Weeks 4-6)
 
-### Week 4: PyBullet Integration & Inverse Kinematics
+### Week 4: RAPID Parser Implementation
 
 **Goals:**
-- Integrate PyBullet physics engine
-- Implement IK solver for IRB 4600
-- Handle reachability and joint limits
+- Implement RAPID lexer and parser
+- Support MoveJ, MoveL, and basic control flow
+- Generate trajectory waypoints from parsed code
 
 **Deliverables:**
-- [ ] PyBullet URDF model for IRB 4600
+- [ ] RAPID lexer (tokenization)
+- [ ] RAPID parser (AST generation)
+- [ ] Support: MoveJ, MoveL, IF, FOR, WHILE
+- [ ] Waypoint extraction from AST
+- [ ] `/api/parse-rapid` endpoint
+- [ ] Unit tests for common RAPID patterns
+
+**Backend Focus:**
+- Python lexer/parser (PLY or custom)
+- AST node structure
+- Error reporting and validation
+
+**Testing:**
+- Test with 5+ real RAPID programs
+- Validate against expected AST
+
+---
+
+### Week 5: PyBullet Integration & Inverse Kinematics
+
+**Goals:**
+- Integrate PyBullet for accurate IK solving
+- Generate smooth trajectories between waypoints
+- Support all 3 robot models
+
+**Deliverables:**
+- [ ] PyBullet robot models (URDF) for all 3 ABB robots
 - [ ] IK solver with joint limit constraints
 - [ ] Reachability validation
-- [ ] API endpoint: `/api/inverse-kinematics`
+- [ ] Linear interpolation for MoveL
+- [ ] `/api/inverse-kinematics` endpoint
+- [ ] Trajectory smoothness testing
+
+**Backend Focus:**
+- PyBullet URDF conversion or creation
+- IK solver configuration
+- Joint limit validation
+- Trajectory quality metrics
 
 ---
 
-### Week 5: Smooth Trajectory Interpolation
+### Week 6: End-to-End Batch Execution Pipeline
 
 **Goals:**
-- Implement smooth motion between waypoints
-- Add MoveC (circular motion) support
-- Optimize trajectory timing
+- Connect RAPID parser → IK solver → trajectory output
+- Implement batch processing workflow
+- Return complete trajectory JSON
 
 **Deliverables:**
-- [ ] Cubic spline interpolation
-- [ ] MoveC arc trajectory generation
-- [ ] Velocity and acceleration profiles
-- [ ] Trajectory smoothness validation
+- [ ] `/api/execute` endpoint (accepts RAPID + obstacles)
+- [ ] Trajectory JSON format (timestamp, joint angles, TCP)
+- [ ] Collision detection API (PyBullet)
+- [ ] Basic error handling and validation
+- [ ] Performance testing (execution time)
+
+**Backend Focus:**
+- Pipeline orchestration
+- JSON schema definition
+- Error messages for invalid code
+- Batch job management
 
 ---
 
-### Week 6: Advanced RAPID Features
+## Phase 3: Student MVP Launch (Weeks 7-8)
+
+### Week 7: Playback Engine & Timeline Controls
 
 **Goals:**
-- Support RAPID control flow (IF, WHILE, FOR)
-- Implement WorkObject and Tool definitions
-- Add coordinate frame transformations
+- Implement trajectory playback animation
+- Add timeline scrubber for seeking
+- Polish UI for student-friendly interaction
 
 **Deliverables:**
-- [ ] RAPID control flow interpreter
-- [ ] WorkObject coordinate transforms
-- [ ] Tool Center Point (TCP) definitions
-- [ ] Multi-frame trajectory visualization
+- [ ] Babylon.js animation loop (smooth robot motion)
+- [ ] Timeline UI component (Tailwind)
+- [ ] Play/Pause/Seek controls
+- [ ] Speed adjustment slider
+- [ ] Real-time TCP/joint display
+- [ ] Error message display for failed simulations
+
+**Frontend Focus:**
+- Animation interpolation between trajectory points
+- Timeline scrubber with drag-to-seek
+- State management for playback
+- Responsive UI for all screen sizes
+
+**Quality Checklist:**
+- Animation smooth at all speeds
+- No visual stuttering
+- Responsive controls (<100ms latency)
 
 ---
 
-## Phase 3: Collision Detection & Interactivity (Weeks 7-9)
-
-### Week 7: Obstacle Import & Scene Management
+### Week 8: Collision Detection & MVP Polish
 
 **Goals:**
-- Enable user STL/OBJ obstacle uploads
-- Implement obstacle positioning (X, Y, Z, R)
-- Visualize full workcell environment
+- Implement collision detection in playback
+- Visual feedback for collisions
+- Final MVP testing and bug fixes
+- **MVP Status: COMPLETE & READY FOR DEMO**
 
 **Deliverables:**
-- [ ] File upload API (STL, OBJ, GLTF)
-- [ ] Obstacle placement gizmos (Babylon.js)
-- [ ] Scene save/load functionality
-- [ ] Workcell environment presets
+- [ ] PyBullet collision detection integration
+- [ ] Collision visual feedback (robot turns red)
+- [ ] Collision event logging (time, location)
+- [ ] Error handling for edge cases
+- [ ] UI refinement and accessibility
+- [ ] Complete user guide (SOP)
+
+**Frontend Focus:**
+- Collision highlighting
+- Error messages and recovery
+- Accessibility (keyboard navigation)
+- Mobile responsiveness (if time)
+
+**Testing:**
+- 10+ test RAPID programs
+- Various obstacle configurations
+- Edge cases (unreachable targets, etc.)
+
+**🎯 MVP LAUNCH: Student View is demo-ready**
 
 ---
 
-### Week 8: Collision Detection
+## Phase 4: Expansion & Polish (Weeks 9-10) - As Time Permits
+
+### Week 9: Engineer View Features
 
 **Goals:**
-- Implement mesh-to-mesh collision detection
-- Map collisions to RAPID line numbers
-- Generate engineering collision reports
+- Line-linked collision logging
+- Advanced diagnostics for engineers
+- Multi-robot model support
 
 **Deliverables:**
-- [ ] PyBullet collision detection
-- [ ] Collision → RAPID line mapping
-- [ ] Detailed collision logs (link, time, location)
-- [ ] Collision visualization (red highlights)
+- [ ] Collision → RAPID line number mapping
+- [ ] Detailed collision logs (link, velocity, energy)
+- [ ] TCP velocity and acceleration curves
+- [ ] IRB 2600 and 6700 model support
+- [ ] Robot model selection dropdown
 
 ---
 
-### Week 9: Interactive Trajectory Editor
+### Week 10: Advanced Features & Optimization
 
 **Goals:**
-- Enable point-and-click trajectory creation
-- Support manual waypoint editing
-- Export user-created trajectories as RAPID
+- Performance optimization
+- Additional RAPID features (if needed)
+- Production hardening
 
 **Deliverables:**
-- [ ] Interactive waypoint placement
-- [ ] Drag-to-edit trajectory points
-- [ ] RAPID code generation from GUI
-- [ ] Trajectory validation feedback
+- [ ] Rendering performance optimization
+- [ ] Trajectory caching
+- [ ] Database persistence (optional)
+- [ ] Deployment preparation
 
 ---
 
-## Phase 4: Multi-Robot & Deployment (Weeks 10-11)
-
-### Week 10: Multi-Robot Support & Optimization
+### Week 11: Finalization & Deployment
 
 **Goals:**
-- Add IRB 2600 and IRB 6700 models
-- Implement robot selection UI
-- Optimize rendering performance
+- Complete documentation
+- Final testing and bug fixes
+- Production deployment
+- Demo preparation
 
 **Deliverables:**
-- [ ] IRB 2600 DH parameters + GLB model
-- [ ] IRB 6700 DH parameters + GLB model
-- [ ] Robot selection dropdown
-- [ ] Performance profiling and optimization
+- [ ] Complete API documentation (OpenAPI/Swagger)
+- [ ] User SOP and tutorial video
+- [ ] Test coverage report (unit + integration)
+- [ ] Docker deployment configuration
+- [ ] CI/CD pipeline setup (GitHub Actions)
+- [ ] Final presentation slides
+- [ ] Demo script and video
 
----
+**Testing:**
+- Comprehensive regression testing
+- Performance benchmarks
+- User acceptance testing with students
 
-### Week 11: Polish & Deployment
-
-**Goals:**
-- Cloud deployment (AWS/Azure/Vercel)
-- Documentation finalization
-- User testing and bug fixes
-- Final demo preparation
-
-**Deliverables:**
-- [ ] Dockerized deployment
-- [ ] Production CI/CD pipeline
-- [ ] User documentation (SOP)
-- [ ] Final presentation and demo
+**Documentation:**
+- System architecture diagram
+- API endpoint reference
+- User getting-started guide
+- Developer setup instructions
 
 ---
 
 ## Milestones Summary
 
-| Week | Milestone | Status |
-|------|-----------|--------|
-| 1 | RAPID Lexer & Project Setup | In Progress |
-| 2 | Forward Kinematics & Visualization | Pending |
-| 3 | Basic Trajectory Animation | Pending |
-| 4 | Inverse Kinematics (PyBullet) | Pending |
-| 5 | Smooth Trajectories & MoveC | Pending |
-| 6 | RAPID Control Flow & Frames | Pending |
-| 7 | Obstacle Import & Scene | Pending |
-| 8 | Collision Detection | Pending |
-| 9 | Interactive Editor | Pending |
-| 10 | Multi-Robot Support | Pending |
-| 11 | Deployment & Polish | Pending |
+| Week | Milestone | MVP Status |
+|------|-----------|-----------|
+| 1 | TypeScript/Babylon.js Setup + STL Uploader | Foundation |
+| 2 | Robot Rigging + Forward Kinematics (3 models) | Critical |
+| 3 | Transform Gizmo + Obstacle Positioning | Critical |
+| **4** | **RAPID Parser** | **Critical** |
+| **5** | **PyBullet IK + Smooth Trajectories** | **Critical** |
+| **6** | **End-to-End Batch Pipeline** | **Critical** |
+| **7** | **Playback Engine + Timeline Controls** | **MVP Phase** |
+| **8** | **Collision Detection + MVP Polish** | **🎯 MVP LAUNCH** |
+| 9 | Engineer View (Stretch Goal) | As Time Permits |
+| 10 | Advanced Features (Stretch Goal) | As Time Permits |
+| 11 | Documentation + Deployment | Final Delivery |
+
+**Key Decision:** Hard cutoff at Week 8 for MVP completion. Weeks 9-11 are for stretch goals and polish. |
 
 ---
 
 ## Risk Management
 
-**Identified Risks:**
-1. PyBullet IK solver accuracy vs real ABB controllers
-2. Babylon.js performance with complex robot models
-3. RAPID parser edge cases and error handling
-4. Collision detection computational cost
+### Identified Risks
 
-**Mitigation Strategies:**
-1. Validate against RobotStudio simulations (accuracy benchmarks)
-2. Optimize mesh LOD and rendering pipeline
-3. Comprehensive test suite with real-world RAPID programs
-4. Spatial hashing and broad-phase collision culling
+| Risk | Impact | Mitigation |
+|------|--------|-----------|
+| **PyBullet IK accuracy** | Medium | Validate against RobotStudio; document accuracy limits |
+| **RAPID parser complexity** | Medium | Start with core features (MoveJ/L/IF/FOR); defer advanced |
+| **Babylon.js performance** | Low | Optimize LOD; profile early; cache trajectories |
+| **Collision detection speed** | Low | Broad-phase culling; spatial hashing; async computation |
+| **Scope creep** | High | **Hard cutoff at Week 8; defer all stretch goals** |
+
+### Success Factors
+
+1. **Clear MVP Definition** - Student View focused, no feature creep
+2. **Early Testing** - Start testing with real RAPID programs by Week 4
+3. **Weekly Checkpoints** - Review progress every Friday; adjust if needed
+4. **Modular Design** - Decouple RAPID parser from rendering; enable parallel work
+5. **Documentation** - Keep SOP and API docs updated continuously (not Week 11)
