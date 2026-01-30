@@ -6,6 +6,8 @@
 - **Jason** - Backend Lead (FastAPI, kinematics, RAPID parser)
 - **Noah** - Testing/QA & Documentation
 
+**Approach:** Frontend and backend teams work in **parallel** throughout Weeks 1-6 using mock data. Both teams use mock API responses to develop independently, then **integrate at critical points** (Weeks 6-8) to create the final full-stack product.
+
 ---
 
 ## Phase 1: Visualization Foundation (Weeks 1-3)
@@ -24,14 +26,18 @@
 - [ ] Design and implement file upload UI (Tailwind)
 - [ ] Create drag-and-drop file input
 - [ ] Add file type validation (STL, OBJ, GLB)
-- **Deliverables:** Upload form component, responsive layout
+- [ ] Mock file upload response for testing
+- **Deliverables:** Upload form component, responsive layout, mock data handler
+- **Note:** Can work independently with mock `/api/upload` response
 
 **Jason (Backend)**
 - [ ] Set up FastAPI project structure and dependencies
 - [ ] Research STL/OBJ parsing libraries
-- [ ] Implement `/api/upload` endpoint scaffolding
+- [ ] Implement `/api/upload` endpoint
 - [ ] Add file validation logic (size, type)
-- **Deliverables:** Upload API endpoint, file validation
+- [ ] Return sample response for frontend integration
+- **Deliverables:** Upload API endpoint, file validation, example response
+- **Note:** Parallel with frontend; can integrate Week 2 if early sync preferred
 
 **Noah (Testing/QA)**
 - [ ] Set up pytest framework for backend testing
@@ -39,7 +45,7 @@
 - [ ] Write unit tests for file upload validation
 - [ ] Document testing setup in `/docs/guides/testing.md`
 - **Deliverables:** Test framework, initial test coverage
-- **Blocked By:** Jason's `/api/upload` endpoint
+- **Note:** Test frontend with mocks and backend independently
 
 ---
 
@@ -51,28 +57,32 @@
 - [ ] Test model loading and animation setup
 - [ ] Create UI to select between robot models
 - **Deliverables:** All 3 robot models rendering in scene
+- **Note:** Can work independently; uses mock FK data for slider testing
 
 **Umaya (Frontend - React UI)**
 - [ ] Create joint angle slider controls for testing FK
 - [ ] Build UI panel to display current joint positions
 - [ ] Add robot model selector dropdown
 - [ ] Implement responsive layout for controls
-- **Deliverables:** Joint control UI, responsive layout
+- [ ] Mock FK response to test UI
+- **Deliverables:** Joint control UI, responsive layout, mock FK integration
+- **Note:** Can test with mock FK data while backend develops solver
 
 **Jason (Backend)**
 - [ ] Research and document DH parameters for IRB 4600, 2600, 6700
 - [ ] Implement forward kinematics solver (NumPy)
-- [ ] Create `/api/forward-kinematics` endpoint
+- [ ] Create `/api/forward-kinematics` endpoint with sample response
 - [ ] Write unit tests with known joint positions
-- **Deliverables:** FK solver, validated API endpoint
+- **Deliverables:** FK solver, validated API endpoint, example responses
+- **Note:** Parallel with frontend; integration Week 3 if early sync preferred
 
 **Noah (Testing/QA)**
 - [ ] Validate FK solver output against RobotStudio
 - [ ] Test with 5+ known joint positions per robot model
-- [ ] Integration test: joint sliders → FK calculation → visual feedback
+- [ ] Test frontend UI with mock FK data
 - [ ] Document FK validation results
 - **Deliverables:** FK validation report
-- **Blocked By:** Jason's FK solver
+- **Note:** Test backend independently; frontend with mocks
 
 ---
 
@@ -82,30 +92,35 @@
 - [ ] Implement 3D transform gizmo (move/rotate/scale handles)
 - [ ] Render uploaded STL/OBJ obstacles in scene
 - [ ] Add gizmo snap-to-grid option
-- [ ] Test gizmo interaction and obstacle positioning
+- [ ] Test gizmo interaction with mock obstacle data
 - **Deliverables:** Working transform gizmo, obstacle rendering
+- **Note:** Can work independently with mock obstacle positions
 
 **Umaya (Frontend - React UI)**
 - [ ] Create obstacle list UI panel
 - [ ] Add properties display (position, rotation, scale)
 - [ ] Implement save/load obstacle configuration UI
 - [ ] Add delete and reset buttons for obstacles
-- **Deliverables:** Obstacle management UI
+- [ ] Mock obstacle API responses
+- **Deliverables:** Obstacle management UI, mock integration
+- **Note:** Can test with mock data while backend builds API
 
 **Jason (Backend)**
 - [ ] Load STL/OBJ meshes and validate geometry
 - [ ] Implement `/api/obstacles` endpoint (in-memory storage)
 - [ ] Create coordinate transformation utilities
 - [ ] Add mesh validation and error reporting
-- **Deliverables:** Obstacle API, mesh loading
+- [ ] Return sample obstacle responses
+- **Deliverables:** Obstacle API, mesh loading, example responses
+- **Note:** Parallel with frontend; integration Week 3-4 if sync preferred
 
 **Noah (Testing/QA)**
-- [ ] Test gizmo with various obstacle sizes/shapes
-- [ ] Validate coordinate transformations
-- [ ] Integration test: upload STL → position gizmo → save config
-- [ ] Test edge cases (overlapping obstacles, out of bounds)
-- **Deliverables:** Gizmo validation report, test cases
-- **Blocked By:** Dylane's gizmo, Jason's obstacle API
+- [ ] Test gizmo with various obstacle sizes/shapes using mock data
+- [ ] Test frontend UI independently
+- [ ] Test backend mesh validation independently
+- [ ] Plan integration testing for Week 4
+- **Deliverables:** Gizmo validation report, test plan
+- **Note:** Test frontend with mocks and backend separately
 
 ---
 
@@ -117,30 +132,34 @@
 - [ ] Create code editor UI component (syntax highlighting for RAPID)
 - [ ] Add error message display area
 - [ ] Implement code input form with submit button
-- **Deliverables:** RAPID code editor UI
+- [ ] Mock parser response with sample AST data
+- **Deliverables:** RAPID code editor UI, mock response handler
+- **Note:** Can work independently with mock data
 
 **Umaya (Frontend)**
 - [ ] Build UI for parser feedback (errors, warnings)
 - [ ] Create waypoint visualization toggle
 - [ ] Add execution status indicator
-- **Deliverables:** Parser feedback UI components
+- [ ] Wire up mock parser responses to UI
+- **Deliverables:** Parser feedback UI components, mock integration
+- **Note:** Can test with mock data while backend develops parser
 
 **Jason (Backend)**
 - [ ] Implement RAPID lexer (tokenization)
 - [ ] Build RAPID parser (AST generation)
 - [ ] Support: MoveJ, MoveL, IF, FOR, WHILE commands
-- [ ] Create `/api/parse-rapid` endpoint
+- [ ] Create `/api/parse-rapid` endpoint with sample response
 - [ ] Write unit tests for common RAPID patterns
-- **Deliverables:** Working RAPID parser, validated API
-- **Testing:** Test with 5+ real RAPID programs
+- [ ] **Deliverables:** Working RAPID parser, validated API, example responses
+- **Note:** Parallel with frontend; can integrate mid-week if sync preferred
 
 **Noah (Testing/QA)**
 - [ ] Create test suite of RAPID programs
-- [ ] Validate parser AST output
+- [ ] Validate parser AST output with real API
 - [ ] Test error handling (syntax errors, invalid commands)
-- [ ] Integration test: upload RAPID → parse → display errors
+- [ ] Integration test: frontend mocks → backend parser validation
 - **Deliverables:** RAPID parser test suite, validation report
-- **Blocked By:** Jason's parser implementation
+- **Note:** Test backend independently; mock integration with frontend
 
 ---
 
@@ -410,16 +429,46 @@
 
 ---
 
-## Critical Dependencies
+## Critical Dependencies & Parallel Workflow
 
-1. **Week 1:** No blockers - can start all in parallel
-2. **Week 2:** Blocked by Jason's `/api/upload` (needed for model testing)
-3. **Week 3:** Blocked by Jason's obstacle API
-4. **Week 4:** Blocked by prior phases (Jason's parser is independent)
-5. **Week 5:** Blocked by Jason's FK solver from Week 2
-6. **Week 6:** Blocked by Jason's parser and IK solver
-7. **Week 7:** Blocked by `/api/execute` endpoint from Week 6
-8. **Week 8:** All features must be complete for MVP
+### Frontend & Backend Work in Parallel
+
+**Weeks 1-6:** Frontend and backend teams work independently with mock data/UI
+- **Frontend:** Can build components and UI without waiting for backend APIs
+- **Backend:** Can develop APIs without waiting for UI implementation
+
+### Integration Points (Must Sync)
+
+1. **Week 1:** No blockers - both teams start independently
+   - Frontend: Build 3D scene, UI components with mock data
+   - Backend: Build APIs with basic implementation
+
+2. **Week 6-7 Integration:** Critical sync point
+   - Frontend must consume `/api/execute` trajectory JSON format
+   - Backend must finalize trajectory JSON schema
+   - Joint implementation of playback + animation
+
+3. **Week 8 Integration:** Final sync
+   - Collision detection integration (backend collision data → frontend rendering)
+   - Error handling alignment across stack
+   - Full end-to-end testing
+
+### Detailed Dependency Chain
+
+**No Hard Blockers for Initial Development:**
+- Frontend can mock API responses while backend is building
+- Backend can stub endpoints while frontend is building UI
+- Both teams test independently, then integrate at checkpoints
+
+**Optional Early Integration (if preferred):**
+- Week 2: Frontend can connect to Jason's `/api/upload` for real testing
+- Week 4: Frontend can call Jason's `/api/parse-rapid` for real parser feedback
+- Week 5: Frontend can test IK solver output with real API
+
+**Hard Dependencies (Must be Complete):**
+- Week 6: `/api/execute` endpoint format must be finalized (used by both teams)
+- Week 7: Trajectory animation must work with real `/api/execute` output
+- Week 8: Collision detection must integrate backend data with frontend rendering
 
 ---
 
