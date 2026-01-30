@@ -8,6 +8,14 @@
 
 **Approach:** Frontend and backend teams work in **parallel** throughout Weeks 1-6 using mock data. Both teams use mock API responses to develop independently, then **integrate at critical points** (Weeks 6-8) to create the final full-stack product.
 
+**Student View Features (Weeks 1-8):**
+1. **File Upload** (Week 1) - Students can upload RAPID programs as files
+2. **Code Editor** (Week 4) - Students can type/paste RAPID code directly in the app
+3. **Visualization** (Weeks 1-3, 5-7) - 3D robot animation and obstacle positioning
+4. **Execution** (Week 6) - Submit code for execution and playback
+5. **Timeline Controls** (Week 7) - Play, pause, seek through trajectory
+6. **Collision Detection** (Week 8) - Visual feedback when robot hits obstacles
+
 ---
 
 ## Phase 1: Visualization Foundation (Weeks 1-3)
@@ -126,14 +134,16 @@
 
 ## Phase 2: The Brain - Logic Engine & Kinematics (Weeks 4-6)
 
-### Week 4: RAPID Parser Implementation
+### Week 4: RAPID Parser Implementation & Code Editor
 
 **Dylane (Frontend)**
-- [ ] Create code editor UI component (syntax highlighting for RAPID)
-- [ ] Add error message display area
+- [ ] Create RAPID code editor UI component (syntax highlighting for RAPID)
 - [ ] Implement code input form with submit button
+- [ ] Add line numbers and code formatting
 - [ ] Mock parser response with sample AST data
-- **Deliverables:** RAPID code editor UI, mock response handler
+- [ ] Test editor with sample RAPID programs
+- **Deliverables:** RAPID code editor component, mock response handler
+- **Feature:** Students can type/paste RAPID code directly in student view
 - **Note:** Can work independently with mock data
 
 **Umaya (Frontend)**
@@ -141,7 +151,10 @@
 - [ ] Create waypoint visualization toggle
 - [ ] Add execution status indicator
 - [ ] Wire up mock parser responses to UI
-- **Deliverables:** Parser feedback UI components, mock integration
+- [ ] Implement error message display for parser/execution failures
+- [ ] Integrate code editor into main student view layout
+- **Deliverables:** Parser feedback UI, integrated editor layout, mock integration
+- **Feature:** Students see real-time feedback (syntax errors, execution status)
 - **Note:** Can test with mock data while backend develops parser
 
 **Jason (Backend)**
@@ -385,24 +398,26 @@
 ## Summary by Team Member
 
 ### Dylane (Frontend - Babylon.js Specialist)
-**Responsibilities:** 3D scene, robot models, animations, transform gizmo, collision rendering
+**Responsibilities:** 3D scene, robot models, animations, transform gizmo, RAPID code editor, collision rendering
 
 - **Weeks 1-3:** Scene setup, robot rigging, gizmo implementation
-- **Weeks 4-6:** Trajectory visualization, animation interpolation
+- **Weeks 4-6:** RAPID code editor component, trajectory visualization, animation interpolation
 - **Weeks 7-8:** Playback engine, collision visuals
 - **Weeks 9-11:** Advanced overlays, optimization (as time permits)
-- **Total Tasks:** ~30 across 8 weeks
+- **Total Tasks:** ~32 across 8 weeks
+- **Key Feature:** Builds the RAPID code editor UI that lets students type code directly
 
 ---
 
 ### Umaya (Frontend - React UI Specialist)
-**Responsibilities:** User interface, component library, controls, responsive design
+**Responsibilities:** User interface, component library, controls, responsive design, RAPID editor integration
 
 - **Weeks 1-3:** Upload UI, robot selector, control panels
-- **Weeks 4-6:** Code editor, parser feedback, trajectory controls
+- **Weeks 4-6:** Code editor integration, parser error feedback, trajectory controls
 - **Weeks 7-8:** Timeline scrubber, playback controls, accessibility, polish
 - **Weeks 9-11:** Engineer View, advanced features (as time permits)
-- **Total Tasks:** ~28 across 8 weeks
+- **Total Tasks:** ~30 across 8 weeks
+- **Key Feature:** Integrates code editor into student view and provides real-time error feedback
 
 ---
 
