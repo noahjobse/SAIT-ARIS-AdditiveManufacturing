@@ -33,22 +33,6 @@ for /f "tokens=*" %%i in ('python --version') do set PYTHON_VERSION=%%i
 echo [OK] Node.js %NODE_VERSION%
 echo [OK] Python %PYTHON_VERSION%
 
-REM Check for poetry
-where poetry >nul 2>nul
-if %errorlevel% neq 0 (
-    echo.
-    echo Installing poetry...
-    call pip install poetry
-    where poetry >nul 2>nul
-    if %errorlevel% neq 0 (
-        echo [WARN] poetry may require restarting CMD
-    ) else (
-        echo [OK] poetry installed
-    )
-) else (
-    for /f "tokens=*" %%i in ('poetry --version') do echo [OK] %%i
-)
-
 REM Check for pnpm
 where pnpm >nul 2>nul
 if %errorlevel% neq 0 (
@@ -71,8 +55,21 @@ REM Backend setup
 echo Setting up backend...
 cd backend
 
-echo Installing Python dependencies with poetry...
-call poetry install --with dev
+echo Creating Python virtual environment...
+call python -m venv venv
+
+if %errorlevel% neq 0 (
+    echo [ERROR] Virtual environment creation failed
+    cd ..
+    pause
+    exit /b 1
+)
+
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+
+echo Installing Python dependencies with pip...
+call pip install -r requirements.txt
 
 if %errorlevel% neq 0 (
     echo [ERROR] Backend setup failed
@@ -112,7 +109,8 @@ echo To start development:
 echo.
 echo   Backend:
 echo     cd backend
-echo     poetry run uvicorn app.main:app --reload
+echo     venv\Scripts\activate.bat
+echo     uvicorn app.main:app --reload
 echo.
 echo   Frontend:
 echo     cd frontend

@@ -57,7 +57,7 @@ See [docs/architecture/system-design.md](docs/architecture/system-design.md) for
 ### Package Managers
 
 - **Frontend:** pnpm (faster, efficient)
-- **Backend:** poetry (modern Python package manager with lock files)
+- **Backend:** pip (Python standard package manager)
 
 ### Installation
 
@@ -86,9 +86,11 @@ scripts\setup.bat
 
 **Manual Setup:**
 ```bash
-# Backend (requires Poetry)
+# Backend (requires Python 3.11+)
 cd backend
-poetry install --with dev
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
 # Frontend (requires Node.js + pnpm)
 cd frontend
@@ -102,7 +104,8 @@ pnpm install
 ```bash
 # Terminal 1: Backend
 cd backend
-poetry run uvicorn app.main:app --reload
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+uvicorn app.main:app --reload
 
 # Terminal 2: Frontend
 cd frontend

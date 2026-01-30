@@ -12,7 +12,6 @@ Write-Host "Checking prerequisites..." -ForegroundColor Yellow
 
 $nodeExists = $null -ne (Get-Command node -ErrorAction SilentlyContinue)
 $pythonExists = $null -ne (Get-Command python -ErrorAction SilentlyContinue)
-$poetryExists = $null -ne (Get-Command poetry -ErrorAction SilentlyContinue)
 $pnpmExists = $null -ne (Get-Command pnpm -ErrorAction SilentlyContinue)
 
 if (-not $nodeExists) {
@@ -28,11 +27,6 @@ if (-not $pythonExists) {
 Write-Host "OK: Node.js $(node --version)" -ForegroundColor Green
 Write-Host "OK: Python $(python --version)" -ForegroundColor Green
 
-if (-not $poetryExists) {
-    Write-Host "Installing poetry..." -ForegroundColor Yellow
-    pip install poetry
-}
-
 if (-not $pnpmExists) {
     Write-Host "Installing pnpm..." -ForegroundColor Yellow
     npm install -g pnpm
@@ -42,8 +36,18 @@ Write-Host ""
 Write-Host "Setting up backend..." -ForegroundColor Yellow
 
 cd backend
-Write-Host "Installing dependencies with poetry..." -ForegroundColor Cyan
-poetry install --with dev
+Write-Host "Creating Python virtual environment..." -ForegroundColor Cyan
+python -m venv venv
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Virtual environment creation failed" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Activating virtual environment..." -ForegroundColor Cyan
+& .\venv\Scripts\Activate.ps1
+
+Write-Host "Installing dependencies with pip..." -ForegroundColor Cyan
+pip install -r requirements.txt
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Backend setup failed" -ForegroundColor Red
     exit 1
@@ -73,7 +77,8 @@ Write-Host "To start development:" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Backend:" -ForegroundColor Cyan
 Write-Host "  cd backend" -ForegroundColor White
-Write-Host "  poetry run uvicorn app.main:app --reload" -ForegroundColor White
+Write-Host "  .\venv\Scripts\Activate.ps1" -ForegroundColor White
+Write-Host "  uvicorn app.main:app --reload" -ForegroundColor White
 Write-Host ""
 Write-Host "Frontend:" -ForegroundColor Cyan
 Write-Host "  cd frontend" -ForegroundColor White

@@ -13,7 +13,7 @@ services:
     environment:
       - ENVIRONMENT=development
       - PYTHONUNBUFFERED=1
-    command: poetry run uvicorn app.main:app --host 0.0.0.0 --reload
+    command: sh -c "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --reload"
 
   frontend:
     build:
