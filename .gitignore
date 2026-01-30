@@ -39,6 +39,9 @@ build/
 *.swp
 *.swo
 
+# === Claude Code ===
+.claude/
+
 # === User Uploads (local testing) ===
 models/obstacles/uploads/
 
