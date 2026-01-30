@@ -170,12 +170,19 @@ See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete s
 
 ## Documentation
 
-- **[System Architecture](docs/architecture/system-design.md)** - Component design and data flow
-- **[API Specification](docs/architecture/api-specification.md)** - REST endpoint documentation
-- **[Development Setup](docs/guides/development-setup.md)** - Detailed installation guide
-- **[RAPID Language Reference](docs/research/rapid-language-spec.md)** - ABB RAPID syntax and semantics
-- **[11-Week Roadmap](docs/roadmap/11-week-plan.md)** - Detailed development schedule
+### Getting Started
+- **[Setup Guide](docs/guides/setup.md)** - Quick start (assumes pip/pnpm not installed)
+- **[Project Specification](docs/PROJECT_SPECIFICATION.md)** - Complete feature requirements and success criteria
+
+### Development
+- **[11-Week Roadmap](docs/roadmap/11-week-plan.md)** - Week-by-week development schedule
+- **[Task Assignments](docs/team/task-assignments.md)** - Team member responsibilities and deliverables
 - **[ARIS Partnership](docs/aris-partnership.md)** - Stakeholder collaboration details
+
+### Reference (In Progress)
+- **System Architecture** - `docs/architecture/system-design.md` (placeholder)
+- **API Specification** - `docs/architecture/api-specification.md` (placeholder)
+- **RAPID Language Reference** - `docs/research/rapid-language-spec.md` (placeholder)
 
 ---
 
