@@ -14,12 +14,13 @@ This project delivers a browser-based "Digital Twin" for the **ABB IRB 4600, 260
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| **Frontend** | TypeScript + Babylon.js + React | Type-safe 3D rendering and UI |
-| **Backend** | Python FastAPI + PyBullet | Kinematics solver and collision detection |
-| **Data Model** | Batch "Run & Review" | Server-side trajectory computation |
-| **Logic Engine** | RAPID State-Machine Interpreter | RAPID flow control (IF, FOR, WHILE) |
-| **Build Tools** | Vite (frontend), pip (backend) | Fast development and production builds |
-| **Styling** | Tailwind CSS | Utility-first responsive design |
+| **Frontend** | React 19 + TypeScript + Babylon.js 8.46 | Type-safe 3D rendering and UI |
+| **Backend** | Python 3.11 + FastAPI 0.128 + PyBullet 3.2.6 | Kinematics solver and collision detection |
+| **Data Model** | File-based (no database for MVP) | Server-side trajectory computation |
+| **Parser** | Lark (Python parser generator) | RAPID grammar → AST transformation |
+| **Robot Models** | GLB (frontend) + URDF (backend) | Dual format for rendering + physics |
+| **Build Tools** | Vite 7 (frontend), pip (backend) | Fast development and production builds |
+| **Styling** | Tailwind CSS 4 | Utility-first responsive design |
 
 ---
 
@@ -32,7 +33,7 @@ This project delivers a browser-based "Digital Twin" for the **ABB IRB 4600, 260
 | **FR-1** | Triple-Model Support | Provide rigged 3D models and kinematics for IRB 4600, 2600, and 6700 | CRITICAL |
 | **FR-2** | Environment Upload | Users can upload custom workcell geometry (STL/OBJ) | CRITICAL |
 | **FR-3** | Active Transform Gizmo | In-app 3D Gizmo for manual adjustment (X, Y, Z, R) of obstacles | CRITICAL |
-| **FR-4** | RAPID Interpretation | Parse motion commands (MoveJ/MoveL) and basic logic (IF, FOR, WHILE) | CRITICAL |
+| **FR-4** | RAPID Interpretation | Parse motion commands (MoveJ/MoveL/MoveC) for MVP; basic logic (IF, FOR, WHILE) in Phase 4 | CRITICAL |
 | **FR-5** | Batch Processing | Calculate trajectory server-side before playback | CRITICAL |
 | **FR-6** | Playback Controls | Timeline scrubber: play, pause, seek through simulation | CRITICAL |
 | **FR-7** | Basic Collision | Visual warning (e.g., robot turns red) upon collision | CRITICAL |
@@ -173,10 +174,13 @@ This project delivers a browser-based "Digital Twin" for the **ABB IRB 4600, 260
 |----------|-----------|
 | **MVP Focus** | Ensure polished, working deliverable by Week 8 |
 | **Batch Processing** | Simpler than real-time; accurate server-side computation |
-| **PyBullet** | Industry-standard, free, accurate kinematics |
+| **Lightweight Client** | All heavy computation (IK, collision) server-side for smooth 60 FPS rendering |
+| **No Database** | File-based storage for MVP; no user accounts or persistence needed |
+| **Lark Parser** | Grammar-based parser generator; faster to implement than hand-written parser |
+| **Dual Model Formats** | GLB for Babylon.js rendering, URDF for PyBullet physics |
+| **PyBullet** | Industry-standard, free, accurate kinematics solver |
 | **TypeScript** | Type safety for complex geometry and state |
-| **Babylon.js** | Built-in industrial tools, native TS support |
-| **RAPID Interpreter** | Custom parser = full control; leverage Python |
+| **Babylon.js** | Built-in industrial tools, native TS support, WebGL rendering |
 
 ---
 
@@ -235,6 +239,6 @@ See [docs/guides/deployment.md](guides/deployment.md) for details.
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-01-29
-**Status:** Final - Ready for Development
+**Document Version:** 1.1
+**Last Updated:** 2026-02-05
+**Status:** Updated with Week 1-2 planning decisions

@@ -1,12 +1,27 @@
 # Task Assignments - 11-Week MVP Development
 
+> **📍 [START HERE - Documentation Hub](../START_HERE.md)** - Main entry point for all project documentation
+>
+> **Detailed Sprint Plans (2-Week Cycles):**
+> - **[Week 1-2 Sprint Plan](../roadmap/week-1-2-sprint-plan.md)** - Foundation (3D scene, robot loading, upload)
+> - **[Week 3-4 Sprint Plan](../roadmap/week-3-4-sprint-plan.md)** - Parser & kinematics (RAPID parser, FK/IK, gizmo)
+> - **[Week 5-6 Sprint Plan](../roadmap/week-5-6-sprint-plan.md)** - Simulation pipeline (trajectory, collision)
+> - **[Week 7-8 Sprint Plan](../roadmap/week-7-8-sprint-plan.md)** - MVP launch ⭐ (timeline scrubber, UAT, sign-off)
+> - **[Week 9-10 Sprint Plan](../roadmap/week-9-10-sprint-plan.md)** - Stretch goals (control flow, multi-robot)
+> - **[Week 11 Finalization](../roadmap/week-11-finalization.md)** - Handoff (docs, deployment, presentation)
+>
+> **Planning & Architecture:**
+> - [Implementation Timeline](../roadmap/implementation-timeline.md) - High-level 11-week breakdown by person
+> - [System Design](../architecture/system-design.md) - Architecture decisions
+> - [API Specification](../architecture/api-specification.md) - Endpoint details
+
 **Team:**
 - **Dylane** - Frontend (Babylon.js, 3D visualization)
 - **Umaya** - Frontend (React UI, components)
 - **Jason** - Backend Lead (FastAPI, kinematics, RAPID parser)
-- **Noah** - Testing/QA & Documentation
+- **Noah** - Backend (PyBullet, collision detection) + Testing/QA & PM
 
-**Approach:** Frontend and backend teams work in **parallel** throughout Weeks 1-6 using mock data. Both teams use mock API responses to develop independently, then **integrate at critical points** (Weeks 6-8) to create the final full-stack product.
+**Updated Approach (2026-02-05):** Noah split backend work with Jason. Detailed week-by-week breakdown now in timeline docs above.
 
 **Student View Features (Weeks 1-8):**
 1. **File Upload** (Week 1) - Students can upload RAPID programs as files
