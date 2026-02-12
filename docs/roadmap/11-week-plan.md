@@ -8,6 +8,8 @@ Detailed week-by-week plan for building the ABB Online Simulation Platform with 
 **Strategy:** Staged commitment to MVP, with Phase 2 extensions as time permits
 **Target:** Polished, working Student View by end of Week 8
 
+**Documentation Strategy:** API docs, architecture docs, and user SOP are drafted **continuously** throughout development (not deferred to Week 11). Week 11 is for finalization and polish only.
+
 See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete specification.
 
 ---
@@ -48,11 +50,13 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 - Validate FK with visual feedback
 
 **Deliverables:**
-- [ ] DH parameters for IRB 4600, 2600, 6700
+- [ ] DH parameters researched for IRB 4600, 2600, 6700 (all 3 robots)
 - [ ] Forward kinematics solver (NumPy)
-- [ ] GLB model loader in Babylon.js
+- [ ] GLB model loader in Babylon.js (IRB 4600 first)
 - [ ] Joint angle visualization UI
-- [ ] `/api/forward-kinematics` endpoint
+- [ ] Robot metadata API (`GET /api/robots`)
+
+**Note:** DH parameters researched for all 3 robots this week. Implementation: IRB 4600 URDF in Week 3, IRB 2600/6700 URDFs in Week 4. All 3 robots functional by Week 8 MVP.
 
 **Backend Focus:**
 - DH parameter research for all 3 robots
@@ -104,10 +108,12 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 **Deliverables:**
 - [ ] RAPID lexer (tokenization)
 - [ ] RAPID parser (AST generation)
-- [ ] Support: MoveJ, MoveL, IF, FOR, WHILE
+- [ ] Support: MoveJ, MoveL, MoveC (control flow deferred to Phase 4)
 - [ ] Waypoint extraction from AST
-- [ ] `/api/parse-rapid` endpoint
+- [ ] `/api/upload/rapid` endpoint (parses and returns AST)
 - [ ] Unit tests for common RAPID patterns
+
+**Note:** Control flow (IF/ELSE, FOR, WHILE) is deferred to Weeks 9-10 (Phase 4 stretch goals).
 
 **Backend Focus:**
 - Python lexer/parser (PLY or custom)
@@ -236,11 +242,14 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 - Multi-robot model support
 
 **Deliverables:**
-- [ ] Collision → RAPID line number mapping
-- [ ] Detailed collision logs (link, velocity, energy)
-- [ ] TCP velocity and acceleration curves
-- [ ] IRB 2600 and 6700 model support
-- [ ] Robot model selection dropdown
+- [ ] Control flow support (IF/ELSE statements)
+- [ ] Boolean expressions (comparisons, AND/OR)
+- [ ] AST interpreter for conditional branching
+- [ ] Multi-robot validation (verify all 3 robots work correctly)
+- [ ] Collision → RAPID line number mapping (optional)
+- [ ] TCP velocity and acceleration curves (optional)
+
+**Note:** All 3 robots (IRB 4600, 2600, 6700) should already be functional from Week 4. This week validates completeness and adds control flow support.
 
 ---
 
@@ -252,10 +261,14 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 - Production hardening
 
 **Deliverables:**
+- [ ] Loop support (FOR and WHILE loops)
+- [ ] Procedure calls (PROC/ENDPROC)
+- [ ] Nested control flow (IF within FOR, etc.)
 - [ ] Rendering performance optimization
-- [ ] Trajectory caching
-- [ ] Database persistence (optional)
-- [ ] Deployment preparation
+- [ ] Trajectory caching (IK result caching)
+- [ ] Execution timeout for loops (prevent infinite execution)
+
+**Note:** Focus on FOR loops first (higher priority); WHILE loops are stretch within this stretch goal.
 
 ---
 
@@ -281,11 +294,14 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 - Performance benchmarks
 - User acceptance testing with students
 
-**Documentation:**
-- System architecture diagram
-- API endpoint reference
-- User getting-started guide
-- Developer setup instructions
+**Documentation (Finalization):**
+- System architecture diagram (finalize from Week 6 draft)
+- API endpoint reference (finalize auto-generated Swagger docs)
+- User getting-started guide (finalize from Week 7-8 draft)
+- Developer setup instructions (finalize)
+- Presentation slides and demo video (create new)
+
+**Note:** Documentation has been drafted continuously since Week 1. Week 11 focuses on finalization, not initial creation.
 
 ---
 
@@ -328,3 +344,5 @@ See [docs/PROJECT_SPECIFICATION.md](../PROJECT_SPECIFICATION.md) for complete sp
 3. **Weekly Checkpoints** - Review progress every Friday; adjust if needed
 4. **Modular Design** - Decouple RAPID parser from rendering; enable parallel work
 5. **Documentation** - Keep SOP and API docs updated continuously (not Week 11)
+6. **Week 6 Critical** - End-to-end `/api/simulate` pipeline working by end of Week 6 is key to hitting MVP
+7. **Scope Discipline** - Week 4 parser: MoveL/MoveJ/MoveC only; control flow deferred to Phase 4

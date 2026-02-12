@@ -47,10 +47,11 @@ By the end of Week 10, we should have:
 - Handle conditional branches in trajectory generation
 
 **Backend - Noah:**
-- Create URDF configs for IRB 2600 and IRB 6700 (complete)
+- Add URDF config files for IRB 2600 and IRB 6700 (if not already complete from Week 4)
 - Validate DH parameters against ABB datasheets
 - Test FK/IK for all 3 robots with known configurations
-- Implement robot config loader (switch between robots)
+- Verify robot config loader works for all 3 robots
+- **Note:** Controller is robot-agnostic; all 3 robots should already work via config files created in Week 4. This week validates completeness.
 
 **PM/QA - Noah:**
 - Create control flow test suite
@@ -103,10 +104,11 @@ By the end of Week 10, we should have:
 - **Why:** Grammar must support control flow before interpreter can execute it
 - **Deliverable:** Grammar file with IF/ELSE rules, boolean expressions
 
-**Week 9 Day 3 (Noah Backend):** Add IRB 2600 and IRB 6700 configs
+**Week 9 Day 1-2 (Noah Backend):** Verify IRB 2600 and IRB 6700 configs complete
 - **Blocks:** Multi-robot testing, robot selector functionality
 - **Why:** All 3 robots must be available for testing and switching
-- **Deliverable:** URDF files for IRB 2600 and 6700, configs validated
+- **Deliverable:** URDF files for IRB 2600 and 6700 exist and validated (should be done from Week 4; this is verification only)
+- **Assumption:** Config files were created in Week 4 as planned. If not, create them now (1-2 days).
 
 ### Cross-Team Integration Points
 

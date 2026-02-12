@@ -148,7 +148,7 @@ Three-tier web application enabling real-time visualization of RAPID programs wi
 | **Physics/IK** | PyBullet | 3.2.6 | Inverse kinematics + collision |
 | **Math** | NumPy | 2.4.1 | Numerical computation |
 | **Math** | SciPy | 1.17.0 | Optimization |
-| **Parser** | Lark | *TBD* | RAPID grammar parsing |
+| **Parser** | Lark | 1.3.1 | RAPID grammar parsing |
 | **Data Validation** | Pydantic | 2.12.5 | Request/response schemas |
 | **Testing (Backend)** | pytest | 9.0.2 | Unit + integration tests |
 | **Linting (Backend)** | ruff | 0.14.14 | Fast Python linter |

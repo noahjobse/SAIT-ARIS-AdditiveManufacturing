@@ -1,5 +1,10 @@
 # Task Assignments - 11-Week MVP Development
 
+**Project:** ABB Online Simulation Platform
+**Version:** 2.0 (Revised 2026-02-11)
+**Team Size:** 4 developers
+**Timeline:** 11 weeks, MVP target Week 8
+
 > **📍 [START HERE - Documentation Hub](../START_HERE.md)** - Main entry point for all project documentation
 >
 > **Detailed Sprint Plans (2-Week Cycles):**
@@ -10,518 +15,463 @@
 > - **[Week 9-10 Sprint Plan](../roadmap/week-9-10-sprint-plan.md)** - Stretch goals (control flow, multi-robot)
 > - **[Week 11 Finalization](../roadmap/week-11-finalization.md)** - Handoff (docs, deployment, presentation)
 >
-> **Planning & Architecture:**
-> - [Implementation Timeline](../roadmap/implementation-timeline.md) - High-level 11-week breakdown by person
+> **Architecture & Testing:**
 > - [System Design](../architecture/system-design.md) - Architecture decisions
-> - [API Specification](../architecture/api-specification.md) - Endpoint details
-
-**Team:**
-- **Dylane** - Frontend (Babylon.js, 3D visualization)
-- **Umaya** - Frontend (React UI, components)
-- **Jason** - Backend Lead (FastAPI, kinematics, RAPID parser)
-- **Noah** - Backend (PyBullet, collision detection) + Testing/QA & PM
-
-**Updated Approach (2026-02-05):** Noah split backend work with Jason. Detailed week-by-week breakdown now in timeline docs above.
-
-**Student View Features (Weeks 1-8):**
-1. **File Upload** (Week 1) - Students can upload RAPID programs as files
-2. **Code Editor** (Week 4) - Students can type/paste RAPID code directly in the app
-3. **Visualization** (Weeks 1-3, 5-7) - 3D robot animation and obstacle positioning
-4. **Execution** (Week 6) - Submit code for execution and playback
-5. **Timeline Controls** (Week 7) - Play, pause, seek through trajectory
-6. **Collision Detection** (Week 8) - Visual feedback when robot hits obstacles
+> - [API Specification](../architecture/api-specification.md) - 10 endpoints with error codes
+> - [Testing Strategy](../testing-strategy.md) - Test pyramid, coverage targets, CI/CD
 
 ---
 
-## Phase 1: Visualization Foundation (Weeks 1-3)
+## Team Structure
 
-### Week 1: TypeScript Setup & 3D Scene Foundation
+| Person | Primary Role | Secondary Responsibilities | Workload |
+|--------|-------------|---------------------------|----------|
+| **Dylane** | Frontend - Babylon.js Specialist | 3D rendering, animations, visual effects | ~32 tasks over 8 weeks |
+| **Umaya** | Frontend - React UI Specialist | Components, layouts, controls, styling | ~30 tasks over 8 weeks |
+| **Jason** | Backend Lead | FastAPI, RAPID parser, trajectory generation | ~32 tasks over 8 weeks |
+| **Noah** | Backend (IK/Collision) + PM + QA Lead | PyBullet, collision detection, testing, docs | ~40 tasks over 8 weeks ⚠️ |
 
-**Dylane (Frontend - Babylon.js)**
-- [ ] Initialize Babylon.js 3D scene with camera controls
-- [ ] Set up lighting system (hemispheric + directional lights)
-- [ ] Create basic 3D environment (ground plane, grid)
-- [ ] Test scene rendering and camera movement
-- **Deliverables:** Working 3D scene with camera controls
-
-**Umaya (Frontend - React UI)**
-- [ ] Set up React component hierarchy and layout
-- [ ] Design and implement file upload UI (Tailwind)
-- [ ] Create drag-and-drop file input
-- [ ] Add file type validation (STL, OBJ, GLB)
-- [ ] Mock file upload response for testing
-- **Deliverables:** Upload form component, responsive layout, mock data handler
-- **Note:** Can work independently with mock `/api/upload` response
-
-**Jason (Backend)**
-- [ ] Set up FastAPI project structure and dependencies
-- [ ] Research STL/OBJ parsing libraries
-- [ ] Implement `/api/upload` endpoint
-- [ ] Add file validation logic (size, type)
-- [ ] Return sample response for frontend integration
-- **Deliverables:** Upload API endpoint, file validation, example response
-- **Note:** Parallel with frontend; can integrate Week 2 if early sync preferred
-
-**Noah (Testing/QA)**
-- [ ] Set up pytest framework for backend testing
-- [ ] Create Vitest/Jest config for frontend tests
-- [ ] Write unit tests for file upload validation
-- [ ] Document testing setup in `/docs/guides/testing.md`
-- **Deliverables:** Test framework, initial test coverage
-- **Note:** Test frontend with mocks and backend independently
+**⚠️ Risk:** Noah has significant workload across backend development, project management, QA, and documentation. This is acknowledged and monitored.
 
 ---
 
-### Week 2: Robot Rigging & Forward Kinematics
+## Responsibility Matrix
 
-**Dylane (Frontend - Babylon.js)**
-- [ ] Load and render 3D robot models (GLB format for all 3 robots)
-- [ ] Bind skeletal rigging to Babylon.js bones
-- [ ] Test model loading and animation setup
-- [ ] Create UI to select between robot models
-- **Deliverables:** All 3 robot models rendering in scene
-- **Note:** Can work independently; uses mock FK data for slider testing
+### Frontend (Dylane - Babylon.js)
 
-**Umaya (Frontend - React UI)**
-- [ ] Create joint angle slider controls for testing FK
-- [ ] Build UI panel to display current joint positions
-- [ ] Add robot model selector dropdown
-- [ ] Implement responsive layout for controls
-- [ ] Mock FK response to test UI
-- **Deliverables:** Joint control UI, responsive layout, mock FK integration
-- **Note:** Can test with mock FK data while backend develops solver
+**Core Responsibilities:**
+- 3D scene initialization (camera, lighting, ground plane)
+- Robot GLB loading and skeletal animation
+- Obstacle STL/OBJ rendering
+- Transform gizmo (position, rotation controls)
+- Trajectory animation and playback engine
+- Collision highlighting (red material on collision)
+- Timeline scrubber UI integration with 3D scene
+- Rendering optimization (60 FPS target)
 
-**Jason (Backend)**
-- [ ] Research and document DH parameters for IRB 4600, 2600, 6700
-- [ ] Implement forward kinematics solver (NumPy)
-- [ ] Create `/api/forward-kinematics` endpoint with sample response
-- [ ] Write unit tests with known joint positions
-- **Deliverables:** FK solver, validated API endpoint, example responses
-- **Note:** Parallel with frontend; integration Week 3 if early sync preferred
-
-**Noah (Testing/QA)**
-- [ ] Validate FK solver output against RobotStudio
-- [ ] Test with 5+ known joint positions per robot model
-- [ ] Test frontend UI with mock FK data
-- [ ] Document FK validation results
-- **Deliverables:** FK validation report
-- **Note:** Test backend independently; frontend with mocks
+**Key Deliverables:**
+- Week 1-2: 3D scene with camera controls, robot GLB loading
+- Week 3-4: Obstacle rendering, transform gizmo
+- Week 5-6: Trajectory animation, playback controls
+- Week 7-8: Timeline scrubber, collision visualization
 
 ---
 
-### Week 3: Transform Gizmo & Obstacle Positioning
+### Frontend (Umaya - React UI)
 
-**Dylane (Frontend - Babylon.js)**
-- [ ] Implement 3D transform gizmo (move/rotate/scale handles)
-- [ ] Render uploaded STL/OBJ obstacles in scene
-- [ ] Add gizmo snap-to-grid option
-- [ ] Test gizmo interaction with mock obstacle data
-- **Deliverables:** Working transform gizmo, obstacle rendering
-- **Note:** Can work independently with mock obstacle positions
+**Core Responsibilities:**
+- React component hierarchy and layout
+- File upload UI (drag-drop, validation)
+- Robot selector dropdown
+- RAPID editor (textarea → Monaco upgrade in Phase 4)
+- StatusPanel (errors, warnings, collision alerts)
+- Obstacle list sidebar
+- SimulationControls (simulate button, progress indicator)
+- PlaybackControls (play/pause/stop/speed)
+- TimelineScrubber component
+- Responsive design and accessibility
 
-**Umaya (Frontend - React UI)**
-- [ ] Create obstacle list UI panel
-- [ ] Add properties display (position, rotation, scale)
-- [ ] Implement save/load obstacle configuration UI
-- [ ] Add delete and reset buttons for obstacles
-- [ ] Mock obstacle API responses
-- **Deliverables:** Obstacle management UI, mock integration
-- **Note:** Can test with mock data while backend builds API
-
-**Jason (Backend)**
-- [ ] Load STL/OBJ meshes and validate geometry
-- [ ] Implement `/api/obstacles` endpoint (in-memory storage)
-- [ ] Create coordinate transformation utilities
-- [ ] Add mesh validation and error reporting
-- [ ] Return sample obstacle responses
-- **Deliverables:** Obstacle API, mesh loading, example responses
-- **Note:** Parallel with frontend; integration Week 3-4 if sync preferred
-
-**Noah (Testing/QA)**
-- [ ] Test gizmo with various obstacle sizes/shapes using mock data
-- [ ] Test frontend UI independently
-- [ ] Test backend mesh validation independently
-- [ ] Plan integration testing for Week 4
-- **Deliverables:** Gizmo validation report, test plan
-- **Note:** Test frontend with mocks and backend separately
+**Key Deliverables:**
+- Week 1-2: Upload UI, robot selector, layout shell
+- Week 3-4: StatusPanel, obstacle list, error display
+- Week 5-6: SimulationControls, loading indicators
+- Week 7-8: PlaybackControls, TimelineScrubber, ARIA labels
 
 ---
 
-## Phase 2: The Brain - Logic Engine & Kinematics (Weeks 4-6)
+### Backend (Jason - Lead)
 
-### Week 4: RAPID Parser Implementation & Code Editor
+**Core Responsibilities:**
+- FastAPI router structure and middleware
+- RAPID parser (Lark grammar → AST)
+  - Grammar definition in `grammar.lark`
+  - AST node dataclasses (MoveL, MoveJ, MoveC, RobTarget, JointTarget, SpeedData, ZoneData)
+  - Transformer (parse tree → AST)
+- Trajectory generator
+  - MoveL → linear interpolation
+  - MoveJ → joint-space interpolation
+  - MoveC → circular arc interpolation
+  - SpeedData and ZoneData handling
+- `/api/simulate` endpoint orchestration
+- IK caching (LRU, 1000 entries)
+- Control flow interpreter (IF/ELSE, FOR, WHILE) - Phase 4
+- API documentation (Swagger/OpenAPI)
 
-**Dylane (Frontend)**
-- [ ] Create RAPID code editor UI component (syntax highlighting for RAPID)
-- [ ] Implement code input form with submit button
-- [ ] Add line numbers and code formatting
-- [ ] Mock parser response with sample AST data
-- [ ] Test editor with sample RAPID programs
-- **Deliverables:** RAPID code editor component, mock response handler
-- **Feature:** Students can type/paste RAPID code directly in student view
-- **Note:** Can work independently with mock data
-
-**Umaya (Frontend)**
-- [ ] Build UI for parser feedback (errors, warnings)
-- [ ] Create waypoint visualization toggle
-- [ ] Add execution status indicator
-- [ ] Wire up mock parser responses to UI
-- [ ] Implement error message display for parser/execution failures
-- [ ] Integrate code editor into main student view layout
-- **Deliverables:** Parser feedback UI, integrated editor layout, mock integration
-- **Feature:** Students see real-time feedback (syntax errors, execution status)
-- **Note:** Can test with mock data while backend develops parser
-
-**Jason (Backend)**
-- [ ] Implement RAPID lexer (tokenization)
-- [ ] Build RAPID parser (AST generation)
-- [ ] Support: MoveJ, MoveL, IF, FOR, WHILE commands
-- [ ] Create `/api/parse-rapid` endpoint with sample response
-- [ ] Write unit tests for common RAPID patterns
-- [ ] **Deliverables:** Working RAPID parser, validated API, example responses
-- **Note:** Parallel with frontend; can integrate mid-week if sync preferred
-
-**Noah (Testing/QA)**
-- [ ] Create test suite of RAPID programs
-- [ ] Validate parser AST output with real API
-- [ ] Test error handling (syntax errors, invalid commands)
-- [ ] Integration test: frontend mocks → backend parser validation
-- **Deliverables:** RAPID parser test suite, validation report
-- **Note:** Test backend independently; mock integration with frontend
+**Key Deliverables:**
+- Week 1-2: FastAPI structure, health/robots/model endpoints
+- Week 3-4: Lark grammar complete, AST nodes, `/api/upload/rapid` parser
+- Week 5-6: Trajectory generator, `/api/simulate` endpoint
+- Week 7-8: IK caching, edge case handling, Swagger docs polish
 
 ---
 
-### Week 5: PyBullet Integration & Inverse Kinematics
+### Backend (Noah - IK/Collision + PM/QA)
 
-**Dylane (Frontend)**
-- [ ] Create trajectory visualization (waypoint markers in scene)
-- [ ] Add animation preview for calculated trajectory
-- [ ] Implement speed/playback slider
-- **Deliverables:** Trajectory visualization UI
+**Backend Responsibilities:**
+- PyBullet headless setup
+- URDF creation for all 3 robots (IRB 4600, 2600, 6700)
+- DH parameter research and validation
+- Forward kinematics (FK) solver
+- Inverse kinematics (IK) solver (PyBullet wrapper)
+- Collision detector (mesh-to-mesh)
+- Obstacle mesh loading (STL/OBJ into PyBullet)
+- GLB/URDF file management
+- Upload endpoints (`/api/upload/rapid`, `/api/upload/obstacle`)
+- Obstacle CRUD endpoints (`GET /api/obstacles`, `PUT /transform`, `DELETE`)
+- Pydantic request/response schemas
+- Input validation and error handling
+- Security review (file upload validation)
 
-**Umaya (Frontend)**
-- [ ] Build reachability status display (reachable/unreachable)
-- [ ] Create error message display for IK failures
-- [ ] Add trajectory smoothness indicator
-- **Deliverables:** IK feedback UI
+**PM/QA Responsibilities:**
+- Sprint planning (task breakdown, dependency tracking)
+- Daily standup scheduling and facilitation
+- Test infrastructure (pytest, vitest, CI pipelines)
+- Parser test suite (20+ RAPID programs)
+- FK/IK validation (against RobotStudio ground truth)
+- Collision detection tests
+- Integration testing (end-to-end workflows)
+- Performance benchmarking (<5s for 100 waypoints)
+- UAT coordination (10+ real RAPID programs)
+- Regression testing (full suite before MVP)
+- Sample RAPID programs creation
+- Demo script and presentation slides
+- All documentation (user guide, developer guide, architecture docs, deployment guide)
 
-**Jason (Backend)**
-- [ ] Convert ABB robot specs to PyBullet URDF format (or create custom)
-- [ ] Implement IK solver with joint limit constraints
-- [ ] Add reachability validation
-- [ ] Create `/api/inverse-kinematics` endpoint
-- [ ] Implement linear interpolation for MoveL commands
-- [ ] Write trajectory quality tests
-- **Deliverables:** IK solver, validated API, trajectory generation
-
-**Noah (Testing/QA)**
-- [ ] Validate IK solutions against RobotStudio
-- [ ] Test reachability detection accuracy
-- [ ] Integration test: waypoints → IK calculation → smooth trajectory
-- [ ] Test joint limit constraints
-- **Deliverables:** IK validation report, constraint test results
-- **Blocked By:** Jason's IK solver
-
----
-
-### Week 6: End-to-End Batch Execution Pipeline
-
-**Dylane (Frontend)**
-- [ ] Test full trajectory animation pipeline
-- [ ] Optimize rendering for long trajectories
-- [ ] Add performance profiling UI
-- **Deliverables:** Optimized rendering, performance data
-
-**Umaya (Frontend)**
-- [ ] Create loading/progress indicator for batch processing
-- [ ] Add execution status display
-- [ ] Implement error handling UI
-- **Deliverables:** Batch execution status UI
-
-**Jason (Backend)**
-- [ ] Create `/api/execute` endpoint (RAPID code + obstacles → trajectory)
-- [ ] Define trajectory JSON schema (timestamp, joint angles, TCP position)
-- [ ] Implement collision detection integration
-- [ ] Add error handling and validation
-- [ ] Optimize execution performance
-- **Deliverables:** Complete `/api/execute` endpoint, trajectory schema
-- **Testing:** Performance benchmark (<5s for typical programs)
-
-**Noah (Testing/QA)**
-- [ ] End-to-end integration test: RAPID code → execute → animation
-- [ ] Test with 10+ RAPID programs and obstacle configs
-- [ ] Performance testing (execution time, rendering)
-- [ ] Error handling validation (bad code, unreachable targets)
-- **Deliverables:** End-to-end test report, performance metrics
-- **Blocked By:** Jason's `/api/execute` endpoint
+**Key Deliverables:**
+- Week 1-2: PyBullet setup, pytest/vitest frameworks, upload endpoints
+- Week 3-4: IRB 4600 URDF, FK solver, IK solver, validation tests
+- Week 5-6: IRB 2600/6700 URDFs, collision detector, integration tests
+- Week 7-8: UAT, regression suite, SOP, demo prep
+- Week 11: Full documentation package, deployment guide, presentation
 
 ---
 
-## Phase 3: Student MVP Launch (Weeks 7-8)
+## Multi-Robot Architecture
 
-### Week 7: Playback Engine & Timeline Controls
+**Important:** The kinematics and collision detection system is **robot-agnostic**. Once the controller is built, all 3 robots work via configuration files.
 
-**Dylane (Frontend - Babylon.js)**
-- [ ] Implement smooth animation loop (interpolate between trajectory points)
-- [ ] Build animation timeline state management
-- [ ] Test animation smoothness at various speeds
-- [ ] Optimize rendering performance during playback
-- **Deliverables:** Smooth trajectory animation, optimized rendering
+### How Multi-Robot Support Works
 
-**Umaya (Frontend - React UI)**
-- [ ] Create timeline scrubber UI component
-- [ ] Implement play/pause/stop buttons
-- [ ] Add speed adjustment slider (0.5x - 2x)
-- [ ] Build real-time display of current joint angles and TCP position
-- [ ] Add animation progress indicator
-- **Deliverables:** Playback controls, timeline UI, status displays
+**Single IK/Collision Controller:**
+- PyBullet solver works for any URDF
+- Collision detector works with any mesh
+- Trajectory generator is independent of robot model
 
-**Jason (Backend)**
-- [ ] Optimize `/api/execute` endpoint performance
-- [ ] Add trajectory caching (optional)
-- [ ] Ensure robust error handling for all edge cases
-- **Deliverables:** Optimized execution, robust error handling
+**Robot-Specific Configuration Files:**
+- `models/robots/irb4600/robot.urdf` - PyBullet kinematics model
+- `models/robots/irb4600/visual.glb` - Babylon.js 3D model
+- `models/robots/irb4600/config.json` - DH parameters, joint limits, metadata
 
-**Noah (Testing/QA)**
-- [ ] Test animation smoothness at all speeds (0.5x - 2x)
-- [ ] Verify responsive control latency (<100ms)
-- [ ] Test timeline scrubber seeking
-- [ ] Validate joint position displays accuracy
-- [ ] Integration test: full playback workflow
-- **Deliverables:** Playback validation report, performance metrics
+**Same pattern for IRB 2600 and IRB 6700.**
+
+**Development Timeline:**
+- Week 3-4: Build IK/collision controller + IRB 4600 config files
+- Week 4: Add IRB 2600 and IRB 6700 config files (URDF, GLB, config.json)
+- Week 8 MVP: All 3 robots fully functional via selector dropdown
+
+**This means:** Noah is not "rebuilding the controller" for each robot. He's creating 3 sets of configuration files that the single controller consumes.
 
 ---
 
-### Week 8: Collision Detection & MVP Polish ⭐ **MVP DEADLINE**
+## Phase Breakdown
 
-**Dylane (Frontend - Babylon.js)**
-- [ ] Integrate collision detection into playback animation
-- [ ] Implement collision visual feedback (robot turns red on collision)
-- [ ] Add collision highlighting and UI feedback
-- [ ] Final performance optimization
-- **Deliverables:** Working collision detection, visual feedback
+### Phase 1: Visualization Foundation (Weeks 1-3)
 
-**Umaya (Frontend - React UI)**
-- [ ] Create collision event log display
-- [ ] Implement error message system for edge cases
-- [ ] Add accessibility features (keyboard navigation)
-- [ ] Finalize responsive design (mobile, tablet, desktop)
-- [ ] Polish all UI components and transitions
-- **Deliverables:** Collision UI, accessible interface, polished design
+**Goal:** 3D scene working, robot loads and animates, obstacles uploadable, transform gizmo functional
 
-**Jason (Backend)**
-- [ ] Integrate PyBullet collision detection into trajectory computation
-- [ ] Implement collision event logging (time, location, robot link)
-- [ ] Add error handling for edge cases (unreachable targets, etc.)
-- [ ] Final API validation and robustness
-- **Deliverables:** Collision detection API, robust error handling
+**Dylane:**
+- Babylon.js scene (camera, lighting, ground)
+- Load IRB 4600 GLB
+- Skeleton-based joint animation
+- 6 joint sliders (testing FK)
+- Obstacle STL loading
+- Transform gizmo (PositionGizmo, RotationGizmo)
 
-**Noah (Testing/QA)**
-- [ ] Comprehensive regression testing (all features)
-- [ ] Test with 10+ RAPID programs with various obstacles
-- [ ] Validate collision detection accuracy
-- [ ] Edge case testing (unreachable targets, joint limits, etc.)
-- [ ] Create comprehensive SOP/user guide
-- [ ] Complete accessibility audit
-- [ ] Demo preparation and validation
-- **Deliverables:** Regression test report, complete SOP, demo script
+**Umaya:**
+- App layout (Header, MainLayout, SidePanel)
+- Robot selector dropdown
+- File upload components (drag-drop)
+- RAPID editor (textarea)
+- StatusPanel (errors/warnings)
+- Obstacle list sidebar
 
----
+**Jason:**
+- FastAPI router structure
+- `GET /api/robots` endpoint
+- `GET /api/robots/{id}/model` (serve GLB)
+- CORS middleware
+- Begin Lark research
 
-## Phase 4: Expansion & Polish (Weeks 9-10) - *As Time Permits*
+**Noah (Backend):**
+- Add IRB 4600 GLB to repo
+- `POST /api/upload/rapid` endpoint
+- `POST /api/upload/obstacle` endpoint
+- Pydantic schemas (UploadResponse, etc.)
+- File validation (size, extension, magic bytes)
 
-### Week 9: Engineer View Features
-
-**Dylane (Frontend)**
-- [ ] Add advanced overlay displays (TCP velocity, acceleration curves)
-- [ ] Implement line-linked collision logging visualization
-- [ ] Create engineer-specific diagnostic views
-- **Deliverables:** Advanced visualization features
-
-**Umaya (Frontend)**
-- [ ] Build Engineer View UI toggle
-- [ ] Create detailed collision log interface
-- [ ] Implement diagnostic data display
-- **Deliverables:** Engineer View UI
-
-**Jason (Backend)**
-- [ ] Map collisions to RAPID source line numbers
-- [ ] Create detailed collision analysis data (velocity, energy, etc.)
-- [ ] Add Engineer View data endpoints
-- **Deliverables:** Engineer View API endpoints
-
-**Noah (Testing/QA)**
-- [ ] Validate collision-to-line mapping
-- [ ] Test Engineer View features
-- **Deliverables:** Engineer View test report
+**Noah (QA):**
+- Vitest setup
+- Pytest setup
+- CI pipelines (GitHub Actions)
+- Sample RAPID programs
+- Integration test skeleton
 
 ---
 
-### Week 10: Advanced Features & Optimization
+### Phase 2: Logic Engine & Kinematics (Weeks 4-6)
 
-**Dylane & Umaya (Frontend)**
-- [ ] Performance optimization across all components
-- [ ] Add multi-robot model support if not complete
-- [ ] Optimize rendering for large trajectories
-- **Deliverables:** Optimized performance
+**Goal:** RAPID parser complete, FK/IK working, trajectory generation, `/api/simulate` endpoint functional
 
-**Jason (Backend)**
-- [ ] Trajectory caching and optimization
-- [ ] Database persistence (optional)
-- [ ] Performance profiling and tuning
-- **Deliverables:** Optimized execution, optional persistence
+**Dylane:**
+- Obstacle rendering in scene
+- Transform gizmo wired to backend API
+- AnimationController (play/pause/stop)
+- Collision highlighting (red material)
 
-**Noah (Testing/QA)**
-- [ ] Performance benchmarking
-- [ ] Load testing
-- **Deliverables:** Performance report
+**Umaya:**
+- StatusPanel displays parse errors
+- Obstacle metadata display
+- PlaybackControls component
+- SimulationControls component
+- Speed slider
+- Progress bar
+- Collision alerts
 
----
+**Jason:**
+- Complete Lark grammar (MoveL/MoveJ/MoveC)
+- AST node dataclasses
+- Transformer (parse tree → AST)
+- Wire parser to `/api/upload/rapid`
+- Trajectory generator (linear/joint/circular interpolation)
+- `/api/simulate` endpoint
+- SpeedData and ZoneData handling
 
-### Week 11: Finalization & Deployment
+**Noah (Backend):**
+- PyBullet headless setup
+- URDF for IRB 4600
+- Forward kinematics solver
+- Inverse kinematics solver
+- URDF for IRB 2600 and IRB 6700
+- Collision detector (PyBullet mesh-to-mesh)
+- Obstacle mesh loader
+- Collision detail reporting
 
-**All Team Members**
-
-**Documentation (Noah Lead):**
-- [ ] Complete OpenAPI/Swagger documentation
-- [ ] User getting-started guide and SOP
-- [ ] Developer setup instructions
-- [ ] System architecture documentation
-- [ ] Test coverage report
-- [ ] Final presentation slides
-
-**Deployment (Noah + Jason):**
-- [ ] Docker configuration for deployment
-- [ ] CI/CD pipeline setup (GitHub Actions)
-- [ ] Final integration testing
-- [ ] Production deployment
-
-**Demo Preparation (Noah + Dylane + Umaya):**
-- [ ] Create demo script and walkthrough
-- [ ] Record demo video
-- [ ] Prepare presentation materials
-- [ ] Final bug fixes
-
-**Testing (Noah):**
-- [ ] Comprehensive regression test suite
-- [ ] User acceptance testing
-- [ ] Performance benchmarks
-- [ ] Browser compatibility testing
+**Noah (QA):**
+- 20+ parser test cases
+- FK validation (known configs vs. datasheet)
+- IK tests (reachable/unreachable)
+- Collision tests (overlapping meshes)
+- Integration tests (upload→parse→simulate→trajectory)
+- Performance benchmarks
 
 ---
 
-## Summary by Team Member
+### Phase 3: Student MVP Launch (Weeks 7-8) ⭐
 
-### Dylane (Frontend - Babylon.js Specialist)
-**Responsibilities:** 3D scene, robot models, animations, transform gizmo, RAPID code editor, collision rendering
+**Goal:** Timeline scrubber, playback controls, collision detection, UAT, **MVP sign-off**
 
-- **Weeks 1-3:** Scene setup, robot rigging, gizmo implementation
-- **Weeks 4-6:** RAPID code editor component, trajectory visualization, animation interpolation
-- **Weeks 7-8:** Playback engine, collision visuals
-- **Weeks 9-11:** Advanced overlays, optimization (as time permits)
-- **Total Tasks:** ~32 across 8 weeks
-- **Key Feature:** Builds the RAPID code editor UI that lets students type code directly
+**Dylane:**
+- TimelineScrubber component
+- Step-through (next/prev frame)
+- Keyboard shortcuts
+- Rendering optimization
+- Final visual polish
 
----
+**Umaya:**
+- SpeedControl component
+- LoadingIndicator
+- ErrorMessage components
+- Responsive layout
+- ARIA labels and accessibility
 
-### Umaya (Frontend - React UI Specialist)
-**Responsibilities:** User interface, component library, controls, responsive design, RAPID editor integration
+**Jason:**
+- IK caching (LRU, 1000 entries)
+- Edge case handling
+- Swagger docs improvement
+- Performance tuning
 
-- **Weeks 1-3:** Upload UI, robot selector, control panels
-- **Weeks 4-6:** Code editor integration, parser error feedback, trajectory controls
-- **Weeks 7-8:** Timeline scrubber, playback controls, accessibility, polish
-- **Weeks 9-11:** Engineer View, advanced features (as time permits)
-- **Total Tasks:** ~30 across 8 weeks
-- **Key Feature:** Integrates code editor into student view and provides real-time error feedback
+**Noah (Backend):**
+- Input validation hardening
+- Timeout handling (2s IK, 5s collision)
+- Security review (file upload)
+- Error code implementation
 
----
-
-### Jason (Backend Lead)
-**Responsibilities:** FastAPI, kinematics (FK/IK), RAPID parser, collision detection, pipeline orchestration
-
-- **Weeks 1-3:** File upload API, forward kinematics
-- **Weeks 4-6:** RAPID parser, IK solver, batch execution pipeline
-- **Weeks 7-8:** Collision detection, optimization, error handling
-- **Weeks 9-11:** Engineer View features, optimization (as time permits)
-- **Total Tasks:** ~32 across 8 weeks
-- **Support:** Noah assists with testing and validation
-
----
-
-### Noah (Testing/QA & Documentation Lead)
-**Responsibilities:** Test framework setup, integration testing, validation, SOP documentation, demo prep
-
-- **Weeks 1-3:** Test framework, unit tests, integration tests
-- **Weeks 4-6:** RAPID parser validation, kinematics validation
-- **Weeks 7-8:** Full regression testing, SOP writing, demo preparation
-- **Weeks 9-11:** Documentation, deployment, final testing
-- **Total Tasks:** ~25 across 8 weeks
+**Noah (QA):**
+- Full regression testing
+- UAT with 10+ real RAPID programs
+- Multi-browser testing (Chrome, Firefox, Edge)
+- MVP acceptance checklist (FR-1 through FR-7)
+- Demo rehearsal (Day 4)
+- MVP sign-off (Day 5)
 
 ---
 
-## Critical Dependencies & Parallel Workflow
+### Phase 4: Expansion (Weeks 9-10) - Stretch Goals
 
-### Frontend & Backend Work in Parallel
+**Goal:** IF/ELSE/FOR/WHILE control flow, all 3 robots fully validated, advanced features
 
-**Weeks 1-6:** Frontend and backend teams work independently with mock data/UI
-- **Frontend:** Can build components and UI without waiting for backend APIs
-- **Backend:** Can develop APIs without waiting for UI implementation
+**Dylane:**
+- Multi-robot selector with thumbnails
+- Robot info panel
+- Smooth robot switching
 
-### Integration Points (Must Sync)
+**Umaya:**
+- ControlFlowVisualizer (optional)
+- VariableInspector (optional)
+- Monaco Editor integration (syntax highlighting upgrade)
 
-1. **Week 1:** No blockers - both teams start independently
-   - Frontend: Build 3D scene, UI components with mock data
-   - Backend: Build APIs with basic implementation
+**Jason:**
+- Extend Lark grammar (IF/ELSE, FOR, WHILE, PROC/ENDPROC)
+- Boolean expressions
+- AST interpreter
+- Execution timeout (10K iterations)
 
-2. **Week 6-7 Integration:** Critical sync point
-   - Frontend must consume `/api/execute` trajectory JSON format
-   - Backend must finalize trajectory JSON schema
-   - Joint implementation of playback + animation
+**Noah (Backend):**
+- Verify all 3 robot URDFs complete
+- Robot config loader
+- Multi-robot test matrix
 
-3. **Week 8 Integration:** Final sync
-   - Collision detection integration (backend collision data → frontend rendering)
-   - Error handling alignment across stack
-   - Full end-to-end testing
+**Noah (QA):**
+- Control flow test suite
+- Multi-robot testing (3 robots x 5 programs = 15 tests)
 
-### Detailed Dependency Chain
+---
 
-**No Hard Blockers for Initial Development:**
-- Frontend can mock API responses while backend is building
-- Backend can stub endpoints while frontend is building UI
-- Both teams test independently, then integrate at checkpoints
+### Phase 5: Finalization (Week 11)
 
-**Optional Early Integration (if preferred):**
-- Week 2: Frontend can connect to Jason's `/api/upload` for real testing
-- Week 4: Frontend can call Jason's `/api/parse-rapid` for real parser feedback
-- Week 5: Frontend can test IK solver output with real API
+**Goal:** Documentation, deployment, demo, presentation, handoff
 
-**Hard Dependencies (Must be Complete):**
-- Week 6: `/api/execute` endpoint format must be finalized (used by both teams)
-- Week 7: Trajectory animation must work with real `/api/execute` output
-- Week 8: Collision detection must integrate backend data with frontend rendering
+**Dylane:**
+- Final UI polish
+- Demo mode (pre-loaded data)
+- Demo video (3-5 min)
+- Code cleanup
+
+**Umaya:**
+- User guide with screenshots
+- Step-by-step tutorials
+
+**Jason:**
+- API docs auto-generation (OpenAPI)
+- Deployment config (Docker, env vars)
+- Cloud VM test
+
+**Noah (Backend):**
+- Architecture docs
+- Deployment scripts
+- Developer guide
+
+**Noah (QA):**
+- Final test pass
+- Presentation slides (15-20 slides)
+- Handoff package
+
+---
+
+## MVP Success Criteria (Week 8)
+
+**Functional Requirements (All Must Pass):**
+- ✅ **FR-1:** Triple-model support (IRB 4600, 2600, 6700 selectable)
+- ✅ **FR-2:** Environment upload (STL/OBJ obstacles)
+- ✅ **FR-3:** Active transform gizmo (position/rotate obstacles)
+- ✅ **FR-4:** RAPID interpretation (MoveL, MoveJ, MoveC)
+- ✅ **FR-5:** Batch processing (server-side trajectory)
+- ✅ **FR-6:** Playback controls (timeline scrubber, play/pause/seek/speed)
+- ✅ **FR-7:** Basic collision detection (visual warning)
+
+**Technical Requirements:**
+- ✅ System runs without crashes for 30+ minute sessions
+- ✅ `/api/simulate` completes in <5 seconds for typical programs
+- ✅ Frontend animates at 60 FPS
+- ✅ All automated tests pass (backend coverage ≥80%, frontend ≥60%)
+- ✅ Multi-browser compatible (Chrome, Firefox, Edge)
+
+**Documentation Requirements:**
+- ✅ Complete user SOP
+- ✅ Demo script ready
+- ✅ API documentation (Swagger UI)
+
+**Sign-Off:**
+- ✅ Demo rehearsal completed (Week 8, Day 4)
+- ✅ Stakeholder sign-off (Week 8, Day 5)
+
+---
+
+## Communication & Meetings
+
+**Daily Standup:**
+- **Time:** 9:00 AM (15 minutes)
+- **Format:** What I did yesterday, what I'm doing today, blockers
+- **Channels:** Slack `#abb-sim-dev`
+
+**Sprint Reviews:**
+- **When:** End of each 2-week sprint (30 min)
+- **Exception:** Week 8 MVP sign-off (1 hour)
+
+**Slack Channels:**
+- `#abb-sim-dev` - General development
+- `#abb-sim-frontend` - Dylane + Umaya coordination
+- `#abb-sim-backend` - Jason + Noah coordination
+- `#abb-sim-qa` - Testing, bugs, UAT
+
+---
+
+## Dependencies & Integration Points
+
+**No Hard Blockers for Weeks 1-5:**
+- Frontend can mock all API responses
+- Backend can stub endpoints
+- Both teams test independently
+
+**Critical Integration Points:**
+
+**Week 3 Day 1:**
+- Jason creates `grammar.lark` skeleton → blocks Week 4 AST implementation
+
+**Week 3 Day 2-3:**
+- Noah sets up PyBullet + IRB 4600 URDF → blocks Week 4 IK solver
+
+**Week 5 Day 1:**
+- Jason defines SimulateRequest/Response schemas → blocks Dylane animation (Day 3-4)
+
+**Week 6:**
+- `/api/simulate` format finalized → used by both frontend and backend
+
+**Week 7:**
+- Trajectory animation must work with real `/api/simulate` output
+
+**Week 8:**
+- Collision detection integration (backend data → frontend rendering)
+
+---
+
+## Risk Management
+
+| Risk | Owner | Mitigation |
+|------|-------|-----------|
+| Noah workload overload | Noah + PM | Weekly workload review, delegate docs to team where possible |
+| PyBullet IK inaccurate | Noah | Validate against RobotStudio ground truth (Week 4) |
+| RAPID parser incomplete | Jason | Phased grammar (movement-only MVP, control flow Phase 4) |
+| Babylon.js performance | Dylane | Profile early (Week 2), simplify scene if needed |
+| Timeline overrun | Noah (PM) | MVP gate at Week 8, defer stretch goals |
+| URDF creation delays | Noah | Focus IRB 4600 first, 2600/6700 can be Week 9 if needed (not ideal) |
 
 ---
 
 ## Testing Checkpoints
 
-### Weekly QA Schedule (Noah)
+**Weekly QA Schedule (Noah):**
 - **Monday:** Review previous week's deliverables
 - **Wednesday:** Mid-week integration testing
 - **Friday:** Weekly demo and regression tests
 
-### Critical Milestones
+**Critical Milestones:**
 - **Week 3:** End of Phase 1 - Full visualization stack test
 - **Week 6:** End of Phase 2 - RAPID → trajectory pipeline test
 - **Week 8:** MVP LAUNCH - Comprehensive acceptance testing
 
 ---
 
-## Success Criteria - MVP (Week 8)
-
-✅ All 7 critical functional requirements working (FR-1 through FR-7)
-✅ Student can upload RAPID code and see robot animate
-✅ Collision detection provides visual feedback
-✅ Timeline controls (play, pause, seek) are responsive
-✅ UI is intuitive for non-programmers
-✅ System runs without crashes for 30+ minute sessions
-✅ Complete user SOP and demo-ready
+**Last Updated:** 2026-02-11
+**Owner:** Noah (PM Lead)
+**Next Review:** End of Week 2 (Sprint 1 retro)

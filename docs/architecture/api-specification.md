@@ -291,7 +291,173 @@ curl -X POST http://localhost:8000/api/upload/obstacle \
 
 ---
 
-### 6. Simulate Trajectory
+### 6. Parse RAPID Text
+
+**Endpoint:** `POST /api/parse`
+
+**Description:** Parse raw RAPID code (typed in editor) and return AST. Differs from `/api/upload/rapid` which accepts file uploads - this endpoint accepts raw text for in-browser editing.
+
+**Request:** `application/json`
+
+```json
+{
+  "code": "MoveL p10, v1000, z10, tool0;\nMoveJ jpos1, v500, fine, tool0;"
+}
+```
+
+**Response:**
+
+```json
+{
+  "ast": [
+    {
+      "type": "MoveL",
+      "target": {
+        "type": "RobTarget",
+        "trans": [500.0, 0.0, 600.0],
+        "rot": [1.0, 0.0, 0.0, 0.0],
+        "robconf": [0, 0, 0, 0],
+        "extax": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+      },
+      "speed": {"type": "SpeedData", "v_tcp": 1000.0, "v_ori": 500.0},
+      "zone": {"type": "ZoneData", "finep": false, "pzone_tcp": 10.0}
+    }
+  ],
+  "errors": [],
+  "warnings": []
+}
+```
+
+**Status Codes:**
+- `200 OK` - Parsing successful
+- `400 Bad Request` - Malformed RAPID syntax
+- `422 Unprocessable Entity` - Validation error
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8000/api/parse \
+  -H "Content-Type: application/json" \
+  -d '{"code": "MoveL p10, v1000, z10, tool0;"}'
+```
+
+---
+
+### 7. List Obstacles
+
+**Endpoint:** `GET /api/obstacles`
+
+**Description:** List all currently uploaded obstacles in the session.
+
+**Request:** None
+
+**Response:**
+
+```json
+[
+  {
+    "obstacle_id": "obs_1707145800_abc123",
+    "filename": "table.stl",
+    "position": [500.0, 0.0, 0.0],
+    "rotation": [0.0, 0.0, 45.0],
+    "bounds": {
+      "min": [400.0, -100.0, -50.0],
+      "max": [600.0, 100.0, 50.0]
+    },
+    "vertices": 1200,
+    "triangles": 400
+  }
+]
+```
+
+**Status Codes:**
+- `200 OK` - Success (returns empty array if no obstacles)
+
+**Example:**
+
+```bash
+curl http://localhost:8000/api/obstacles
+```
+
+---
+
+### 8. Update Obstacle Transform
+
+**Endpoint:** `PUT /api/obstacles/{obstacle_id}/transform`
+
+**Description:** Update obstacle position and rotation (for transform gizmo interactions).
+
+**Path Parameters:**
+- `obstacle_id` (string, required) - Obstacle identifier from upload response
+
+**Request:** `application/json`
+
+```json
+{
+  "position": [550.0, 10.0, 5.0],
+  "rotation": [0.0, 0.0, 90.0]
+}
+```
+
+**Response:**
+
+```json
+{
+  "obstacle_id": "obs_1707145800_abc123",
+  "position": [550.0, 10.0, 5.0],
+  "rotation": [0.0, 0.0, 90.0],
+  "updated_at": "2026-02-05T14:35:00Z"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Transform updated
+- `404 Not Found` - Invalid obstacle ID
+- `422 Unprocessable Entity` - Validation error
+
+**Example:**
+
+```bash
+curl -X PUT http://localhost:8000/api/obstacles/obs_1707145800_abc123/transform \
+  -H "Content-Type: application/json" \
+  -d '{"position": [550, 10, 5], "rotation": [0, 0, 90]}'
+```
+
+---
+
+### 9. Delete Obstacle
+
+**Endpoint:** `DELETE /api/obstacles/{obstacle_id}`
+
+**Description:** Remove obstacle from session.
+
+**Path Parameters:**
+- `obstacle_id` (string, required) - Obstacle identifier
+
+**Request:** None
+
+**Response:**
+
+```json
+{
+  "obstacle_id": "obs_1707145800_abc123",
+  "deleted": true
+}
+```
+
+**Status Codes:**
+- `200 OK` - Obstacle deleted
+- `404 Not Found` - Invalid obstacle ID
+
+**Example:**
+
+```bash
+curl -X DELETE http://localhost:8000/api/obstacles/obs_1707145800_abc123
+```
+
+---
+
+### 10. Simulate Trajectory
 
 **Endpoint:** `POST /api/simulate`
 
@@ -639,6 +805,73 @@ for (const waypoint of trajectory) {
 
 ---
 
-**Last Updated:** 2026-02-05
+## Error Code Catalog
+
+Machine-readable error codes returned in the `error_code` field of error responses.
+
+### General Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `VALIDATION_ERROR` | 422 | Pydantic schema validation failed | Check request payload against schema |
+| `INVALID_FILE_TYPE` | 400 | Unsupported file extension | Use .mod for RAPID, .stl for obstacles |
+| `FILE_TOO_LARGE` | 400 | File exceeds size limit | RAPID: max 1MB, STL: max 10MB |
+| `FILE_READ_ERROR` | 500 | Unable to read uploaded file | Check file permissions, retry upload |
+
+### RAPID Parser Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `PARSE_ERROR` | 400 | RAPID syntax error | Fix syntax at reported line number |
+| `UNSUPPORTED_INSTRUCTION` | 400 | Instruction not supported in MVP | Use only MoveL/MoveJ/MoveC for MVP |
+| `UNDEFINED_TARGET` | 400 | Referenced target not defined | Define all targets before use |
+| `UNDEFINED_SPEED` | 400 | Speed data not defined | Define SpeedData before use |
+| `UNDEFINED_ZONE` | 400 | Zone data not defined | Define ZoneData before use |
+
+### Kinematics Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `IK_FAILURE` | 500 | Inverse kinematics solver failed | Target may be out of reach or unreachable |
+| `IK_NO_SOLUTION` | 400 | No IK solution exists | Check target position is within robot workspace |
+| `IK_TIMEOUT` | 500 | IK solver exceeded time limit (2s) | Simplify target pose or reduce waypoint density |
+| `FK_ERROR` | 500 | Forward kinematics calculation failed | Check joint limits, verify robot config |
+| `JOINT_LIMIT_EXCEEDED` | 400 | Computed joint angles exceed limits | Adjust target pose to stay within joint ranges |
+
+### Collision Detection Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `COLLISION_DETECTED` | 200 | Collision found (warning, not error) | Returned in trajectory with collision details |
+| `MESH_LOAD_ERROR` | 500 | Unable to load obstacle STL | Verify STL file is valid (ASCII or binary) |
+| `INVALID_MESH` | 400 | STL mesh is malformed | Check mesh has valid vertices/triangles |
+
+### Robot Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `INVALID_ROBOT_ID` | 404 | Robot ID not found | Use irb4600, irb2600, or irb6700 |
+| `ROBOT_CONFIG_ERROR` | 500 | Failed to load robot config | Check URDF/DH parameter files exist |
+| `MODEL_NOT_FOUND` | 404 | GLB model file missing | Verify .glb file in /models/robots/{id}/ |
+
+### Obstacle Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `OBSTACLE_NOT_FOUND` | 404 | Obstacle ID not found | Verify obstacle was uploaded and ID is correct |
+| `OBSTACLE_LIMIT_EXCEEDED` | 400 | Too many obstacles (>10) | Remove some obstacles before adding more |
+| `INVALID_TRANSFORM` | 400 | Position/rotation values invalid | Check position is [x,y,z] mm, rotation is [rx,ry,rz] deg |
+
+### Simulation Errors
+
+| Code | HTTP Status | Description | Mitigation |
+|------|-------------|-------------|-----------|
+| `EMPTY_AST` | 400 | AST array is empty | Upload RAPID program first |
+| `SIMULATION_TIMEOUT` | 500 | Simulation exceeded 5s limit | Reduce program complexity or waypoint count |
+| `PYBULLET_ERROR` | 500 | PyBullet internal error | Check logs for details, may be transient |
+
+---
+
+**Last Updated:** 2026-02-11
 **Approved by:** Noah (PM/QA Lead)
 **Next Review:** End of Week 2

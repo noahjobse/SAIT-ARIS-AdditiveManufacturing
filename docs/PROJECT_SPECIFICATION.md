@@ -86,7 +86,7 @@ This project delivers a browser-based "Digital Twin" for the **ABB IRB 4600, 260
 
 | Week | Focus | Deliverables | MVP Impact |
 |------|-------|--------------|-----------|
-| **4** | RAPID parser (MoveJ, MoveL, IF/FOR/WHILE) | Working parser, AST structure | Core Feature (FR-4) |
+| **4** | RAPID parser (MoveJ, MoveL, MoveC) | Working parser, AST structure | Core Feature (FR-4) |
 | **5** | PyBullet IK, trajectory generation | Inverse kinematics, smooth interpolation | Core Feature (FR-5) |
 | **6** | Batch execution, JSON trajectory output | End-to-end RAPID → trajectory pipeline | Core Feature (FR-5) |
 
@@ -123,8 +123,10 @@ This project delivers a browser-based "Digital Twin" for the **ABB IRB 4600, 260
 
 | Week | Focus | Deliverables | Feature |
 |------|-------|--------------|---------|
-| **9** | Line-linked collision logging | Collision → RAPID line mapping, detailed logs | FR-8, FR-9 |
-| **10** | IRB 2600 & 6700 models, advanced overlays | Multi-robot support, velocity curves | FR-1 (full), FR-10 |
+| **9** | Control flow (IF/ELSE), multi-robot validation | Conditional branching, verify all 3 robots work | FR-4 (extended), FR-1 (validation) |
+| **10** | Loop support (FOR/WHILE), advanced overlays | Loop execution, velocity curves (optional) | FR-4 (extended), FR-10 |
+
+**Note:** All 3 robots (IRB 4600, 2600, 6700) functional by Week 8 MVP. Weeks 9-10 add control flow and validate multi-robot support.
 
 ---
 
