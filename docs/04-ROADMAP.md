@@ -74,6 +74,8 @@
 **Goal:** Timeline scrubber, playback controls, error states, MVP sign-off
 **Key Milestone:** STUDENT MVP COMPLETE
 
+![Playback Controls Flow](./diagrams/playback-controls.svg)
+
 **Deliverables:**
 - Timeline scrubber (seek to any waypoint), step-through (next/prev)
 - Speed controls (0.25x, 0.5x, 1x, 2x)

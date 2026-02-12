@@ -10,6 +10,14 @@
 **Design:** Synchronous REST, stateless, Pydantic validation, all computation server-side.
 **Auth:** None for MVP. **Versioning:** No prefix for MVP.
 
+## Sequence Diagrams
+
+Visual documentation of key API flows:
+
+- **[RAPID Upload & Parse](./diagrams/rapid-upload-parse.svg)** - File upload, validation, parsing, error handling
+- **[Obstacle Management](./diagrams/obstacle-management.svg)** - Upload, transform, and delete obstacle workflows
+- **[End-to-End Simulation](./diagrams/end-to-end-flow.svg)** - Complete pipeline from RAPID upload to 3D visualization
+
 ## Error Format
 
 ```json
@@ -53,6 +61,8 @@ Serves GLB binary file (`application/octet-stream`). 404 for invalid robot ID.
 
 ### POST /api/upload/rapid
 
+![RAPID Upload Flow](./diagrams/rapid-upload-parse.svg)
+
 Upload `.mod` file (multipart/form-data, max 1MB). Returns parsed AST:
 
 ```json
@@ -72,6 +82,8 @@ Upload `.mod` file (multipart/form-data, max 1MB). Returns parsed AST:
 ```
 
 ### POST /api/upload/obstacle
+
+![Obstacle Management Flow](./diagrams/obstacle-management.svg)
 
 Upload `.stl` file (multipart/form-data, max 10MB) with optional `position` ([x,y,z] mm) and `rotation` ([rx,ry,rz] degrees).
 
