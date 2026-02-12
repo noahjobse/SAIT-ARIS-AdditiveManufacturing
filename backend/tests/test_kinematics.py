@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from app.kinematics.solver import KinematicsSolver
-from app.kinematics.exceptions import InvalidJointAnglesError
+from app.kinematics.exceptions import InvalidJointAnglesError, IKSolutionNotFoundError
 
 
 class TestForwardKinematics:
@@ -60,5 +60,108 @@ class TestForwardKinematics:
         # Joint 1 limit is ±180° (-3.14 to 3.14), try 400° (6.98 rad)
         with pytest.raises(InvalidJointAnglesError):
             solver.forward_kinematics("irb4600", [7.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+        solver.disconnect()
+
+
+class TestInverseKinematics:
+    """Test inverse kinematics calculations."""
+
+    def test_ik_simple_target(self):
+        """Test IK for reachable target position."""
+        solver = KinematicsSolver()
+
+        # Target at home position (should return close to zero angles)
+        target_position = [1.58, 0.0, 1.765]
+        target_orientation = None  # Use default orientation
+
+        result = solver.inverse_kinematics(
+            "irb4600", target_position, target_orientation
+        )
+
+        assert "joint_angles" in result
+        assert len(result["joint_angles"]) == 6
+
+        # Verify solution by running FK
+        fk_result = solver.forward_kinematics("irb4600", result["joint_angles"])
+        assert fk_result["position"][0] == pytest.approx(target_position[0], abs=0.01)
+        assert fk_result["position"][1] == pytest.approx(target_position[1], abs=0.01)
+        assert fk_result["position"][2] == pytest.approx(target_position[2], abs=0.01)
+
+        solver.disconnect()
+
+    def test_ik_with_orientation(self):
+        """Test IK with target position and orientation."""
+        solver = KinematicsSolver()
+
+        target_position = [1.0, 0.5, 1.5]
+        target_orientation = [0, 0, 0, 1]  # Identity quaternion
+
+        result = solver.inverse_kinematics(
+            "irb4600", target_position, target_orientation
+        )
+
+        assert len(result["joint_angles"]) == 6
+
+        # Verify with FK
+        fk_result = solver.forward_kinematics("irb4600", result["joint_angles"])
+        np.testing.assert_allclose(
+            fk_result["position"], target_position, atol=0.01
+        )
+
+        solver.disconnect()
+
+    def test_ik_unreachable_target(self):
+        """Test IK for unreachable target (too far)."""
+        solver = KinematicsSolver()
+
+        # Target beyond robot reach (reach is ~2.05m)
+        target_position = [5.0, 0.0, 0.0]
+
+        with pytest.raises(IKSolutionNotFoundError):
+            solver.inverse_kinematics("irb4600", target_position)
+
+        solver.disconnect()
+
+    def test_ik_fk_roundtrip(self):
+        """Test FK(IK(pose)) ≈ pose round-trip."""
+        solver = KinematicsSolver()
+
+        # Start with known joint angles
+        original_angles = [0.5, -0.3, 0.8, 0.0, 0.5, 0.0]
+
+        # FK to get pose
+        fk_result = solver.forward_kinematics("irb4600", original_angles)
+
+        # IK back to joint angles
+        ik_result = solver.inverse_kinematics(
+            "irb4600",
+            fk_result["position"],
+            fk_result["orientation"]
+        )
+
+        # FK again to verify
+        fk_verify = solver.forward_kinematics("irb4600", ik_result["joint_angles"])
+
+        np.testing.assert_allclose(
+            fk_verify["position"], fk_result["position"], atol=0.01
+        )
+
+        solver.disconnect()
+
+    def test_ik_with_current_joints_hint(self):
+        """Test IK with current joint angles as seed."""
+        solver = KinematicsSolver()
+
+        target_position = [1.2, 0.3, 1.4]
+        current_joints = [0.1, -0.2, 0.3, 0.0, 0.2, 0.0]
+
+        result = solver.inverse_kinematics(
+            "irb4600",
+            target_position,
+            current_joints=current_joints
+        )
+
+        assert len(result["joint_angles"]) == 6
 
         solver.disconnect()
