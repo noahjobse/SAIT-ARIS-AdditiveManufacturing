@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import upload
+from app.routers import upload, robots
 
 app = FastAPI(
     title="ABB Robot Simulation Backend",
@@ -19,6 +19,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(upload.router)
+app.include_router(robots.router)
 
 @app.get("/")
 async def root():
