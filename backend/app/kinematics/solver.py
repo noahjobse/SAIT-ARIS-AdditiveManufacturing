@@ -44,41 +44,36 @@ class KinematicsSolver:
             ValueError: If joint_angles length doesn't match robot DOF
             InvalidJointAnglesError: If joint angles violate limits
         """
-        # Load robot if not already loaded
         if not self.loader.is_loaded(robot_id):
             self.loader.load_robot(robot_id)
 
         pybullet_id = self.loader.get_pybullet_id(robot_id)
         num_joints = self.loader.get_joint_count(robot_id)
+        movable_indices = self.loader.get_movable_joint_indices(robot_id)
+        ee_link = self.loader.get_ee_link_index(robot_id)
 
-        # Validate input
         if len(joint_angles) != num_joints:
             raise ValueError(f"Expected {num_joints} joint angles, got {len(joint_angles)}")
 
-        # Validate joint limits
         self._validate_joint_limits(robot_id, joint_angles)
 
-        # Set joint positions in PyBullet
-        for joint_idx in range(num_joints):
+        # Set only movable joint positions
+        for i, joint_idx in enumerate(movable_indices):
             p.resetJointState(
                 pybullet_id,
                 joint_idx,
-                joint_angles[joint_idx],
+                joint_angles[i],
                 physicsClientId=self.loader.physics_client,
             )
 
-        # Get end-effector link state (link_6 or tool0)
-        # Link index for tool0 is num_joints (last link)
         link_state = p.getLinkState(
             pybullet_id,
-            num_joints,  # tool0 link index
+            ee_link,
             physicsClientId=self.loader.physics_client,
         )
 
         position = list(link_state[4])  # World position
         orientation = list(link_state[5])  # World orientation (quaternion)
-
-        logger.debug(f"FK result for {robot_id}: pos={position}, ori={orientation}")
 
         return {
             "position": position,
@@ -107,12 +102,13 @@ class KinematicsSolver:
         Raises:
             IKSolutionNotFoundError: If IK cannot find a solution
         """
-        # Load robot if not already loaded
         if not self.loader.is_loaded(robot_id):
             self.loader.load_robot(robot_id)
 
         pybullet_id = self.loader.get_pybullet_id(robot_id)
         num_joints = self.loader.get_joint_count(robot_id)
+        movable_indices = self.loader.get_movable_joint_indices(robot_id)
+        ee_link = self.loader.get_ee_link_index(robot_id)
 
         # Set current joints as starting position (if provided)
         if current_joints is not None:
@@ -120,17 +116,13 @@ class KinematicsSolver:
                 raise ValueError(
                     f"Expected {num_joints} current joints, got {len(current_joints)}"
                 )
-            for joint_idx in range(num_joints):
+            for i, joint_idx in enumerate(movable_indices):
                 p.resetJointState(
                     pybullet_id,
                     joint_idx,
-                    current_joints[joint_idx],
+                    current_joints[i],
                     physicsClientId=self.loader.physics_client,
                 )
-
-        # Use default orientation if not provided
-        if target_orientation is None:
-            target_orientation = [0, 0, 0, 1]  # Identity quaternion
 
         # Get joint limits for PyBullet IK
         limits = self.loader.get_joint_limits(robot_id)
@@ -139,55 +131,51 @@ class KinematicsSolver:
         joint_ranges = [upper - lower for upper, lower in zip(upper_limits, lower_limits)]
         rest_poses = [(upper + lower) / 2 for upper, lower in zip(upper_limits, lower_limits)]
 
-        # Call PyBullet IK solver
-        joint_angles = p.calculateInverseKinematics(
-            pybullet_id,
-            num_joints,  # End-effector link index (tool0)
-            target_position,
-            targetOrientation=target_orientation,
-            lowerLimits=lower_limits,
-            upperLimits=upper_limits,
-            jointRanges=joint_ranges,
-            restPoses=rest_poses,
-            maxNumIterations=100,
-            residualThreshold=1e-5,
-            physicsClientId=self.loader.physics_client,
-        )
+        # Build IK kwargs
+        ik_kwargs = {
+            "bodyUniqueId": pybullet_id,
+            "endEffectorLinkIndex": ee_link,
+            "targetPosition": target_position,
+            "lowerLimits": lower_limits,
+            "upperLimits": upper_limits,
+            "jointRanges": joint_ranges,
+            "restPoses": rest_poses,
+            "maxNumIterations": 100,
+            "residualThreshold": 1e-5,
+            "physicsClientId": self.loader.physics_client,
+        }
+        if target_orientation is not None:
+            ik_kwargs["targetOrientation"] = target_orientation
 
-        # Validate solution by checking distance to target
-        # Set joints to solution
-        for joint_idx in range(num_joints):
+        try:
+            joint_angles = p.calculateInverseKinematics(**ik_kwargs)
+        except p.error:
+            raise IKSolutionNotFoundError(robot_id, target_position)
+
+        # Validate solution: set joints and check distance to target
+        for i, joint_idx in enumerate(movable_indices):
             p.resetJointState(
                 pybullet_id,
                 joint_idx,
-                joint_angles[joint_idx],
+                joint_angles[i],
                 physicsClientId=self.loader.physics_client,
             )
 
-        # Get actual end-effector position
         link_state = p.getLinkState(
-            pybullet_id, num_joints, physicsClientId=self.loader.physics_client
+            pybullet_id, ee_link, physicsClientId=self.loader.physics_client
         )
         actual_position = link_state[4]
 
-        # Check if solution is close enough (within 1cm)
         distance = np.linalg.norm(np.array(actual_position) - np.array(target_position))
         if distance > 0.01:  # 1cm tolerance
             raise IKSolutionNotFoundError(robot_id, target_position)
 
-        logger.debug(f"IK solution for {robot_id}: {joint_angles}, error={distance:.4f}m")
-
         return {
-            "joint_angles": list(joint_angles[:num_joints]),  # Only return controllable joints
+            "joint_angles": list(joint_angles[:num_joints]),
         }
 
     def _validate_joint_limits(self, robot_id: str, joint_angles: List[float]):
-        """
-        Validate joint angles against joint limits.
-
-        Raises:
-            InvalidJointAnglesError: If any joint exceeds limits
-        """
+        """Validate joint angles against joint limits."""
         limits = self.loader.get_joint_limits(robot_id)
 
         for joint_idx, angle in enumerate(joint_angles):

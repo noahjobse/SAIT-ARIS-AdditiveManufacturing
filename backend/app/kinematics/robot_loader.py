@@ -26,6 +26,8 @@ class RobotLoader:
         self.physics_client = None
         self.loaded_robots: Dict[str, int] = {}  # robot_id -> pybullet_id
         self.robot_configs: Dict[str, dict] = {}  # robot_id -> config
+        self._movable_joints: Dict[str, list] = {}  # robot_id -> [joint indices]
+        self._ee_link_index: Dict[str, int] = {}  # robot_id -> end-effector link index
         self.connect()
 
     def connect(self):
@@ -46,6 +48,8 @@ class RobotLoader:
             self.physics_client = None
             self.loaded_robots.clear()
             self.robot_configs.clear()
+            self._movable_joints.clear()
+            self._ee_link_index.clear()
             logger.info("PyBullet disconnected")
 
     def load_robot(self, robot_id: str) -> int:
@@ -89,7 +93,26 @@ class RobotLoader:
 
         self.loaded_robots[robot_id] = pybullet_id
         self.robot_configs[robot_id] = config
-        logger.info(f"Loaded robot '{robot_id}' (PyBullet ID: {pybullet_id})")
+
+        # Discover movable (revolute/prismatic) joints vs fixed joints
+        total_joints = p.getNumJoints(pybullet_id, physicsClientId=self.physics_client)
+        movable = []
+        ee_index = total_joints - 1  # Default to last joint's child link
+        for i in range(total_joints):
+            info = p.getJointInfo(pybullet_id, i, physicsClientId=self.physics_client)
+            joint_type = info[2]
+            if joint_type != p.JOINT_FIXED:
+                movable.append(i)
+            else:
+                # The fixed joint's link is likely the end-effector
+                ee_index = i
+
+        self._movable_joints[robot_id] = movable
+        self._ee_link_index[robot_id] = ee_index
+        logger.info(
+            f"Loaded robot '{robot_id}' (PyBullet ID: {pybullet_id}, "
+            f"{len(movable)} movable joints, EE link: {ee_index})"
+        )
 
         return pybullet_id
 
@@ -104,22 +127,31 @@ class RobotLoader:
         return self.loaded_robots[robot_id]
 
     def get_joint_count(self, robot_id: str) -> int:
-        """Get number of joints for a robot."""
-        pybullet_id = self.get_pybullet_id(robot_id)
-        return p.getNumJoints(pybullet_id, physicsClientId=self.physics_client)
+        """Get number of movable joints for a robot."""
+        self.get_pybullet_id(robot_id)  # Validate robot is loaded
+        return len(self._movable_joints[robot_id])
+
+    def get_movable_joint_indices(self, robot_id: str) -> list:
+        """Get PyBullet indices of movable joints."""
+        self.get_pybullet_id(robot_id)  # Validate robot is loaded
+        return self._movable_joints[robot_id]
+
+    def get_ee_link_index(self, robot_id: str) -> int:
+        """Get PyBullet link index for the end-effector (tool0)."""
+        self.get_pybullet_id(robot_id)  # Validate robot is loaded
+        return self._ee_link_index[robot_id]
 
     def get_joint_limits(self, robot_id: str) -> list:
         """
-        Get joint limits for all joints.
+        Get joint limits for movable joints only.
 
         Returns:
-            List of dicts with 'lower', 'upper', 'velocity' for each joint
+            List of dicts with 'lower', 'upper', 'velocity' for each movable joint
         """
         pybullet_id = self.get_pybullet_id(robot_id)
-        num_joints = self.get_joint_count(robot_id)
 
         limits = []
-        for joint_idx in range(num_joints):
+        for joint_idx in self._movable_joints[robot_id]:
             joint_info = p.getJointInfo(
                 pybullet_id, joint_idx, physicsClientId=self.physics_client
             )
