@@ -80,20 +80,24 @@ backend/app/
 +-- routers/
 |   +-- robots.py        # GET /api/robots, GET /api/robots/{id}/model
 |   +-- upload.py        # POST /api/upload/rapid, POST /api/upload/obstacle
+|   +-- kinematics.py    # POST /api/kinematics/fk, POST /api/kinematics/ik  ✅
 |   +-- simulate.py      # POST /api/simulate
 +-- parser/
 |   +-- grammar.lark     # RAPID grammar definition
 |   +-- transformer.py   # Lark Transformer -> AST nodes
 |   +-- parser.py        # Parse RAPID string -> AST
 |   +-- ast_nodes.py     # AST node dataclasses
-+-- kinematics/
-|   +-- solver.py        # PyBullet IK/FK solver wrapper
-|   +-- trajectory.py    # AST -> interpolated waypoints
-|   +-- robot_config.py  # Load DH params + URDF
++-- kinematics/          # ✅ IMPLEMENTED
+|   +-- __init__.py      # Module exports
+|   +-- exceptions.py    # KinematicsError, IKSolutionNotFoundError, etc.
+|   +-- robot_loader.py  # PyBullet URDF loading + joint discovery
+|   +-- solver.py        # FK/IK solver (PyBullet wrapper)
+|   +-- trajectory.py    # AST -> interpolated waypoints (TODO)
 +-- collision/
 |   +-- detector.py      # PyBullet collision checking
 |   +-- mesh_loader.py   # Load STL/OBJ into PyBullet
 +-- schemas/
+|   +-- kinematics.py    # FK/IK request/response models  ✅
 |   +-- requests.py      # Pydantic request models
 |   +-- responses.py     # Pydantic response models
 +-- utils/

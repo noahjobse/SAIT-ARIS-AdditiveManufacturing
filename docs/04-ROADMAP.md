@@ -47,9 +47,21 @@
 - PyBullet headless, FK solver, IK solver (all 3 robot URDFs)
 - Parser test suite (20+ cases), FK/IK validation tests
 
+**Progress:**
+- [x] **Noah:** IRB 4600 URDF created (ROS Industrial parameters) — `models/robots/irb4600/irb4600.urdf`
+- [x] **Noah:** PyBullet headless robot loader — `app/kinematics/robot_loader.py`
+- [x] **Noah:** FK solver (joint angles → TCP pose) — `app/kinematics/solver.py`
+- [x] **Noah:** IK solver (target pose → joint angles) — `app/kinematics/solver.py`
+- [x] **Noah:** FK/IK REST endpoints — `POST /api/kinematics/fk`, `POST /api/kinematics/ik`
+- [x] **Noah:** 21 kinematics tests passing (unit + integration)
+- [ ] **Noah:** IRB 2600 + IRB 6700 URDFs
+- [ ] **Noah:** Collision detector + obstacle mesh loader
+- [ ] **Jason:** Lark grammar skeleton
+- [ ] **Jason:** AST transformer
+
 **Blocking Dependencies:**
+- ~~Week 3 Day 2-3 (Noah): PyBullet + IRB 4600 URDF -> blocks Week 4 IK solver~~ ✅ DONE
 - Week 3 Day 1 (Jason): `grammar.lark` skeleton -> blocks Week 4 AST implementation
-- Week 3 Day 2-3 (Noah): PyBullet + IRB 4600 URDF -> blocks Week 4 IK solver
 
 ## Sprint: Weeks 5-6 (Simulation Pipeline)
 

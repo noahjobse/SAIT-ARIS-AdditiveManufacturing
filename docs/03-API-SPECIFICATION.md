@@ -115,6 +115,55 @@ Update obstacle position/rotation. Body: `{"position": [x,y,z], "rotation": [rx,
 
 Remove obstacle. Returns `{"obstacle_id": "...", "deleted": true}`.
 
+### POST /api/kinematics/fk
+
+Calculate end-effector pose from joint angles (Forward Kinematics).
+
+**Request:**
+```json
+{
+  "robot_id": "irb4600",
+  "joint_angles": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+}
+```
+
+**Response (200):**
+```json
+{
+  "robot_id": "irb4600",
+  "position": [1.58, 0.0, 1.765],
+  "orientation": [0.0, 0.0, 0.0, 1.0]
+}
+```
+
+**Errors:** 400 for invalid joint count or joint limit violation, 404 for unknown robot ID.
+
+### POST /api/kinematics/ik
+
+Calculate joint angles to reach target pose (Inverse Kinematics).
+
+**Request:**
+```json
+{
+  "robot_id": "irb4600",
+  "target_position": [1.2, 0.3, 1.4],
+  "target_orientation": [0, 0, 0, 1],
+  "current_joints": [0.1, -0.2, 0.3, 0.0, 0.2, 0.0]
+}
+```
+
+`target_orientation` and `current_joints` are optional. `current_joints` seeds the IK solver for better convergence.
+
+**Response (200):**
+```json
+{
+  "robot_id": "irb4600",
+  "joint_angles": [0.234, -0.456, 0.789, 0.123, 0.456, 0.789]
+}
+```
+
+**Errors:** 400 for invalid input, 404 for unreachable target (`IK_NO_SOLUTION`) or unknown robot ID.
+
 ### POST /api/simulate
 
 Execute full simulation pipeline.
