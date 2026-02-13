@@ -32,7 +32,7 @@ This platform allows users to:
 **Backend:**
 - **FastAPI** - Modern Python web framework
 - **PyBullet** - Physics simulation and inverse kinematics
-- **Custom RAPID Parser** - Lexer/parser for ABB robot language
+- **Lark Parser** - Grammar-based RAPID language parser
 
 **Workflow:**
 1. User uploads RAPID code via web interface
@@ -57,7 +57,7 @@ See [docs/architecture/system-design.md](docs/architecture/system-design.md) for
 ### Package Managers
 
 - **Frontend:** pnpm (faster, efficient)
-- **Backend:** poetry (modern Python package manager with lock files)
+- **Backend:** pip (Python standard package manager)
 
 ### Installation
 
@@ -86,9 +86,11 @@ scripts\setup.bat
 
 **Manual Setup:**
 ```bash
-# Backend (requires Poetry)
+# Backend (requires Python 3.11+)
 cd backend
-poetry install --with dev
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
 # Frontend (requires Node.js + pnpm)
 cd frontend
@@ -102,7 +104,8 @@ pnpm install
 ```bash
 # Terminal 1: Backend
 cd backend
-poetry run uvicorn app.main:app --reload
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+uvicorn app.main:app --reload
 
 # Terminal 2: Frontend
 cd frontend
@@ -167,12 +170,40 @@ See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete s
 
 ## Documentation
 
-- **[System Architecture](docs/architecture/system-design.md)** - Component design and data flow
-- **[API Specification](docs/architecture/api-specification.md)** - REST endpoint documentation
-- **[Development Setup](docs/guides/development-setup.md)** - Detailed installation guide
-- **[RAPID Language Reference](docs/research/rapid-language-spec.md)** - ABB RAPID syntax and semantics
-- **[11-Week Roadmap](docs/roadmap/11-week-plan.md)** - Detailed development schedule
-- **[ARIS Partnership](docs/aris-partnership.md)** - Stakeholder collaboration details
+### 📍 **[START HERE - Documentation Hub](docs/START_HERE.md)** ⭐
+
+**New to the project?** The Documentation Hub is your single entry point for all project documentation, organized by role and task.
+
+**Quick links from the hub:**
+- **By Role:** Frontend dev, Backend dev, QA/PM guides
+- **Sprint Plans:** Week-by-week detailed task breakdowns
+- **Architecture:** System design and API specs
+- **Getting Help:** Slack channels, daily standups, troubleshooting
+
+---
+
+### Core Documents
+
+#### Project Overview
+- **[Project Specification](docs/PROJECT_SPECIFICATION.md)** - Complete MVP requirements (FR-1 to FR-7)
+- **[CLAUDE.md](CLAUDE.md)** - Development commands and project instructions
+
+#### Architecture & Design
+- **[System Architecture](docs/architecture/system-design.md)** - Full pipeline workflow and component design
+- **[API Specification](docs/architecture/api-specification.md)** - REST endpoints and schemas
+
+#### Planning & Roadmap
+- **[11-Week Roadmap](docs/roadmap/11-week-plan.md)** - High-level phase overview
+- **[Implementation Timeline](docs/roadmap/implementation-timeline.md)** - Person-by-person breakdown
+- **[Task Assignments](docs/team/task-assignments.md)** - Current task assignments
+
+#### Sprint Plans (Detailed 2-Week Plans)
+- **[Week 1-2 Sprint Plan](docs/roadmap/week-1-2-sprint-plan.md)** - Foundation (3D scene, robot loading)
+- **[Week 3-4 Sprint Plan](docs/roadmap/week-3-4-sprint-plan.md)** - Parser & kinematics
+- **[Week 5-6 Sprint Plan](docs/roadmap/week-5-6-sprint-plan.md)** - Simulation pipeline
+- **[Week 7-8 Sprint Plan](docs/roadmap/week-7-8-sprint-plan.md)** - MVP launch ⭐
+- **[Week 9-10 Sprint Plan](docs/roadmap/week-9-10-sprint-plan.md)** - Stretch goals
+- **[Week 11 Finalization](docs/roadmap/week-11-finalization.md)** - Handoff & presentation
 
 ---
 

@@ -5,20 +5,23 @@ FastAPI + PyBullet backend for robot trajectory simulation.
 ## Setup
 
 ```bash
-poetry install --with dev
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ## Running
 
 ```bash
-poetry run uvicorn app.main:app --reload
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+uvicorn app.main:app --reload
 ```
 
 API docs: http://localhost:8000/docs
 
 ## Development
 
-- `poetry add <package>` - Add dependency
-- `poetry add --group dev <package>` - Add dev dependency
-- `poetry run pytest` - Run tests
-- `poetry run ruff check .` - Lint code
+- `pip install <package>` - Add dependency (then add to requirements.txt manually)
+- `pip install <package>` - Add dev dependency (then add to requirements.txt manually)
+- `pytest` - Run tests
+- `ruff check .` - Lint code
