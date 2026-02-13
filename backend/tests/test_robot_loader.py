@@ -61,3 +61,48 @@ class TestRobotLoader:
             loader.load_robot("missing_robot")
 
         loader.disconnect()
+
+    def test_load_irb2600_urdf(self):
+        """Test loading IRB 2600 URDF into PyBullet."""
+        loader = RobotLoader()
+        loader.load_robot("irb2600")
+
+        assert loader.is_loaded("irb2600")
+        assert loader.get_joint_count("irb2600") == 6
+
+        limits = loader.get_joint_limits("irb2600")
+        assert len(limits) == 6
+        assert limits[0]["lower"] == pytest.approx(-3.14159, abs=0.01)
+
+        loader.disconnect()
+
+    def test_load_irb6700_urdf(self):
+        """Test loading IRB 6700 URDF into PyBullet."""
+        loader = RobotLoader()
+        loader.load_robot("irb6700")
+
+        assert loader.is_loaded("irb6700")
+        assert loader.get_joint_count("irb6700") == 6
+
+        limits = loader.get_joint_limits("irb6700")
+        assert len(limits) == 6
+        assert limits[0]["lower"] == pytest.approx(-2.967, abs=0.01)
+
+        loader.disconnect()
+
+    def test_fk_all_robots_zero_position(self):
+        """Test FK at zero position for all 3 robots."""
+        from app.kinematics.solver import KinematicsSolver
+
+        solver = KinematicsSolver()
+        zeros = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+        for robot_id in ["irb4600", "irb2600", "irb6700"]:
+            result = solver.forward_kinematics(robot_id, zeros)
+            assert len(result["position"]) == 3
+            assert len(result["orientation"]) == 4
+            # TCP should be in positive X (arm extended) and positive Z (above base)
+            assert result["position"][0] > 0.5
+            assert result["position"][2] > 0.3
+
+        solver.disconnect()
