@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@babylonjs/core':
-        specifier: ^8.46.2
+        specifier: ^8.49.6
         version: 8.49.6
       '@babylonjs/loaders':
         specifier: ^8.46.2
         version: 8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@6.49.0)
       '@babylonjs/materials':
-        specifier: ^8.46.2
+        specifier: ^8.49.6
         version: 8.49.6(@babylonjs/core@8.49.6)
       axios:
         specifier: ^1.13.4
@@ -23,6 +23,9 @@ importers:
       react:
         specifier: ^19.2.4
         version: 19.2.4
+      react-babylonjs:
+        specifier: 3.2.5-beta.2
+        version: 3.2.5-beta.2(@babylonjs/core@8.49.6)(@babylonjs/gui@8.51.2(@babylonjs/core@8.49.6))(react-dom@19.2.4(react@19.2.4))(react-reconciler@0.31.0(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
@@ -161,6 +164,11 @@ packages:
 
   '@babylonjs/core@8.49.6':
     resolution: {integrity: sha512-Q0wsDfDQhwXhE22ltb89hL+XYaDzBLGDr/sSlKUEsHtALK+u36Ttwa8wVD0XJP30pgFpKIrd1LvdSB9FemNwzg==}
+
+  '@babylonjs/gui@8.51.2':
+    resolution: {integrity: sha512-V0QdO7HFzS1Sk2RdAPQ8oDAQ6Vl9QZ69nQkJyGv3kd0Xyik/GTEbf0ObUFZOxJzEJwehQnBp+d7JA/lKfIPFLw==}
+    peerDependencies:
+      '@babylonjs/core': ^8.0.0
 
   '@babylonjs/loaders@8.49.6':
     resolution: {integrity: sha512-KsguPMqonctgvyjCcR8A3izGaoQoQrEdG3n4mZ4scX/WHskAciW5P/zsE3AUYugOAb+TL7iBW5VCb+sz/uEkVw==}
@@ -1298,10 +1306,29 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  react-babylonjs@3.2.5-beta.2:
+    resolution: {integrity: sha512-loYNlDCVj9MK8ftd5Tmyzp/iZtmVM7jk314kCQOSDubnw63OvOiwlPeY8s8bptLLIHSnSLyYQB8Tos6A275o8A==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      '@babylonjs/core': 5.x || 6.x || 7.x || 8.x
+      '@babylonjs/gui': 5.x || 6.x || 7.x || 8.x
+      react: '>=17'
+      react-dom: '>=17'
+      react-reconciler: 0.29.2 || 0.31.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react-dom@19.2.4:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
       react: ^19.2.4
+
+  react-reconciler@0.31.0:
+    resolution: {integrity: sha512-7Ob7Z+URmesIsIVRjnLoDGwBEG/tVitidU0nMsqX/eeJaLY89RISO/10ERe0MqmzuKUUB1rmY+h1itMbUHg9BQ==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      react: ^19.0.0
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -1319,6 +1346,9 @@ packages:
     resolution: {integrity: sha512-e5lPJi/aui4TO1LpAXIRLySmwXSE8k3b9zoGfd42p67wzxog4WHjiZF3M2uheQih4DGyc25QEV4yRBbpueNiUA==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
+
+  scheduler@0.25.0:
+    resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
 
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
@@ -1619,6 +1649,10 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@babylonjs/core@8.49.6': {}
+
+  '@babylonjs/gui@8.51.2(@babylonjs/core@8.49.6)':
+    dependencies:
+      '@babylonjs/core': 8.49.6
 
   '@babylonjs/loaders@8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@6.49.0)':
     dependencies:
@@ -2630,10 +2664,24 @@ snapshots:
 
   punycode@2.3.1: {}
 
+  react-babylonjs@3.2.5-beta.2(@babylonjs/core@8.49.6)(@babylonjs/gui@8.51.2(@babylonjs/core@8.49.6))(react-dom@19.2.4(react@19.2.4))(react-reconciler@0.31.0(react@19.2.4))(react@19.2.4):
+    dependencies:
+      '@babylonjs/core': 8.49.6
+      '@babylonjs/gui': 8.51.2(@babylonjs/core@8.49.6)
+      react: 19.2.4
+      react-reconciler: 0.31.0(react@19.2.4)
+    optionalDependencies:
+      react-dom: 19.2.4(react@19.2.4)
+
   react-dom@19.2.4(react@19.2.4):
     dependencies:
       react: 19.2.4
       scheduler: 0.27.0
+
+  react-reconciler@0.31.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+      scheduler: 0.25.0
 
   react-refresh@0.17.0: {}
 
@@ -2671,6 +2719,8 @@ snapshots:
       '@rollup/rollup-win32-x64-gnu': 4.57.0
       '@rollup/rollup-win32-x64-msvc': 4.57.0
       fsevents: 2.3.3
+
+  scheduler@0.25.0: {}
 
   scheduler@0.27.0: {}
 
