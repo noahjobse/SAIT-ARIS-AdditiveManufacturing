@@ -3,8 +3,16 @@ start: module+
 // RAPID files consist of at least one module. 
 // The internal hierarchy is module -> procedure -> statement -> terminal
 
-module: "MODULE" IDENTIFIER procedure* "ENDMODULE"
-procedure: "PROC" IDENTIFIER "()" statement* "ENDPROC"
+module: "MODULE" IDENTIFIER (procedure | declaration)* "ENDMODULE"
+declaration: const_decl | var_decl | pers_decl
+const_decl: "CONST" type IDENTIFIER ":=" value ";"
+var_decl: "VAR" type IDENTIFIER [":=" value] ";"
+pers_decl: "PERS" type IDENTIFIER ":=" value ";"
+
+procedure: "PROC" IDENTIFIER "(" [parameter_list] ")" statement* "ENDPROC"
+parameter_list: parameter ("," parameter)*
+parameter: type IDENTIFIER
+
 statement: move_l | move_j | move_c
 
 // These are our movements commands.
@@ -24,10 +32,13 @@ zone: IDENTIFIER | zonedata
 tool: IDENTIFIER
 wobj: "\\WObj" ":=" IDENTIFIER
 
+// Types and values
+
+type: IDENTIFIER
+value: robtarget | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
 
 // "robtarget" is our primary coordinate type. Structured as:
 // [position, rotation, configuration, external_axes]
-// each of these individual data structures are then defined below
 
 robtarget: "[" pos "," rot "," confdata "," extax "]"
 pos: "[" NUMBER "," NUMBER "," NUMBER "]"
@@ -40,7 +51,7 @@ extax: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 speeddata: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 zonedata: "[" BOOLEAN "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 
-// IDENTIFIER starts with a letter, followed by letters or numbers
+//Terminals use regex to match patterns in the text. Starts with a letter, followed by letters or numbers.
 IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
 
 // NUMBER matches integers, decimals, and scientific notation.
@@ -55,4 +66,3 @@ COMMENT: "!" /[^\n]*/
 %import common.WS
 %ignore WS
 %ignore COMMENT
-
