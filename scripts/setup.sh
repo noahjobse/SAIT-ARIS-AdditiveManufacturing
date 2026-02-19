@@ -19,11 +19,6 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-if ! command -v poetry &> /dev/null; then
-    echo "❌ poetry not found. Installing poetry..."
-    pip install poetry
-fi
-
 if ! command -v pnpm &> /dev/null; then
     echo "❌ pnpm not found. Installing pnpm..."
     npm install -g pnpm
@@ -31,7 +26,6 @@ fi
 
 echo "✓ Node.js $(node --version)"
 echo "✓ Python $(python3 --version)"
-echo "✓ poetry $(poetry --version)"
 echo "✓ pnpm $(pnpm --version)"
 echo ""
 
@@ -39,8 +33,14 @@ echo ""
 echo "Setting up backend..."
 cd backend
 
-echo "Installing Python dependencies with poetry..."
-poetry install --with dev
+echo "Creating Python virtual environment..."
+python3 -m venv venv
+
+echo "Activating virtual environment..."
+source venv/bin/activate
+
+echo "Installing Python dependencies with pip..."
+pip install -r requirements.txt
 
 echo "✓ Backend setup complete"
 cd ..
@@ -66,7 +66,8 @@ echo "To start development:"
 echo ""
 echo "  Backend:"
 echo "    cd backend"
-echo "    poetry run uvicorn app.main:app --reload"
+echo "    source venv/bin/activate"
+echo "    uvicorn app.main:app --reload"
 echo ""
 echo "  Frontend:"
 echo "    cd frontend"
