@@ -25,7 +25,7 @@ move_c: "MoveC" cir_point "," target "," speed "," zone "," tool ["," wobj] ";"
 // These are our arguments that define the values inside each movement command.
 // Each can be defined either by a variable name or inline data
 
-target: IDENTIFIER | robtarget
+target: IDENTIFIER | robtarget | jointtarget
 cir_point: IDENTIFIER | robtarget
 speed: IDENTIFIER | speeddata
 zone: IDENTIFIER | zonedata
@@ -35,7 +35,7 @@ wobj: "\\WObj" ":=" IDENTIFIER
 // Types and values
 
 type: IDENTIFIER
-value: robtarget | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
+value: robtarget | jointtarget | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
 
 // "robtarget" is our primary coordinate type. Structured as:
 // [position, rotation, configuration, external_axes]
@@ -45,6 +45,13 @@ pos: "[" NUMBER "," NUMBER "," NUMBER "]"
 rot: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 confdata: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 extax: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+
+// "jointtarget" is a joint-space target used by MoveJ. Structured as:
+// [joint_values, external_axes]
+// where joint_values holds the 6 joint angles and external_axes holds up to 6 external axis values.
+
+jointtarget: "[" joint_values "," extax "]"
+joint_values: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 
 // Placeholders for other data types (simplified for MVP, we can expand on this later) 
 
