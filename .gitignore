@@ -78,4 +78,8 @@ Backup/
 
 # Note: RAPID .mod files and STL files are tracked by default
 # (No ignore patterns needed - they are shared artifacts)
-CLAUDE.md
+
+# CAD source files - too large for web bundle (use GLB instead)
+frontend/public/models/robots/**/*.STEP
+frontend/public/models/robots/**/*.zip
+frontend/public/models/robots/**/*_STEP_j/
