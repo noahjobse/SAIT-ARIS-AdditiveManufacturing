@@ -16,7 +16,7 @@ function createEngineAndScene(canvas: HTMLCanvasElement): { engine: Engine; scen
 }
 
 function createCameraAndLight(scene: Scene, canvas: HTMLCanvasElement) {
-    var camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 6, new Vector3(0, 1, 0), scene);
+    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 6, new Vector3(0, 1, 0), scene);
     camera.attachControl(canvas, true);
     camera.wheelPrecision = 100;            // for gradual zoom
     camera.wheelDeltaPercentage = 0.01;
@@ -46,7 +46,6 @@ function createGroundGrid(scene: Scene) {
 
 async function loadRobotModel(scene: Scene, modelPath: string) {
     const robotModel = await ImportMeshAsync(modelPath, scene);
-    console.log("Model loaded:", robotModel);
     return robotModel;
 }
 
@@ -218,8 +217,7 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): P
 
 
     // Hide/show the Inspector
-    window.addEventListener("keydown", (ev) => {
-        // Shift+Ctrl+Alt+I
+    const keydownHandler = (ev: KeyboardEvent) => {
         if (ev.shiftKey && ev.ctrlKey && ev.altKey && (ev.key === "I" || ev.key === "i")) {
             if (scene.debugLayer.isVisible()) {
                 scene.debugLayer.hide();
@@ -227,21 +225,21 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): P
                 scene.debugLayer.show();
             }
         }
-    });
-
+    };
+    window.addEventListener("keydown", keydownHandler);
 
     // Run the main render loop
     engine.runRenderLoop(() => {
         scene.render();
-        
     });
 
-    window.addEventListener("resize", () => {
-        engine.resize();
-    });
+    const resizeHandler = () => engine.resize();
+    window.addEventListener("resize", resizeHandler);
 
     function dispose() {
         engine.stopRenderLoop();
+        window.removeEventListener("keydown", keydownHandler);
+        window.removeEventListener("resize", resizeHandler);
         scene.dispose();
         engine.dispose();
     }

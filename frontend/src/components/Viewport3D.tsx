@@ -38,6 +38,7 @@ function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
             jointControlsRef.current = null;
         };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modelPath]);
 
     // Update joint angles when sliders change
