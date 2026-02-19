@@ -1,0 +1,11 @@
+{
+  "robot_id": "irb4600",
+  "name": "IRB 4600-60/2.05",
+  "manufacturer": "ABB",
+  "dof": 6,
+  "payload_kg": 60,
+  "reach_mm": 2050,
+  "urdf_path": "models/robots/irb4600/irb4600.urdf",
+  "visual_model": "models/robots/irb4600/irb4600-preview.glb",
+  "notes": "Based on ROS Industrial IRB 4600-40/2.55 kinematics"
+}

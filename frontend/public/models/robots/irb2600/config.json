@@ -1,0 +1,11 @@
+{
+  "robot_id": "irb2600",
+  "name": "IRB 2600-12/1.65",
+  "manufacturer": "ABB",
+  "dof": 6,
+  "payload_kg": 12,
+  "reach_mm": 1650,
+  "urdf_path": "models/robots/irb2600/irb2600.urdf",
+  "visual_model": "models/robots/irb2600/irb2600-preview.glb",
+  "notes": "Based on ROS Industrial IRB 2600-12/1.65 kinematics"
+}
