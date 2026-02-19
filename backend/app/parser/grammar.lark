@@ -1,0 +1,75 @@
+start: module+
+
+// RAPID files consist of at least one module. 
+// The internal hierarchy is module -> procedure -> statement -> terminal
+
+module: "MODULE" IDENTIFIER (procedure | declaration)* "ENDMODULE"
+declaration: const_decl | var_decl | pers_decl
+const_decl: "CONST" type IDENTIFIER ":=" value ";"
+var_decl: "VAR" type IDENTIFIER [":=" value] ";"
+pers_decl: "PERS" type IDENTIFIER ":=" value ";"
+
+procedure: "PROC" IDENTIFIER "(" [parameter_list] ")" statement* "ENDPROC"
+parameter_list: parameter ("," parameter)*
+parameter: type IDENTIFIER
+
+statement: move_l | move_j | move_c
+
+// These are our movements commands.
+// Each movement commands needs a target, speed, zone, tool. Work objects are optional (defined by the brackets [])
+
+move_l: "MoveL" target "," speed "," zone "," tool ["," wobj] ";"
+move_j: "MoveJ" target "," speed "," zone "," tool ["," wobj] ";"
+move_c: "MoveC" cir_point "," target "," speed "," zone "," tool ["," wobj] ";"
+
+// These are our arguments that define the values inside each movement command.
+// Each can be defined either by a variable name or inline data
+
+target: IDENTIFIER | robtarget | jointtarget
+cir_point: IDENTIFIER | robtarget
+speed: IDENTIFIER | speeddata
+zone: IDENTIFIER | zonedata
+tool: IDENTIFIER
+wobj: "\\WObj" ":=" IDENTIFIER
+
+// Types and values
+
+type: IDENTIFIER
+value: robtarget | jointtarget | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
+
+// "robtarget" is our primary coordinate type. Structured as:
+// [position, rotation, configuration, external_axes]
+
+robtarget: "[" pos "," rot "," confdata "," extax "]"
+pos: "[" NUMBER "," NUMBER "," NUMBER "]"
+rot: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+confdata: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+extax: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+
+// "jointtarget" is a joint-space target used by MoveJ. Structured as:
+// [joint_values, external_axes]
+// where joint_values holds the 6 joint angles and external_axes holds up to 6 external axis values.
+
+jointtarget: "[" joint_values "," extax "]"
+joint_values: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+
+// Placeholders for other data types (simplified for MVP, we can expand on this later) 
+
+speeddata: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+zonedata: "[" BOOLEAN "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
+
+//Terminals use regex to match patterns in the text. Starts with a letter, followed by letters or numbers.
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+
+// NUMBER matches integers, decimals, and scientific notation.
+NUMBER: /-?\d+(\.\d+)?([eE][+-]?\d+)?/
+
+// BOOLEAN matches true or false values
+BOOLEAN: "TRUE" | "FALSE"
+
+// COMMENT starts with a "!" and ignores everything until the end of the line.
+COMMENT: "!" /[^\n]*/
+
+%import common.WS
+%ignore WS
+%ignore COMMENT

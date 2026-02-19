@@ -13,13 +13,16 @@ importers:
         version: 8.49.6
       '@babylonjs/loaders':
         specifier: ^8.46.2
-        version: 8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@6.49.0)
+        version: 8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@8.51.2)
       '@babylonjs/materials':
         specifier: ^8.49.6
         version: 8.49.6(@babylonjs/core@8.49.6)
       axios:
         specifier: ^1.13.4
         version: 1.13.4
+      babylonjs-gltf2interface:
+        specifier: ^8
+        version: 8.51.2
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -789,8 +792,8 @@ packages:
   axios@1.13.4:
     resolution: {integrity: sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==}
 
-  babylonjs-gltf2interface@6.49.0:
-    resolution: {integrity: sha512-4qzKCgEayti/YUaeMgAAZxZJlx/kLqXxoC+G8gODYz9wOV9UjnHF09wREZ5cuELzzY/rjSJMqkgDfYbUQIQ6/A==}
+  babylonjs-gltf2interface@8.51.2:
+    resolution: {integrity: sha512-NPrspLrMc+osgBxe5xRDWDBggyIkOj42Kc16kHwmUOzM4gW7QUE+iM1hNIv34832Jp25b3Tdj+Y73lhFaUpCdw==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1650,14 +1653,10 @@ snapshots:
 
   '@babylonjs/core@8.49.6': {}
 
-  '@babylonjs/gui@8.51.2(@babylonjs/core@8.49.6)':
+  '@babylonjs/loaders@8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@8.51.2)':
     dependencies:
       '@babylonjs/core': 8.49.6
-
-  '@babylonjs/loaders@8.49.6(@babylonjs/core@8.49.6)(babylonjs-gltf2interface@6.49.0)':
-    dependencies:
-      '@babylonjs/core': 8.49.6
-      babylonjs-gltf2interface: 6.49.0
+      babylonjs-gltf2interface: 8.51.2
 
   '@babylonjs/materials@8.49.6(@babylonjs/core@8.49.6)':
     dependencies:
@@ -2187,7 +2186,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  babylonjs-gltf2interface@6.49.0: {}
+  babylonjs-gltf2interface@8.51.2: {}
 
   balanced-match@1.0.2: {}
 
