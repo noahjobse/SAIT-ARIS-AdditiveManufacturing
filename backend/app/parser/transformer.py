@@ -2,7 +2,7 @@ from lark import Transformer, Token
 from typing import List, Union
 from .ast_nodes import (
     Program, Module, Procedure, Declaration, MoveCommand, 
-    RobTarget, Position, Orientation
+    RobTarget, Position, Orientation, JointTarget
 )
 
 #Every rule that is defined inside of grammar.lark should be accounted for in RapidTransformer.
@@ -145,8 +145,14 @@ class RapidTransformer(Transformer):
 
     def rot(self, args):
         return Orientation(q1=float(args[0]), q2=float(args[1]), q3=float(args[2]), q4=float(args[3]))
+    
+    def jointtarget(self, args):
+        return JointTarget(robax=args[0], extax=args[1])
+    
+    def joint_values(self, args):
+        return [float(x) for x in args]
         
     def confdata(self, args): return args
-    def extax(self, args): return args
+    def extax(self, args): return [float(x) for x in args]
     def speeddata(self, args): return args
     def zonedata(self, args): return args

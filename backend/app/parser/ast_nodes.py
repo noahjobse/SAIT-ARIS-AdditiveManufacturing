@@ -19,6 +19,11 @@ class RobTarget:
     pos: Position
     rot: Orientation
 
+@dataclass
+class JointTarget:
+    robax: List[float]
+    extax: List[float]
+
 #This class should contain all the data we need to store for converting a RAPID command into Python.
 #Each instance of a MoveCommand class stores its own individual data and then execute in sequence.
 #target uses Union data type so it can handle raw data or variable instructions.
@@ -31,7 +36,7 @@ class MoveCommand:
     zone: str
     tool: str
     wobj: Optional[str] = None
-    cir_point: Optional[Union[str, RobTarget]] = None
+    cir_point: Optional[Union[str, RobTarget, JointTarget]] = None
     line_number: int = 0  # Just for error reporting
 
 @dataclass
@@ -45,7 +50,7 @@ class Declaration:
     dtype: str 
     type_name: str
     name: str
-    value: Union[str, RobTarget, float, bool]
+    value: Union[str, RobTarget, JointTarget, float, bool]
 
 @dataclass
 class Module:
