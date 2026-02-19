@@ -36,9 +36,9 @@ async def get_robot_model(robot_id: str):
     # Map robot IDs to GLB files
     # For now, only IRB 4600 has a GLB file
     model_files = {
-        "irb4600": "irb4600-preview.glb",
-        "irb2600": "irb2600-preview.glb",  # TODO: Add when available
-        "irb6700": "irb6700-preview.glb"   # TODO: Add when available
+        "irb4600": "irb4600/Model_IRB_4600.glb",
+        "irb2600": "irb2600/Model_IRB_2600.glb",
+        "irb6700": "irb6700/Model_IRB_6700.glb"
     }
 
     model_path = MODELS_DIR / model_files[robot_id]
