@@ -8,7 +8,7 @@ from pathlib import Path
 router = APIRouter()
 
 # Path to robot models (relative to project root)
-MODELS_DIR = Path(__file__).parent.parent.parent.parent / "models" / "robots"
+MODELS_DIR = Path(__file__).parent.parent.parent.parent / "frontend" / "public" / "models" / "robots"
 
 
 @router.get("/api/robots/{robot_id}/model")

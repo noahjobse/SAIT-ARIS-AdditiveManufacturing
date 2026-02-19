@@ -32,10 +32,19 @@ def test_get_robot_model_invalid_id():
     assert "Invalid robot ID" in response.json()["detail"]
 
 
-def test_get_robot_model_not_found():
-    """Test getting model for robot without GLB file yet"""
-    # IRB 2600 and 6700 don't have GLB files yet
+def test_get_robot_model_irb2600():
+    """Test getting IRB 2600 GLB model"""
     response = client.get("/api/robots/irb2600/model")
 
-    assert response.status_code == 404
-    assert "Model file not found" in response.json()["detail"]
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/octet-stream"
+    assert response.content[:4] == b"glTF"
+
+
+def test_get_robot_model_irb6700():
+    """Test getting IRB 6700 GLB model"""
+    response = client.get("/api/robots/irb6700/model")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/octet-stream"
+    assert response.content[:4] == b"glTF"
