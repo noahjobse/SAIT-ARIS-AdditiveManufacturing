@@ -1,3 +1,5 @@
+import React from 'react';
+
 type JointJogPanelProps = {
     anglesDeg: number[];
     setAnglesDeg: React.Dispatch<React.SetStateAction<number[]>>;
@@ -20,63 +22,63 @@ function JointJogPanel({ anglesDeg, setAnglesDeg }: JointJogPanelProps) {
     };
 
     return (
-        <div className="flex flex-col p-3 bg-slate-300 rounded-lg ">
-            <h2 className="text-lg font-semibold mb-4">Joint Jog</h2>
+        <div className="flex flex-col p-3 bg-zinc-300 rounded-lg shadow-inner h-full overflow-y-auto">
 
-            {anglesDeg.map((deg, i) => {
-                const bubbleWidthPx = 43;  // Temp hardcoded
-                const sliderWidthPx = 245; 
-
-                let pos = (deg - minDeg) / (maxDeg - minDeg);
-
-                // Clamp bubble positions so it stays within slider
-                const minPos = bubbleWidthPx / 2 / sliderWidthPx;
-                const maxPos = 1 - minPos;
-                pos = Math.min(Math.max(pos, minPos), maxPos);
-
-                const bubblePosition = pos * 100;
-                
-                return (
-                <div key={i} className="mb-4">
-                    
-                    {/* Joint Number + Deg */}
-                    <div className="mb-1 font-semibold">J{i + 1}: {deg}°</div>
-                    
-                    <div className="relative">
-                        {/* Deg Bubble */}
-                        <div 
-                            className="absolute w-12 h-6 bg-purple-950 text-white text-xs rounded-md flex items-center justify-center mb-2 pointer-events-none"
-                            style={{ left: `${bubblePosition}%`, transform: `translateX(-50%)` }}
-                        >
-                            {deg}°
+            {/* All joints in a single container */}
+            <div className="flex flex-col">
+                {anglesDeg.map((deg, i) => {
+                    return (
+                    <div key={i} className="mb-4">
+                        
+                        {/* Joint Number + Editable Deg */}
+                        <div className="flex justify-between items-center mb-1 px-1">
+                            <span className="font-bold text-sm text-zinc-800 tracking-tight">JOINT {i + 1}</span>
+                            <div className="flex items-center gap-1 group">
+                                <input
+                                    type="number"
+                                    min={minDeg}
+                                    max={maxDeg}
+                                    value={deg}
+                                    onChange={(e) => {
+                                        let val = parseFloat(e.target.value);
+                                        if (isNaN(val)) val = 0;
+                                        val = Math.min(maxDeg, Math.max(minDeg, val));
+                                        updateAngle(i, val);
+                                    }}
+                                    className="w-16 text-center text-sm font-bold bg-zinc-200 text-violet-950 py-1 rounded shadow-sm outline-none focus:ring-2 focus:ring-violet-600/50 transition-all cursor-text border border-zinc-300"
+                                />
+                                <span className="text-xs font-bold text-violet-950">°</span>
+                            </div>
+                        </div>
+                        
+                        <div className="relative h-8 flex items-center">
+                            {/* Slider */}
+                            <input 
+                                type="range" min={minDeg} max={maxDeg} value={deg} 
+                                onChange={(e) => updateAngle(i, parseFloat(e.target.value))} 
+                                className="w-full accent-violet-900 h-2 cursor-pointer appearance-none bg-zinc-400/50 rounded-lg" 
+                            />
                         </div>
 
-                        {/* Slider */}
-                        <input 
-                            type="range" min={minDeg} max={maxDeg} value={deg} 
-                            onChange={(e) => updateAngle(i, parseFloat(e.target.value))} 
-                            className="w-full accent-purple-950" 
-                        />
-
                         {/* Min/Max Labels */}
-                        <div className="flex justify-between text-xs text-gray-600 ">
+                        <div className="flex justify-between text-[10px] text-zinc-600 font-medium -mt-1 leading-none">
                             <span>-180°</span>
                             <span>180°</span>
                         </div>
-
-                        {/* Break Line */}
-                        {i < anglesDeg.length - 1 && <hr className="mt-3 border-slate-400" />}
+                        
+                        {/* Thin separator between joints */}
+                        {i < anglesDeg.length - 1 && <hr className="mt-2 border-zinc-400/50" />}
                     </div>
-                </div>
-                );
-            })}
+                    );
+                })}
+            </div>
 
             {/* Reset / Temp Jump to Home */}
             <button 
                 onClick={resetAngles}
-                className="mt-4 px-4 py-2 bg-purple-950 text-white rounded-md transition-colors hover:shadow-[0px_2px_6px_rgba(0,0,0,0.3)]"
+                className="mt-4 px-4 py-2 bg-violet-950 text-white rounded-md transition-all hover:bg-violet-900 active:scale-95 shadow-sm font-bold"
             >
-                Reset
+                Reset Joints
             </button>
         </div>
     );

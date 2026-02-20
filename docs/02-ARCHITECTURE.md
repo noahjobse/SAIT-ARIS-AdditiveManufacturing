@@ -35,23 +35,14 @@ Data Layer (File-based, no database)
 
 ## Data Flow: End-to-End Simulation
 
-```
-1. User uploads RAPID file via frontend
-2. POST /api/upload/rapid -> Lark parses RAPID -> AST -> Returns AST JSON + errors
-3. User clicks "Simulate"
-4. POST /api/simulate {robot_id, ast, obstacles[]}
-   -> Load robot URDF into PyBullet
-   -> Load obstacle STL meshes into PyBullet
-   -> For each AST node (MoveL, MoveJ, MoveC):
-      -> Compute target TCP pose
-      -> Run IK solver -> joint angles
-      -> Interpolate intermediate waypoints
-      -> Check collision at each waypoint
-   -> Return {trajectory: [{joints[], tcp_pose, timestamp, collisions[]}]}
-5. Frontend receives trajectory JSON
-   -> Animates Babylon.js robot through waypoints at 60 FPS
-   -> Highlights collisions in red when detected
-```
+![End-to-End Simulation Flow](./diagrams/end-to-end-flow.svg)
+
+**Flow Overview:**
+1. **Upload Phase** - User uploads RAPID file, backend parses into AST
+2. **Simulation Phase** - Frontend sends AST + obstacles, backend computes trajectory
+3. **Trajectory Generation** - PyBullet solves IK for each movement, interpolates waypoints
+4. **Collision Detection** - Each waypoint checked for collisions
+5. **Visualization Phase** - Frontend animates robot at 60 FPS, highlights collisions
 
 ## Frontend Architecture
 
@@ -89,20 +80,24 @@ backend/app/
 +-- routers/
 |   +-- robots.py        # GET /api/robots, GET /api/robots/{id}/model
 |   +-- upload.py        # POST /api/upload/rapid, POST /api/upload/obstacle
+|   +-- kinematics.py    # POST /api/kinematics/fk, POST /api/kinematics/ik  ✅
 |   +-- simulate.py      # POST /api/simulate
 +-- parser/
 |   +-- grammar.lark     # RAPID grammar definition
 |   +-- transformer.py   # Lark Transformer -> AST nodes
 |   +-- parser.py        # Parse RAPID string -> AST
 |   +-- ast_nodes.py     # AST node dataclasses
-+-- kinematics/
-|   +-- solver.py        # PyBullet IK/FK solver wrapper
-|   +-- trajectory.py    # AST -> interpolated waypoints
-|   +-- robot_config.py  # Load DH params + URDF
++-- kinematics/          # ✅ IMPLEMENTED
+|   +-- __init__.py      # Module exports
+|   +-- exceptions.py    # KinematicsError, IKSolutionNotFoundError, etc.
+|   +-- robot_loader.py  # PyBullet URDF loading + joint discovery
+|   +-- solver.py        # FK/IK solver (PyBullet wrapper)
+|   +-- trajectory.py    # AST -> interpolated waypoints (TODO)
 +-- collision/
 |   +-- detector.py      # PyBullet collision checking
 |   +-- mesh_loader.py   # Load STL/OBJ into PyBullet
 +-- schemas/
+|   +-- kinematics.py    # FK/IK request/response models  ✅
 |   +-- requests.py      # Pydantic request models
 |   +-- responses.py     # Pydantic response models
 +-- utils/
