@@ -10,7 +10,7 @@ class RapidParser:
         with open(grammar_path, 'r') as f:
             self.grammar = f.read()
 
-        self.parser - Lark(grammar, start="start", parser = "lalr")
+        self.parser = Lark(self.grammar, start="start", parser="lalr")
         self.transformer = RapidTransformer()
 
     def parse (self, code:str) -> Program:
