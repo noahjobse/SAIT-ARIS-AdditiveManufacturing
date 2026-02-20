@@ -51,9 +51,27 @@ function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
         });
     }, [anglesDeg]);
 
+    const handleMouseDown = () => {
+        if (canvasRef.current) {
+            canvasRef.current.style.cursor = 'grabbing';
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (canvasRef.current) {
+            canvasRef.current.style.cursor = 'grab';
+        }
+    };
+
     return (
         <div className="w-full h-full">
-            <canvas ref={canvasRef} className="w-full h-full block" />
+            <canvas 
+                ref={canvasRef} 
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                className="w-full h-full block cursor-grab outline-none" 
+            />
         </div>
     );
 
