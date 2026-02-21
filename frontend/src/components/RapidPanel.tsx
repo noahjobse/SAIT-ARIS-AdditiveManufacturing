@@ -2,9 +2,10 @@ import { useState, ChangeEvent } from 'react';
 
 type RapidPanelProps = {
   onFileUploaded: (fileName: string) => void;
+  onAddLog: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void;
 };
 
-const RapidPanel = ({ onFileUploaded }: RapidPanelProps) => {
+const RapidPanel = ({ onFileUploaded, onAddLog }: RapidPanelProps) => {
   const [fileContent, setFileContent] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
 
@@ -20,6 +21,11 @@ const RapidPanel = ({ onFileUploaded }: RapidPanelProps) => {
       setFileContent(content);
     };
     reader.readAsText(file);
+  };
+
+  const handleExecute = () => {
+    console.log('Execute RAPID: Not implemented');
+    onAddLog('Execution of RAPID code is not yet implemented.', 'warning');
   };
 
   return (
@@ -63,7 +69,10 @@ const RapidPanel = ({ onFileUploaded }: RapidPanelProps) => {
         />
       </div>
 
-      <button className="mt-4 px-4 py-2 bg-violet-950 text-white rounded-md hover:bg-violet-900 transition-colors shadow-sm active:transform active:scale-95">
+      <button 
+        onClick={handleExecute}
+        className="mt-4 px-4 py-2 bg-violet-950 text-white rounded-md hover:bg-violet-900 transition-colors shadow-sm active:transform active:scale-95"
+      >
         Execute RAPID
       </button>
     </div>

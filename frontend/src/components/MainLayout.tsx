@@ -8,11 +8,12 @@ import type { TabType, BottomPanelMode } from "../App";
 type MainLayoutProps = {
     activeTab: TabType;
     modelPath: string;
-    lastLog: { message: string, type: 'info' | 'success' | 'error' };
+    lastLog: { message: string, type: 'info' | 'success' | 'error' | 'warning' };
     onFileUploaded: (fileName: string) => void;
+    onAddLog: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void;
 };
 
-function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded }: MainLayoutProps) {
+function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }: MainLayoutProps) {
     const [anglesDeg, setAnglesDeg] = useState<number[]>([0, 0, 0, 0, 0, 0]);
     const [bottomPanelMode, setBottomPanelMode] = useState<BottomPanelMode>("both");
 
@@ -25,6 +26,7 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded }: MainLayou
                     anglesDeg={anglesDeg} 
                     setAnglesDeg={setAnglesDeg} 
                     onFileUploaded={onFileUploaded}
+                    onAddLog={onAddLog}
                 />
             </div>
 

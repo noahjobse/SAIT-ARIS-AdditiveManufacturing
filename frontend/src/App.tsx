@@ -14,7 +14,7 @@ export const ROBOT_MODELS = [
 function App() {
     const [activeTab, setActiveTab] = useState<TabType>("jog");
     const [modelPath, setModelPath] = useState<string>(ROBOT_MODELS[0].path);
-    const [lastLog, setLastLog] = useState<{message: string, type: 'info' | 'success' | 'error'}>({
+    const [lastLog, setLastLog] = useState<{message: string, type: 'info' | 'success' | 'error' | 'warning'}>({
         message: "System Initialized",
         type: 'info'
     });
@@ -37,6 +37,10 @@ function App() {
         });
     };
 
+    const handleLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
+        setLastLog({ message, type });
+    };
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-zinc-900">
             <Header 
@@ -52,6 +56,7 @@ function App() {
                     modelPath={modelPath} 
                     lastLog={lastLog}
                     onFileUploaded={handleFileUploaded}
+                    onAddLog={handleLog}
                 />
             </div>
         </div>

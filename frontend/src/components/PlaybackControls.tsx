@@ -27,9 +27,15 @@ const PlaybackControls = () => {
   };
 
   return (
-    <div className="bg-zinc-800 px-6 py-2 flex flex-col justify-center gap-2 h-full z-50">
-      
-      <div className="flex items-center gap-6">
+    <div className="bg-zinc-800 px-6 py-2 flex flex-col justify-center gap-2 h-full z-50 relative">
+      {/* Stub Indicator */}
+      <div className="absolute top-1 left-6">
+        <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest opacity-70">
+          Playback Simulation (UI Stub)
+        </span>
+      </div>
+
+      <div className="flex items-center gap-6 mt-2">
         {/* Play/Pause Button */}
         <button 
           onClick={() => setIsPlaying(!isPlaying)}
