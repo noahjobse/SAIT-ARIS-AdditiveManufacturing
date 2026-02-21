@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type LogEntry = {
+  id: number;
   timestamp: string;
   message: string;
   type: 'info' | 'error' | 'success' | 'warning';
@@ -11,19 +12,21 @@ type StatusPanelProps = {
 };
 
 const StatusPanel = ({ lastLog }: StatusPanelProps) => {
+  const nextId = useRef(2);
   const [logs, setLogs] = useState<LogEntry[]>([
-    { timestamp: new Date().toLocaleTimeString(), message: "System Initialized", type: 'info' },
-    { timestamp: new Date().toLocaleTimeString(), message: "Robot Models Ready", type: 'success' }
+    { id: 1, timestamp: new Date().toLocaleTimeString(), message: "Robot Models Ready", type: 'success' },
+    { id: 0, timestamp: new Date().toLocaleTimeString(), message: "System Initialized", type: 'info' }
   ]);
 
   // Update logs when a new one comes in via props
   useEffect(() => {
     if (lastLog) {
       setLogs(prev => [{
+        id: nextId.current++,
         timestamp: new Date().toLocaleTimeString(),
         message: lastLog.message,
         type: lastLog.type
-      }, ...prev]);
+      }, ...prev].slice(0, 100));
     }
   }, [lastLog]);
 
@@ -48,8 +51,8 @@ const StatusPanel = ({ lastLog }: StatusPanelProps) => {
         {logs.length === 0 ? (
           <div className="text-zinc-600 italic p-2">No active logs...</div>
         ) : (
-          logs.map((log, i) => (
-            <div key={i} className="flex gap-3 mb-1 border-l-2 border-transparent hover:bg-zinc-800/50 px-2 transition-colors">
+          logs.map((log) => (
+            <div key={log.id} className="flex gap-3 mb-1 border-l-2 border-transparent hover:bg-zinc-800/50 px-2 transition-colors">
               <span className="text-zinc-500 min-w-17.5">[{log.timestamp}]</span>
               <span className={`
                 ${log.type === 'error' ? 'text-red-400' : ''}
