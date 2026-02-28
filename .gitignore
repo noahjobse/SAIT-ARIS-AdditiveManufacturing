@@ -79,3 +79,4 @@ Backup/
 # Note: RAPID .mod files and STL files are tracked by default
 # (No ignore patterns needed - they are shared artifacts)
 CLAUDE.md
+backend/blog_demo.py
