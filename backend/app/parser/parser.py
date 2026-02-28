@@ -1,5 +1,7 @@
 import os
 from lark import Lark, LarkError
+from lark.exceptions import LarkError, UnexpectedToken, UnexpectedCharacters
+from fastapi import HTTPException
 from .transformer import RapidTransformer
 from .ast_nodes import Program
 
@@ -14,7 +16,13 @@ class RapidParser:
         self.transformer = RapidTransformer()
 
     def parse (self, code:str) -> Program:
-        tree = self.parser.parse(code)
-        ast = self.transformer.transform(tree)
-
-        return ast
+        try: 
+            tree = self.parser.parse(code)
+            return self.transformer.transform(tree)
+        except (UnexpectedToken, UnexpectedCharacters) as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Syntax error at line {e.line}, column {e.column}: {e}"
+            )
+        except LarkError as e:
+            raise HTTPException(status_code=400, detail=f"Parsing error: {e}")

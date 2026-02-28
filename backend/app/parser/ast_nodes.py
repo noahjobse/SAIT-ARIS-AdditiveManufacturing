@@ -31,9 +31,9 @@ class JointTarget:
 @dataclass
 class MoveCommand:
     command_type: str
-    target: Union[str, RobTarget]
-    speed: str 
-    zone: str
+    target: Union[str, RobTarget, JointTarget]
+    speed: Union[str, List[float]]
+    zone: Union[str, List[Union[bool, float]]]
     tool: str
     wobj: Optional[str] = None
     cir_point: Optional[Union[str, RobTarget, JointTarget]] = None

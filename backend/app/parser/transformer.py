@@ -80,6 +80,9 @@ class RapidTransformer(Transformer):
     def move_j(self, args):
         return self._create_move("MoveJ", args)
 
+    def move_abs_j(self, args):
+        return self._create_move("MoveAbsJ", args)
+
     def move_c(self, args):
         cir_point = args[0]
         cmd = self._create_move("MoveC", args[1:])
@@ -104,8 +107,6 @@ class RapidTransformer(Transformer):
         if isinstance(zone, Token): zone = str(zone)
         if isinstance(tool, Token): tool = str(tool)
         if wobj and isinstance(wobj, Token): wobj = str(wobj)
-        if isinstance(speed, list): speed = str(speed)
-        if isinstance(zone, list): zone = str(zone)
 
         return MoveCommand(
             command_type=cmd_type,
@@ -154,5 +155,9 @@ class RapidTransformer(Transformer):
         
     def confdata(self, args): return args
     def extax(self, args): return [float(x) for x in args]
-    def speeddata(self, args): return args
-    def zonedata(self, args): return args
+    
+    def speeddata(self, args): 
+        return [float(x) for x in args]
+
+    def zonedata(self, args): 
+        return [(x.value == "TRUE") if x.type == "BOOLEAN" else float(x) for x in args]
