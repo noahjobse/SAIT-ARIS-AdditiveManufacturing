@@ -13,13 +13,14 @@ procedure: "PROC" IDENTIFIER "(" [parameter_list] ")" statement* "ENDPROC"
 parameter_list: parameter ("," parameter)*
 parameter: type IDENTIFIER
 
-statement: move_l | move_j | move_c
+statement: move_l | move_j | move_c | move_abs_j
 
 // These are our movements commands.
 // Each movement commands needs a target, speed, zone, tool. Work objects are optional (defined by the brackets [])
 
 move_l: "MoveL" target "," speed "," zone "," tool ["," wobj] ";"
 move_j: "MoveJ" target "," speed "," zone "," tool ["," wobj] ";"
+move_abs_j: "MoveAbsJ" target "," speed "," zone "," tool ["," wobj] ";"
 move_c: "MoveC" cir_point "," target "," speed "," zone "," tool ["," wobj] ";"
 
 // These are our arguments that define the values inside each movement command.

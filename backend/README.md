@@ -1,6 +1,7 @@
 # ABB Simulation Platform - Backend
 
 FastAPI + PyBullet backend for robot trajectory simulation.
+Requires Python v3.11+
 
 ## Setup
 
