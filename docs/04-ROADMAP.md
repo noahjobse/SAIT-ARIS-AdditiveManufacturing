@@ -145,6 +145,29 @@
 
 ---
 
+## Post-Semester: C# Backend Migration (Summer 2026)
+
+**Goal:** Full swap of Python/FastAPI backend to C#/.NET while preserving the OpenAPI contract.
+
+**Prerequisites:**
+- MVP complete and stable on Python/FastAPI
+- OpenAPI contract frozen at `docs/contract/openapi.json`
+- All contract endpoints implemented and tested in Python
+
+**Key Tasks:**
+- C#/.NET project scaffold (ASP.NET Web API)
+- Port RAPID parser (Lark grammar → C# parser, e.g., ANTLR or Pidgin)
+- Port kinematics engine (PyBullet → BulletSharp or custom IK solver)
+- Port collision detection
+- Implement all contract endpoints
+- Integration testing: validate every endpoint against committed OpenAPI schema
+- Frontend smoke test: verify React app works identically with new backend
+
+**Contract:** `docs/contract/openapi.json` — C# backend must pass all contract endpoints.
+Extensions (ABB controller API, RobotStudio integration) can be added beyond core contract.
+
+---
+
 ## Recent Completions (2026-02-12)
 
 ### Kinematics Module (Weeks 3-4) ✅
@@ -167,4 +190,4 @@
 
 ---
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-03-03

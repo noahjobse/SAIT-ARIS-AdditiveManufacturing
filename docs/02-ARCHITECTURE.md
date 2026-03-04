@@ -158,4 +158,37 @@ Noah creates 3 sets of configuration files; the single controller consumes them 
 
 ---
 
-**Last Updated:** 2026-02-12
+## Backend Migration Strategy
+
+**Decision (March 2026):** Python/FastAPI serves as the MVP backend. A C# (.NET) backend
+will replace it post-semester for industry compatibility.
+
+**Why C#:**
+- ABB provides a C# API for robot controller integration (RobotStudio, IRC5/OmniCore)
+- Industrial PLCs and automation controllers primarily support C#
+- Aligns the platform with industrial deployment requirements
+
+**Contract Boundary:**
+
+```
+Frontend (React + Babylon.js)  ← unchanged
+         |
+         | OpenAPI contract (docs/contract/openapi.json)
+         |
+Backend v1 (Python/FastAPI)  →  Backend v2 (C#/.NET)
+```
+
+**Contract Details:**
+- Source of truth: `docs/contract/openapi.json` (committed, versioned)
+- Live reference: FastAPI serves `/openapi.json` showing current implementation
+- Model: Core contract (all endpoints required) + extensions (C# may add ABB-specific endpoints)
+- Migration: Full swap — complete C# backend built and tested against contract before replacing Python
+
+**Cross-Branch Implementation:**
+- Parser (`jason` branch): Lark grammar → AST transformer → Python objects
+- Kinematics (`noah` branch): PyBullet FK/IK solver, collision detection
+- Frontend (`dylane`/`frontend` branches): React components, Babylon.js 3D scene
+
+---
+
+**Last Updated:** 2026-03-03

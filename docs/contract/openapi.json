@@ -1,0 +1,1168 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ABB Online Simulation Platform API",
+    "description": "Contract-first OpenAPI specification for the ABB robot trajectory simulator. This file is the source of truth for backend-frontend communication. The Python/FastAPI backend implements this contract for MVP; a C#/.NET backend will replace it post-semester while preserving all endpoints and schemas defined here.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "SAIT Research Applications × ARIS Robotics"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "operationId": "getHealth",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["status", "version", "timestamp"],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2026-03-03T17:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/robots": {
+      "get": {
+        "summary": "List available robot models",
+        "operationId": "getRobots",
+        "tags": ["Robots"],
+        "responses": {
+          "200": {
+            "description": "Array of robot metadata for all supported ABB robots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RobotInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/robots/{robot_id}/model": {
+      "get": {
+        "summary": "Download robot GLB model",
+        "operationId": "getRobotModel",
+        "tags": ["Robots"],
+        "parameters": [
+          {
+            "name": "robot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RobotId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary GLB file for Babylon.js 3D rendering",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/upload/rapid": {
+      "post": {
+        "summary": "Upload and parse a RAPID program file",
+        "operationId": "uploadRapid",
+        "tags": ["Upload"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": ".mod file, max 1MB"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File uploaded and parsed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RapidUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/upload/obstacle": {
+      "post": {
+        "summary": "Upload an obstacle STL mesh",
+        "operationId": "uploadObstacle",
+        "tags": ["Upload"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": ".stl file, max 10MB"
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "JSON array [x, y, z] in millimeters",
+                    "example": "[500.0, 0.0, 0.0]"
+                  },
+                  "rotation": {
+                    "type": "string",
+                    "description": "JSON array [rx, ry, rz] in degrees",
+                    "example": "[0.0, 0.0, 45.0]"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Obstacle uploaded and registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObstacleUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/api/parse": {
+      "post": {
+        "summary": "Parse raw RAPID code string",
+        "operationId": "parseRapid",
+        "tags": ["Upload"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code"],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Raw RAPID source code to parse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code parsed — errors/warnings included in response body even if parsing failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RapidUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/obstacles": {
+      "get": {
+        "summary": "List all uploaded obstacles",
+        "operationId": "getObstacles",
+        "tags": ["Obstacles"],
+        "responses": {
+          "200": {
+            "description": "Array of all currently registered obstacles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ObstacleUploadResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/obstacles/{obstacle_id}/transform": {
+      "put": {
+        "summary": "Update obstacle position and rotation",
+        "operationId": "updateObstacleTransform",
+        "tags": ["Obstacles"],
+        "parameters": [
+          {
+            "name": "obstacle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "obs_1707145800_abc123"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "[x, y, z] in millimeters"
+                  },
+                  "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "[rx, ry, rz] in degrees"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transform updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObstacleUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/obstacles/{obstacle_id}": {
+      "delete": {
+        "summary": "Remove an obstacle",
+        "operationId": "deleteObstacle",
+        "tags": ["Obstacles"],
+        "parameters": [
+          {
+            "name": "obstacle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Obstacle deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["obstacle_id", "deleted"],
+                  "properties": {
+                    "obstacle_id": {"type": "string"},
+                    "deleted": {"type": "boolean", "example": true}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/kinematics/fk": {
+      "post": {
+        "summary": "Forward kinematics — joint angles to TCP pose",
+        "operationId": "forwardKinematics",
+        "tags": ["Kinematics"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FKRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "End-effector position and orientation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FKResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/kinematics/ik": {
+      "post": {
+        "summary": "Inverse kinematics — target pose to joint angles",
+        "operationId": "inverseKinematics",
+        "tags": ["Kinematics"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IKRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Joint angles that reach the target pose",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IKResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/simulate": {
+      "post": {
+        "summary": "Run full simulation pipeline",
+        "description": "Executes the complete pipeline: AST → IK solver → trajectory waypoints → collision detection. Returns a timestamped trajectory with per-waypoint collision data.",
+        "operationId": "simulate",
+        "tags": ["Simulation"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation completed — collisions are reported in the trajectory, not as errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RobotId": {
+        "type": "string",
+        "enum": ["irb4600", "irb2600", "irb6700"],
+        "description": "Supported ABB robot model identifiers"
+      },
+      "RobotInfo": {
+        "type": "object",
+        "required": ["id", "name", "manufacturer", "dof", "payload_kg", "reach_mm", "model_url"],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "name": {
+            "type": "string",
+            "example": "IRB 4600-60/2.05"
+          },
+          "manufacturer": {
+            "type": "string",
+            "example": "ABB"
+          },
+          "dof": {
+            "type": "integer",
+            "example": 6
+          },
+          "payload_kg": {
+            "type": "number",
+            "description": "Maximum payload in kilograms",
+            "example": 60
+          },
+          "reach_mm": {
+            "type": "number",
+            "description": "Maximum reach in millimeters",
+            "example": 2050
+          },
+          "model_url": {
+            "type": "string",
+            "example": "/api/robots/irb4600/model"
+          }
+        }
+      },
+      "ErrorDetail": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "line": {
+            "type": ["integer", "null"],
+            "description": "Source line number, if applicable",
+            "example": 12
+          },
+          "message": {
+            "type": "string",
+            "example": "Undefined target: pHome"
+          },
+          "error_code": {
+            "type": "string",
+            "description": "Machine-readable error code from the error catalog",
+            "example": "UNDEFINED_TARGET"
+          }
+        }
+      },
+      "SpeedData": {
+        "type": "object",
+        "required": ["v_tcp", "v_ori"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["SpeedData"]
+          },
+          "v_tcp": {
+            "type": "number",
+            "description": "TCP linear speed in mm/s",
+            "example": 1000.0
+          },
+          "v_ori": {
+            "type": "number",
+            "description": "Reorientation speed in deg/s",
+            "example": 500.0
+          },
+          "v_leax": {
+            "type": "number",
+            "description": "Linear external axis speed in mm/s"
+          },
+          "v_reax": {
+            "type": "number",
+            "description": "Rotational external axis speed in deg/s"
+          }
+        }
+      },
+      "ZoneData": {
+        "type": "object",
+        "required": ["finep", "pzone_tcp"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ZoneData"]
+          },
+          "finep": {
+            "type": "boolean",
+            "description": "Fine point — robot stops exactly at target if true",
+            "example": false
+          },
+          "pzone_tcp": {
+            "type": "number",
+            "description": "TCP path zone radius in mm",
+            "example": 10.0
+          },
+          "pzone_ori": {
+            "type": "number",
+            "description": "Reorientation zone in degrees"
+          },
+          "pzone_eax": {
+            "type": "number",
+            "description": "External axis path zone in mm"
+          },
+          "zone_ori": {
+            "type": "number",
+            "description": "Zone orientation tolerance in degrees"
+          },
+          "zone_leax": {
+            "type": "number",
+            "description": "Linear external axis zone in mm"
+          },
+          "zone_reax": {
+            "type": "number",
+            "description": "Rotational external axis zone in degrees"
+          }
+        }
+      },
+      "RobTarget": {
+        "type": "object",
+        "required": ["trans", "rot", "robconf", "extax"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["RobTarget"]
+          },
+          "trans": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x, y, z] TCP position in millimeters",
+            "example": [500.0, 0.0, 600.0]
+          },
+          "rot": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "[q1, q2, q3, q4] quaternion orientation",
+            "example": [1.0, 0.0, 0.0, 0.0]
+          },
+          "robconf": {
+            "type": "array",
+            "items": {"type": "integer"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "[cf1, cf4, cf6, cfx] robot configuration flags",
+            "example": [0, 0, 0, 0]
+          },
+          "extax": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "External axis values [eax_a through eax_f]",
+            "example": [0, 0, 0, 0, 0, 0]
+          }
+        }
+      },
+      "JointTarget": {
+        "type": "object",
+        "required": ["robax", "extax"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["JointTarget"]
+          },
+          "robax": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[j1, j2, j3, j4, j5, j6] joint angles in degrees",
+            "example": [0.0, -30.0, 30.0, 0.0, 45.0, 0.0]
+          },
+          "extax": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "External axis values",
+            "example": [0, 0, 0, 0, 0, 0]
+          }
+        }
+      },
+      "MoveCommand": {
+        "type": "object",
+        "required": ["type", "target", "speed", "zone"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["MoveL", "MoveJ", "MoveC"],
+            "description": "MoveL = linear, MoveJ = joint-space, MoveC = circular arc"
+          },
+          "target": {
+            "oneOf": [
+              {"$ref": "#/components/schemas/RobTarget"},
+              {"$ref": "#/components/schemas/JointTarget"}
+            ],
+            "description": "Destination target — cartesian (RobTarget) or joint-space (JointTarget)"
+          },
+          "via_point": {
+            "oneOf": [
+              {"$ref": "#/components/schemas/RobTarget"},
+              {"type": "null"}
+            ],
+            "description": "Required for MoveC only — intermediate arc point"
+          },
+          "speed": {
+            "$ref": "#/components/schemas/SpeedData"
+          },
+          "zone": {
+            "$ref": "#/components/schemas/ZoneData"
+          }
+        }
+      },
+      "RapidUploadResponse": {
+        "type": "object",
+        "required": ["filename", "ast", "errors", "warnings"],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "example": "program.mod"
+          },
+          "file_id": {
+            "type": ["string", "null"],
+            "description": "Server-assigned file identifier for later reference",
+            "example": "rapid_1707145800_abc123"
+          },
+          "ast": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MoveCommand"
+            },
+            "description": "Parsed move commands extracted from the RAPID program"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          }
+        }
+      },
+      "BoundingBox": {
+        "type": "object",
+        "required": ["min", "max"],
+        "properties": {
+          "min": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x_min, y_min, z_min] in millimeters"
+          },
+          "max": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x_max, y_max, z_max] in millimeters"
+          }
+        }
+      },
+      "ObstacleUploadResponse": {
+        "type": "object",
+        "required": ["obstacle_id", "filename", "position", "rotation", "bounds", "vertices", "triangles"],
+        "properties": {
+          "obstacle_id": {
+            "type": "string",
+            "example": "obs_1707145800_abc123"
+          },
+          "filename": {
+            "type": "string",
+            "example": "table.stl"
+          },
+          "position": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x, y, z] in millimeters"
+          },
+          "rotation": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[rx, ry, rz] in degrees"
+          },
+          "bounds": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "vertices": {
+            "type": "integer",
+            "description": "Number of vertices in the mesh",
+            "example": 1200
+          },
+          "triangles": {
+            "type": "integer",
+            "description": "Number of triangles in the mesh",
+            "example": 400
+          }
+        }
+      },
+      "FKRequest": {
+        "type": "object",
+        "required": ["robot_id", "joint_angles"],
+        "properties": {
+          "robot_id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "joint_angles": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "Six joint angles in radians",
+            "example": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+          }
+        }
+      },
+      "FKResponse": {
+        "type": "object",
+        "required": ["robot_id", "position", "orientation"],
+        "properties": {
+          "robot_id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "position": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "TCP position [x, y, z] in meters",
+            "example": [1.58, 0.0, 1.765]
+          },
+          "orientation": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "TCP orientation as quaternion [x, y, z, w]",
+            "example": [0.0, 0.0, 0.0, 1.0]
+          }
+        }
+      },
+      "IKRequest": {
+        "type": "object",
+        "required": ["robot_id", "target_position"],
+        "properties": {
+          "robot_id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "target_position": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "Target TCP position [x, y, z] in meters",
+            "example": [1.2, 0.3, 1.4]
+          },
+          "target_orientation": {
+            "type": ["array", "null"],
+            "items": {"type": "number"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "Optional target orientation as quaternion [x, y, z, w]",
+            "example": [0.0, 0.0, 0.0, 1.0]
+          },
+          "current_joints": {
+            "type": ["array", "null"],
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "Optional seed joint angles in radians — improves IK convergence by starting near a known configuration",
+            "example": [0.1, -0.2, 0.3, 0.0, 0.2, 0.0]
+          }
+        }
+      },
+      "IKResponse": {
+        "type": "object",
+        "required": ["robot_id", "joint_angles"],
+        "properties": {
+          "robot_id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "joint_angles": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "Solved joint angles in radians",
+            "example": [0.234, -0.456, 0.789, 0.123, 0.456, 0.789]
+          }
+        }
+      },
+      "CollisionInfo": {
+        "type": "object",
+        "required": ["obstacle_id", "link", "penetration_depth", "contact_point"],
+        "properties": {
+          "obstacle_id": {
+            "type": "string",
+            "description": "ID of the colliding obstacle"
+          },
+          "link": {
+            "type": "string",
+            "description": "Robot link name involved in collision",
+            "example": "link_5"
+          },
+          "penetration_depth": {
+            "type": "number",
+            "description": "Penetration depth in millimeters",
+            "example": 2.3
+          },
+          "contact_point": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x, y, z] contact point in millimeters",
+            "example": [515.0, 3.0, 603.0]
+          }
+        }
+      },
+      "TCPPose": {
+        "type": "object",
+        "required": ["position", "orientation"],
+        "properties": {
+          "position": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x, y, z] in millimeters",
+            "example": [500.0, 0.0, 600.0]
+          },
+          "orientation": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "Quaternion [q1, q2, q3, q4]",
+            "example": [1.0, 0.0, 0.0, 0.0]
+          }
+        }
+      },
+      "TrajectoryWaypoint": {
+        "type": "object",
+        "required": ["index", "timestamp", "joints", "tcp_pose", "collisions"],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Waypoint index in the trajectory sequence",
+            "example": 0
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Time offset from simulation start in seconds",
+            "example": 0.0
+          },
+          "joints": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[j1-j6] joint angles in degrees at this waypoint",
+            "example": [0.0, -30.0, 30.0, 0.0, 45.0, 0.0]
+          },
+          "tcp_pose": {
+            "$ref": "#/components/schemas/TCPPose"
+          },
+          "collisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollisionInfo"
+            },
+            "description": "List of collisions detected at this waypoint — empty array if no collisions"
+          }
+        }
+      },
+      "SimulationStats": {
+        "type": "object",
+        "required": ["total_waypoints", "duration_seconds", "collisions_detected", "ik_failures", "computation_time_ms"],
+        "properties": {
+          "total_waypoints": {
+            "type": "integer",
+            "example": 125
+          },
+          "duration_seconds": {
+            "type": "number",
+            "description": "Simulated robot motion duration",
+            "example": 4.125
+          },
+          "collisions_detected": {
+            "type": "integer",
+            "example": 12
+          },
+          "ik_failures": {
+            "type": "integer",
+            "description": "Number of waypoints where IK had no solution",
+            "example": 0
+          },
+          "computation_time_ms": {
+            "type": "integer",
+            "description": "Server-side computation time in milliseconds",
+            "example": 2341
+          }
+        }
+      },
+      "ObstacleTransform": {
+        "type": "object",
+        "required": ["obstacle_id"],
+        "properties": {
+          "obstacle_id": {
+            "type": "string"
+          },
+          "position": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[x, y, z] in millimeters"
+          },
+          "rotation": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 3,
+            "maxItems": 3,
+            "description": "[rx, ry, rz] in degrees"
+          }
+        }
+      },
+      "SimulateRequest": {
+        "type": "object",
+        "required": ["robot_id", "ast"],
+        "properties": {
+          "robot_id": {
+            "$ref": "#/components/schemas/RobotId"
+          },
+          "ast": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MoveCommand"
+            },
+            "description": "Parsed move commands from the RAPID program"
+          },
+          "obstacles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ObstacleTransform"
+            },
+            "description": "Obstacles to include in collision detection — uses server-stored mesh for each obstacle_id"
+          }
+        }
+      },
+      "SimulateResponse": {
+        "type": "object",
+        "required": ["trajectory", "stats"],
+        "properties": {
+          "trajectory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrajectoryWaypoint"
+            }
+          },
+          "stats": {
+            "$ref": "#/components/schemas/SimulationStats"
+          }
+        }
+      },
+      "APIError": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "error_code": {
+            "type": "string",
+            "description": "Machine-readable code from the error catalog"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request — invalid input, parse error, or constraint violation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIError"
+            },
+            "examples": {
+              "parse_error": {
+                "value": {"detail": "Syntax error at line 12", "error_code": "PARSE_ERROR"}
+              },
+              "joint_limit": {
+                "value": {"detail": "Joint 3 angle exceeds maximum limit", "error_code": "JOINT_LIMIT_EXCEEDED"}
+              },
+              "ik_no_solution": {
+                "value": {"detail": "Target position is out of reach", "error_code": "IK_NO_SOLUTION"}
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIError"
+            },
+            "examples": {
+              "robot_not_found": {
+                "value": {"detail": "Unknown robot ID. Use irb4600, irb2600, or irb6700", "error_code": "INVALID_ROBOT_ID"}
+              },
+              "obstacle_not_found": {
+                "value": {"detail": "Obstacle not found", "error_code": "OBSTACLE_NOT_FOUND"}
+              }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Schema validation failed (Pydantic / request body malformed)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIError"
+            },
+            "examples": {
+              "validation_error": {
+                "value": {"detail": "joint_angles must have exactly 6 elements", "error_code": "VALIDATION_ERROR"}
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Server-side error — IK solver failure, PyBullet error, etc.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/APIError"
+            },
+            "examples": {
+              "ik_failure": {
+                "value": {"detail": "IK solver failed to converge", "error_code": "IK_FAILURE"}
+              },
+              "simulation_timeout": {
+                "value": {"detail": "Simulation exceeded 5s limit", "error_code": "SIMULATION_TIMEOUT"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {"name": "System", "description": "Health and status endpoints"},
+    {"name": "Robots", "description": "Robot model metadata and 3D assets"},
+    {"name": "Upload", "description": "RAPID program and obstacle file ingestion"},
+    {"name": "Obstacles", "description": "Obstacle lifecycle management"},
+    {"name": "Kinematics", "description": "Forward and inverse kinematics computation"},
+    {"name": "Simulation", "description": "Full simulation pipeline execution"}
+  ]
+}
