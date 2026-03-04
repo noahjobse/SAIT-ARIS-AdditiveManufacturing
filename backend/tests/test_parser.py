@@ -2,11 +2,10 @@
 
 import pathlib
 
-import lark
 import pytest
 
-from app.parser.parser import RapidParser, RapidTransformer
-from app.parser.ast_nodes import MoveCommand, JointTarget, Module, Procedure
+from app.parser.ast_nodes import JointTarget
+from app.parser.parser import RapidParser
 
 # Resolve paths relative to this file so tests work regardless of cwd
 GRAMMAR_PATH = pathlib.Path(__file__).parent.parent / "app" / "parser" / "grammar.lark"
@@ -15,9 +14,8 @@ FIXTURES_DIR = pathlib.Path(__file__).parent / "fixtures" / "rapid"
 
 @pytest.fixture(scope="module")
 def parser():
-    """Build and return a Lark parser from the RAPID grammar."""
-    grammar = GRAMMAR_PATH.read_text()
-    return lark.Lark(grammar, parser="earley")
+    """Build and return a RapidParser using the same LALR parser as production."""
+    return RapidParser()
 
 
 def _read_fixture(name: str) -> str:

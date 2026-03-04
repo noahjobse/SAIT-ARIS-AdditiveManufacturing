@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+
 
 @dataclass
 class Position:
@@ -21,8 +21,8 @@ class RobTarget:
 
 @dataclass
 class JointTarget:
-    robax: List[float]
-    extax: List[float]
+    robax: list[float]
+    extax: list[float]
 
 #This class should contain all the data we need to store for converting a RAPID command into Python.
 #Each instance of a MoveCommand class stores its own individual data and then execute in sequence.
@@ -31,33 +31,33 @@ class JointTarget:
 @dataclass
 class MoveCommand:
     command_type: str
-    target: Union[str, RobTarget, JointTarget]
-    speed: Union[str, List[float]]
-    zone: Union[str, List[Union[bool, float]]]
+    target: str | RobTarget | JointTarget
+    speed: str | list[float]
+    zone: str | list[bool | float]
     tool: str
-    wobj: Optional[str] = None
-    cir_point: Optional[Union[str, RobTarget, JointTarget]] = None
+    wobj: str | None = None
+    cir_point: str | RobTarget | JointTarget | None = None
     line_number: int = 0  # Just for error reporting
 
 @dataclass
 class Procedure:
     name: str
-    commands: List[MoveCommand] = field(default_factory=list)
-    params: List[str] = field(default_factory=list)
+    commands: list[MoveCommand] = field(default_factory=list)
+    params: list[str] = field(default_factory=list)
 
 @dataclass
 class Declaration:
-    dtype: str 
+    dtype: str
     type_name: str
     name: str
-    value: Union[str, RobTarget, JointTarget, float, bool]
+    value: str | RobTarget | JointTarget | float | bool | None = None
 
 @dataclass
 class Module:
     name: str
-    procedures: List[Procedure] = field(default_factory=list)
-    declarations: List[Declaration] = field(default_factory=list)
+    procedures: list[Procedure] = field(default_factory=list)
+    declarations: list[Declaration] = field(default_factory=list)
 
 @dataclass
 class Program:
-    modules: List[Module] = field(default_factory=list)
+    modules: list[Module] = field(default_factory=list)
