@@ -1,3 +1,4 @@
+import React from "react";
 import JointJogPanel from "./JointJogPanel";
 import RapidPanel from "./RapidPanel";
 import type { TabType } from "../App";
