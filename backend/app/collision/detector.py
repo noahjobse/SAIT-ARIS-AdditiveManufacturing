@@ -1,7 +1,6 @@
 """Collision detection between robot and obstacles using PyBullet."""
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import pybullet as p
 
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 class CollisionDetector:
     """Detects collisions between a robot and obstacle meshes using PyBullet."""
 
-    def __init__(self, loader: Optional[RobotLoader] = None):
+    def __init__(self, loader: RobotLoader | None = None):
         """
         Initialize collision detector.
 
@@ -22,7 +21,7 @@ class CollisionDetector:
                     Creates a new one if not provided.
         """
         self.loader = loader or RobotLoader(headless=True)
-        self.obstacles: Dict[str, int] = {}  # obstacle_id -> pybullet_body_id
+        self.obstacles: dict[str, int] = {}  # obstacle_id -> pybullet_body_id
 
     def disconnect(self):
         """Disconnect from PyBullet."""
@@ -32,8 +31,8 @@ class CollisionDetector:
         self,
         obstacle_id: str,
         stl_path: str,
-        position: List[float] = None,
-        orientation: List[float] = None,
+        position: list[float] = None,
+        orientation: list[float] = None,
     ) -> int:
         """
         Load an obstacle STL into PyBullet.
@@ -90,9 +89,9 @@ class CollisionDetector:
     def check_collisions(
         self,
         robot_id: str,
-        joint_angles: List[float],
+        joint_angles: list[float],
         distance_threshold: float = 0.0,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Check for collisions between robot and all loaded obstacles.
 
@@ -146,9 +145,9 @@ class CollisionDetector:
     def check_trajectory_collisions(
         self,
         robot_id: str,
-        trajectory: List[List[float]],
+        trajectory: list[list[float]],
         distance_threshold: float = 0.0,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Check collisions for each waypoint in a trajectory.
 

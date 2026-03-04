@@ -1,8 +1,7 @@
 """Tests for collision detection module."""
-import pytest
 import struct
-import tempfile
-from pathlib import Path
+
+import pytest
 
 from app.collision.detector import CollisionDetector
 

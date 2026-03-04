@@ -1,32 +1,15 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+  app:
+    build: .
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
-      - ./models:/app/models
-    environment:
-      - ENVIRONMENT=development
-      - PYTHONUNBUFFERED=1
-    command: sh -c "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --reload"
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./models:/app/models
+      - /app/frontend/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
-    command: pnpm dev -- --host
-
-volumes:
-  node_modules:
+      - PYTHONUNBUFFERED=1

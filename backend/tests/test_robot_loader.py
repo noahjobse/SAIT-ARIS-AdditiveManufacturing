@@ -1,9 +1,9 @@
 """Tests for robot URDF loading in PyBullet."""
-import pytest
-from pathlib import Path
 
-from app.kinematics.robot_loader import RobotLoader
+import pytest
+
 from app.kinematics.exceptions import RobotNotLoadedError
+from app.kinematics.robot_loader import RobotLoader
 
 
 class TestRobotLoader:

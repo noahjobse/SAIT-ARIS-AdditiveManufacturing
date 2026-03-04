@@ -1,9 +1,9 @@
 """Tests for kinematics FK/IK solvers."""
-import pytest
 import numpy as np
+import pytest
 
+from app.kinematics.exceptions import IKSolutionNotFoundError, InvalidJointAnglesError
 from app.kinematics.solver import KinematicsSolver
-from app.kinematics.exceptions import InvalidJointAnglesError, IKSolutionNotFoundError
 
 
 class TestForwardKinematics:

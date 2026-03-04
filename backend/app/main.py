@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import upload, robots, kinematics
+
+from app.routers import kinematics, robots, upload
 
 app = FastAPI(
     title="ABB Robot Simulation Backend",

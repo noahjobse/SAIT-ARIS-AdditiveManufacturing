@@ -1,14 +1,15 @@
 """
 Robot model endpoints
 """
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 router = APIRouter()
 
 # Path to robot models (relative to project root)
-MODELS_DIR = Path(__file__).parent.parent.parent.parent / "models" / "robots"
+MODELS_DIR = Path(__file__).parent.parent.parent.parent / "frontend" / "public" / "models" / "robots"
 
 
 @router.get("/api/robots/{robot_id}/model")

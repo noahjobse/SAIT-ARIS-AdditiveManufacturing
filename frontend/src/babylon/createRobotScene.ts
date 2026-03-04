@@ -46,7 +46,7 @@ function createGroundGrid(scene: Scene) {
 
         ground.material = gridMat;
         return {ground, gridMat};
-    } catch (e) {
+    } catch {
         console.warn("GridMaterial failed to initialize, falling back to StandardMaterial.");
         const fallbackMat = new StandardMaterial("fallbackMat", scene);
         fallbackMat.diffuseColor = new Color3(0.5, 0.5, 0.5);

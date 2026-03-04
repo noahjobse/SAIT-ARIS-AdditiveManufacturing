@@ -54,13 +54,14 @@
 - [x] **Noah:** IK solver (target pose → joint angles) — `app/kinematics/solver.py`
 - [x] **Noah:** FK/IK REST endpoints — `POST /api/kinematics/fk`, `POST /api/kinematics/ik`
 - [x] **Noah:** 21 kinematics tests passing (unit + integration)
-- [ ] **Noah:** IRB 2600 + IRB 6700 URDFs
-- [ ] **Noah:** Collision detector + obstacle mesh loader
+- [x] **Noah:** IRB 2600 + IRB 6700 URDFs — `models/robots/irb2600/`, `models/robots/irb6700/`
+- [x] **Noah:** Collision detector + obstacle mesh loader — `app/collision/detector.py`
 - [ ] **Jason:** Lark grammar skeleton
 - [ ] **Jason:** AST transformer
 
 **Blocking Dependencies:**
 - ~~Week 3 Day 2-3 (Noah): PyBullet + IRB 4600 URDF -> blocks Week 4 IK solver~~ ✅ DONE
+- ~~Week 6 Day 1 (Noah): Obstacle mesh in PyBullet -> blocks collision testing~~ ✅ DONE
 - Week 3 Day 1 (Jason): `grammar.lark` skeleton -> blocks Week 4 AST implementation
 
 ## Sprint: Weeks 5-6 (Simulation Pipeline)
@@ -71,15 +72,19 @@
 **Deliverables:**
 - `/api/simulate` endpoint complete (RAPID -> trajectory JSON)
 - Trajectory generator: MoveL (linear), MoveJ (joint-space), MoveC (circular arc)
-- Collision detector (mesh-to-mesh via PyBullet), obstacle mesh loading
+- Collision detector (mesh-to-mesh via PyBullet), obstacle mesh loading ✅
 - Frontend animation through trajectory waypoints, basic playback (play/pause/stop)
 - Collision highlighting on robot mesh
 - Performance < 5s for 100-waypoint trajectory
 - Integration tests (upload -> parse -> simulate -> animate)
 
+**Progress:**
+- [x] **Noah:** Collision detection module with STL/OBJ obstacle loading
+- [x] **Noah:** PyBullet mesh collision detection working
+- [x] **Noah:** Collision tests passing (13 tests)
+
 **Blocking Dependencies:**
 - Week 5 Day 1 (Jason): SimulateRequest/Response schemas -> blocks Dylane frontend integration
-- Week 6 Day 1 (Noah): Obstacle mesh in PyBullet -> blocks collision testing
 
 ## Sprint: Weeks 7-8 (MVP Launch)
 
@@ -140,4 +145,49 @@
 
 ---
 
-**Last Updated:** 2026-02-12
+## Post-Semester: C# Backend Migration (Summer 2026)
+
+**Goal:** Full swap of Python/FastAPI backend to C#/.NET while preserving the OpenAPI contract.
+
+**Prerequisites:**
+- MVP complete and stable on Python/FastAPI
+- OpenAPI contract frozen at `docs/contract/openapi.json`
+- All contract endpoints implemented and tested in Python
+
+**Key Tasks:**
+- C#/.NET project scaffold (ASP.NET Web API)
+- Port RAPID parser (Lark grammar → C# parser, e.g., ANTLR or Pidgin)
+- Port kinematics engine (PyBullet → BulletSharp or custom IK solver)
+- Port collision detection
+- Implement all contract endpoints
+- Integration testing: validate every endpoint against committed OpenAPI schema
+- Frontend smoke test: verify React app works identically with new backend
+
+**Contract:** `docs/contract/openapi.json` — C# backend must pass all contract endpoints.
+Extensions (ABB controller API, RobotStudio integration) can be added beyond core contract.
+
+---
+
+## Recent Completions (2026-02-12)
+
+### Kinematics Module (Weeks 3-4) ✅
+- **All 3 robot URDFs**: IRB 4600, IRB 2600, IRB 6700 with DH parameters
+- **PyBullet integration**: Robot loader with URDF parsing
+- **FK/IK solvers**: Forward and inverse kinematics implementation
+- **API endpoints**: `/api/kinematics/fk` and `/api/kinematics/ik`
+- **Test coverage**: 21 unit + integration tests passing
+
+### Collision Detection (Week 6) ✅
+- **STL/OBJ obstacle loading**: Dynamic mesh import via PyBullet
+- **Mesh-to-mesh collision**: Robot-to-obstacle collision detection
+- **API ready**: Collision detector module integrated
+- **Test coverage**: 13 collision detection tests passing
+
+### Total Test Coverage
+- **Backend**: 34 tests passing across kinematics + collision modules
+- **API integration**: Full endpoint coverage with Pydantic validation
+- **Documentation**: Architecture, API spec, setup guide updated
+
+---
+
+**Last Updated:** 2026-03-03
