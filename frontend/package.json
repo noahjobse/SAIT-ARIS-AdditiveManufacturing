@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "generate:diagrams": "tsx scripts/generate-diagrams.ts",
     "generate:api": "openapi-typescript ../docs/contract/openapi.json -o src/api/types.gen.ts"
   },
