@@ -29,13 +29,16 @@
 
 ### Phase 2 (Weeks 4-6): Logic Engine & Kinematics
 
+> **Week 5 Status Update (2026-03-03):** Assignments revised to reflect actual sprint ownership.
+> Dylane is unavailable Week 5 — returns Week 6 for obstacle UI and gizmo.
+
 | Person | Deliverables |
 |--------|-------------|
-| **Dylane** | Animation controller (play/pause/stop), collision highlighting (red material) |
-| **Umaya** | Parse error display, PlaybackControls, SimulationControls, speed slider, progress bar, collision alerts |
-| **Jason** | Lark grammar (MoveL/MoveJ/MoveC), AST nodes, transformer, `/api/upload/rapid` parser, trajectory generator, `/api/simulate` endpoint |
-| **Noah (BE)** | PyBullet headless, IRB 4600 URDF, FK solver, IK solver, IRB 2600/6700 URDFs, collision detector, obstacle mesh loader |
-| **Noah (QA)** | 20+ parser tests, FK/IK validation, collision tests, integration tests, performance benchmarks |
+| **Dylane** | *(Week 5: unavailable)* Week 6+: obstacle STL loading in Babylon.js, transform gizmo, animation controller, collision highlighting (red material) |
+| **Umaya** | RapidPanel → `POST /api/simulate` wiring, `PlaybackControls` with real trajectory data (frontend-driven), collision visualization, basic timeline scrubber |
+| **Jason** | ✅ Lark grammar + AST transformer (complete, merged PR #4), parser test coverage review, additional edge case tests, parser module documentation |
+| **Noah (BE)** | ✅ FK/IK solvers (complete), ✅ Collision detector (complete) — **Week 5:** `/api/parse` wiring, `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data), IK LRU cache (1000 entries), `/api/simulate` endpoint, obstacle CRUD (`POST/GET/DELETE /api/obstacles`) |
+| **Noah (QA)** | FK/IK + collision tests ✅, trajectory generator unit tests, `/api/simulate` integration tests, performance benchmark (100-waypoint < 5s) |
 
 ### Phase 3 (Weeks 7-8): Student MVP
 
@@ -75,8 +78,10 @@
 | Week 1 Day 1-2 | Jason: FastAPI routes | Umaya: upload wiring |
 | Week 3 Day 1 | Jason: `grammar.lark` | Week 4: AST implementation |
 | Week 3 Day 2-3 | Noah: PyBullet + URDF | Week 4: IK solver |
-| Week 5 Day 1 | Jason: Simulate schemas | Dylane: frontend animation |
-| Week 6 | `/api/simulate` format finalized | Both frontend and backend |
+| ~~Week 5 Day 1~~ ✅ | ~~Jason: Simulate schemas~~ | ~~Dylane: frontend animation~~ |
+| **Week 5 (NOW)** | **Noah: `/api/simulate` endpoint** | **Umaya: frontend wiring** |
+| **Week 5 (NOW)** | **Noah: Obstacle CRUD endpoints** | **Umaya: obstacle UI, collision testing** |
+| Week 6 | Dylane returns: obstacle STL in scene | Collision demo, transform gizmo |
 | Week 8 | Collision integration | Backend data -> frontend rendering |
 
 ## Definition of Done
@@ -96,4 +101,4 @@ A task is DONE when:
 
 ---
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-03-03

@@ -4,6 +4,64 @@
 
 ---
 
+## 2026-03-03 — Week 5 Sprint Planning (Session 2)
+
+**Attendees:** Noah (PM)
+**Purpose:** Sprint planning, task assignments, and technical decisions for Weeks 5-8
+
+---
+
+### Sprint Assignments (Weeks 5-8)
+
+Revised task ownership for the simulate pipeline sprint:
+
+| Person | Week 5-6 Focus |
+|--------|---------------|
+| **Noah** | `/api/parse`, `TrajectoryGenerator`, `/api/simulate`, obstacle CRUD, IK cache |
+| **Umaya** | RapidPanel → `/api/simulate` wiring, `PlaybackControls`, collision visualization |
+| **Jason** | Parser test coverage, docs, TBD |
+| **Dylane** | Unavailable Week 5 — returns Week 6 for obstacle UI + transform gizmo |
+
+Full breakdown in `docs/08-SPRINT-PLAN-W5-W8.md`.
+
+---
+
+### Trajectory Technical Decisions
+
+**Approach:** Time-based trajectory using RAPID speed data
+- `v100` = 100 mm/s, `v500` = 500 mm/s, `v1000` = 1000 mm/s
+- Waypoint spacing: `ceil(distance / (speed * dt))` where `dt = 20ms`
+- Each waypoint carries a `timestamp` (seconds from start)
+
+**MoveC:** In MVP scope — required for arc weld and pick paths in real programs.
+
+**Playback:** Frontend-driven with precomputed waypoints
+- Backend returns full trajectory array once
+- Frontend uses timestamps in `requestAnimationFrame` loop
+- Speed control = scale timestamp intervals client-side
+- No streaming, no backend state between frames
+
+---
+
+### Infrastructure (Completed March 3)
+
+- All 4 personal branches (noah, jason, dylane, umaya) synced to main
+- CI optimized: split lint/test jobs, single Python 3.12, concurrency cancel on push
+- Frontend CI: updated to Node 20/22 matrix (Vite 7 requirement)
+- ESLint: migrated to v9 flat config format
+- Backend linting: all ruff violations resolved
+
+---
+
+### Action Items
+
+- [ ] **Noah:** Build `/api/parse`, `TrajectoryGenerator`, `/api/simulate`, obstacle CRUD (Week 5)
+- [ ] **Umaya:** Wire `RapidPanel` → `/api/simulate`, build `PlaybackControls` (Week 5-6)
+- [ ] **Jason:** Parser test coverage review, edge case additions
+- [ ] **Dylane:** Return Week 6 — obstacle UI + gizmo + `TimelineScrubber`
+
+---
+
 ## 2026-03-03 — SAIT ARIS Strategy Meeting
 
 **Attendees:** Noah, Jason (ARIS team)
