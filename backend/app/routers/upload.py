@@ -1,17 +1,17 @@
 """
 Upload endpoints for RAPID programs and obstacles
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException, Form
-from app.schemas.responses import RapidUploadResponse, ObstacleUploadResponse, BoundingBox
+import json
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+
+from app.schemas.responses import BoundingBox, ObstacleUploadResponse, RapidUploadResponse
 from app.utils.file_handler import (
     generate_file_id,
     save_temp_file,
     validate_rapid_file,
-    validate_stl_file
+    validate_stl_file,
 )
-import json
-from typing import Optional
-
 
 router = APIRouter()
 
@@ -74,8 +74,8 @@ async def upload_rapid(file: UploadFile = File(...)):
 @router.post("/api/upload/obstacle", response_model=ObstacleUploadResponse)
 async def upload_obstacle(
     file: UploadFile = File(...),
-    position: Optional[str] = Form(None),
-    rotation: Optional[str] = Form(None)
+    position: str | None = Form(None),
+    rotation: str | None = Form(None)
 ):
     """
     Upload obstacle STL file

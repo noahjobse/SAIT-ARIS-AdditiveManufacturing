@@ -1,11 +1,10 @@
 """
 File handling utilities for uploads
 """
-from pathlib import Path
 import tempfile
 import uuid
 from datetime import datetime
-
+from pathlib import Path
 
 # Upload directory in system temp
 UPLOAD_DIR = Path(tempfile.gettempdir()) / "abb_sim_uploads"

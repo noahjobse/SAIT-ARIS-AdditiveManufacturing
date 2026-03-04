@@ -1,10 +1,11 @@
 """
 Test upload endpoints
 """
-import pytest
-from fastapi.testclient import TestClient
-from app.main import app
 from pathlib import Path
+
+from fastapi.testclient import TestClient
+
+from app.main import app
 
 client = TestClient(app)
 

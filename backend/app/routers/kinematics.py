@@ -1,14 +1,15 @@
 """API endpoints for robot kinematics (FK/IK)."""
 import logging
+
 from fastapi import APIRouter, HTTPException, status
 
-from app.schemas.kinematics import FKRequest, FKResponse, IKRequest, IKResponse
-from app.kinematics.solver import KinematicsSolver
 from app.kinematics.exceptions import (
     IKSolutionNotFoundError,
     InvalidJointAnglesError,
     RobotNotLoadedError,
 )
+from app.kinematics.solver import KinematicsSolver
+from app.schemas.kinematics import FKRequest, FKResponse, IKRequest, IKResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/kinematics", tags=["kinematics"])

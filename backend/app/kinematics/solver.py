@@ -1,12 +1,11 @@
 """Forward and inverse kinematics solver using PyBullet."""
 import logging
-from typing import List, Optional, Dict
 
 import numpy as np
 import pybullet as p
 
+from .exceptions import IKSolutionNotFoundError, InvalidJointAnglesError
 from .robot_loader import RobotLoader
-from .exceptions import InvalidJointAnglesError, IKSolutionNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +27,8 @@ class KinematicsSolver:
         self.loader.disconnect()
 
     def forward_kinematics(
-        self, robot_id: str, joint_angles: List[float]
-    ) -> Dict[str, List[float]]:
+        self, robot_id: str, joint_angles: list[float]
+    ) -> dict[str, list[float]]:
         """
         Calculate end-effector pose from joint angles.
 
@@ -83,10 +82,10 @@ class KinematicsSolver:
     def inverse_kinematics(
         self,
         robot_id: str,
-        target_position: List[float],
-        target_orientation: Optional[List[float]] = None,
-        current_joints: Optional[List[float]] = None,
-    ) -> Dict[str, List[float]]:
+        target_position: list[float],
+        target_orientation: list[float] | None = None,
+        current_joints: list[float] | None = None,
+    ) -> dict[str, list[float]]:
         """
         Calculate joint angles to reach target end-effector pose.
 
@@ -174,7 +173,7 @@ class KinematicsSolver:
             "joint_angles": list(joint_angles[:num_joints]),
         }
 
-    def _validate_joint_limits(self, robot_id: str, joint_angles: List[float]):
+    def _validate_joint_limits(self, robot_id: str, joint_angles: list[float]):
         """Validate joint angles against joint limits."""
         limits = self.loader.get_joint_limits(robot_id)
 

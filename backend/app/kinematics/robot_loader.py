@@ -2,7 +2,6 @@
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Optional
 
 import pybullet as p
 import pybullet_data
@@ -24,10 +23,10 @@ class RobotLoader:
         """
         self.headless = headless
         self.physics_client = None
-        self.loaded_robots: Dict[str, int] = {}  # robot_id -> pybullet_id
-        self.robot_configs: Dict[str, dict] = {}  # robot_id -> config
-        self._movable_joints: Dict[str, list] = {}  # robot_id -> [joint indices]
-        self._ee_link_index: Dict[str, int] = {}  # robot_id -> end-effector link index
+        self.loaded_robots: dict[str, int] = {}  # robot_id -> pybullet_id
+        self.robot_configs: dict[str, dict] = {}  # robot_id -> config
+        self._movable_joints: dict[str, list] = {}  # robot_id -> [joint indices]
+        self._ee_link_index: dict[str, int] = {}  # robot_id -> end-effector link index
         self.connect()
 
     def connect(self):
@@ -74,7 +73,7 @@ class RobotLoader:
         if not config_path.exists():
             raise FileNotFoundError(f"Config file not found: {config_path}")
 
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             config = json.load(f)
 
         # Load URDF
