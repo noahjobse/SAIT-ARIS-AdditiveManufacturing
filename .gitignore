@@ -83,4 +83,6 @@ Backup/
 frontend/public/models/robots/**/*.STEP
 frontend/public/models/robots/**/*.zip
 frontend/public/models/robots/**/*_STEP_j/
+
 CLAUDE.md
+backend/blog_demo.py
