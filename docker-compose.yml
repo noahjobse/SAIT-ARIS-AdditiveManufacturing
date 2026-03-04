@@ -13,7 +13,6 @@ services:
     environment:
       - ENVIRONMENT=development
       - PYTHONUNBUFFERED=1
-    command: sh -c "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --reload"
 
   frontend:
     build:
@@ -25,8 +24,6 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
-    command: pnpm dev -- --host
-
-volumes:
-  node_modules:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
