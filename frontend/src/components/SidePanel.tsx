@@ -13,7 +13,7 @@ type SidePanelProps = {
 
 function SidePanel({ activeTab, anglesDeg, setAnglesDeg, onFileUploaded, onAddLog }: SidePanelProps) {
     return (
-        <div className="flex flex-col bg-zinc-400 p-2 h-full">
+        <div className="flex flex-col bg-linear-to-b from-gray-900 via-gray-950 via-85% to-black py-4 px-6 h-full ">
             {activeTab === "rapid" ? (
                 <RapidPanel onFileUploaded={onFileUploaded} onAddLog={onAddLog} />
             ) : (
