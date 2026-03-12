@@ -11,16 +11,15 @@ function interpolateJoints(traj: TrajectoryWaypoint[], t: number): number[] {
   const last = traj[traj.length - 1];
   if (t >= last.timestamp) return [...last.joints];
 
-  let lo = 0, hi = traj.length - 1;
-  while (lo < hi - 1) {
+  let lo = 0, hi = traj.length - 2;
+  while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    if (traj[mid].timestamp <= t) lo = mid;
+    if (traj[mid + 1].timestamp < t) lo = mid + 1;
     else hi = mid;
   }
-
-  const a = traj[lo], b = traj[hi];
+  const a = traj[lo], b = traj[lo + 1];
   const alpha = (t - a.timestamp) / (b.timestamp - a.timestamp);
-  return a.joints.map((v, i) => v + alpha * (b.joints[i] - v));
+  return a.joints.map((j, k) => j + alpha * (b.joints[k] - j));
 }
 
 const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsProps) => {
