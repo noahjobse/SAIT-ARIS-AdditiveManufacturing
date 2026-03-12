@@ -12,12 +12,12 @@ type JointControls = {
 function createEngineAndScene(canvas: HTMLCanvasElement): { engine: Engine; scene: Scene } {
     const engine = new Engine(canvas, true, {stencil: true});
     const scene = new Scene(engine);
-    scene.clearColor = new Color4(35 / 255, 35 / 255, 55 / 255, 1);
+    scene.clearColor = new Color4(0, 0, 0, 0);
     return { engine, scene };
 }
 
 function createCameraAndLight(scene: Scene, canvas: HTMLCanvasElement) {
-    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 6, new Vector3(0, 1, 0), scene);
+    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2.4, 6, new Vector3(0, 1, 0), scene);
     camera.attachControl(canvas, true);
     camera.wheelPrecision = 100;            // for gradual zoom
     camera.wheelDeltaPercentage = 0.01;
@@ -29,13 +29,13 @@ function createCameraAndLight(scene: Scene, canvas: HTMLCanvasElement) {
 }
 
 function createGroundGrid(scene: Scene) {
-    const ground = MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
-    ground.position.y = -0.01; 
+    const ground = MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
+    // ground.position.y = -0.01; 
     
     try {
         const gridMat = new GridMaterial("gridMat", scene);
         gridMat.majorUnitFrequency = 5;         
-        gridMat.minorUnitVisibility = 0.5;     
+        gridMat.minorUnitVisibility = 0.75;     
         gridMat.gridRatio = 1;                  
         gridMat.backFaceCulling = false;
 
@@ -137,7 +137,7 @@ function computeJointAxes(links: TransformNode[]) {
     return jointAxes;
 }
 
-async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): Promise<JointControls> {
+async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string | null): Promise<JointControls> {
     registerBuiltInLoaders();
 
     const { engine, scene } = createEngineAndScene(canvas);
@@ -166,37 +166,39 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): P
     window.addEventListener("keydown", keydownHandler);
 
     // Load and build robot model
-    try {
-        await loadRobotModel(scene, modelPath);
-        const extracted = extractBaseAndLinks(scene);
-        
-        if (extracted) {
-            const { base, links } = extracted;
-            const { joints } = buildJoints(scene, base, links);
-            const jointAxes = computeJointAxes(links);
-            const jointAngles = [0, 0, 0, 0, 0, 0];
-            const restRotation = joints.map((p) => (p.rotationQuaternion ? p.rotationQuaternion.clone() : Quaternion.Identity()));
+    if (modelPath) {
+        try {
+            await loadRobotModel(scene, modelPath);
+            const extracted = extractBaseAndLinks(scene);
+            
+            if (extracted) {
+                const { base, links } = extracted;
+                const { joints } = buildJoints(scene, base, links);
+                const jointAxes = computeJointAxes(links);
+                const jointAngles = [0, 0, 0, 0, 0, 0];
+                const restRotation = joints.map((p) => (p.rotationQuaternion ? p.rotationQuaternion.clone() : Quaternion.Identity()));
 
-            const setJointAngle = (jointIndex: number, angleRad: number) => {
-                jointAngles[jointIndex] = angleRad;
-                const joint = joints[jointIndex];
-                const jointAxis = jointAxes[jointIndex];
-                const q = Quaternion.RotationAxis(jointAxis, angleRad);
-                joint.rotationQuaternion = restRotation[jointIndex].multiply(q);
-            };
+                const setJointAngle = (jointIndex: number, angleRad: number) => {
+                    jointAngles[jointIndex] = angleRad;
+                    const joint = joints[jointIndex];
+                    const jointAxis = jointAxes[jointIndex];
+                    const q = Quaternion.RotationAxis(jointAxis, angleRad);
+                    joint.rotationQuaternion = restRotation[jointIndex].multiply(q);
+                };
 
-            const dispose = () => {
-                engine.stopRenderLoop();
-                window.removeEventListener("keydown", keydownHandler);
-                window.removeEventListener("resize", resizeHandler);
-                scene.dispose();
-                engine.dispose();
-            };
+                const dispose = () => {
+                    engine.stopRenderLoop();
+                    window.removeEventListener("keydown", keydownHandler);
+                    window.removeEventListener("resize", resizeHandler);
+                    scene.dispose();
+                    engine.dispose();
+                };
 
-            return { engine, scene, setJointAngle, dispose };
+                return { engine, scene, setJointAngle, dispose };
+            }
+        } catch (err) {
+            console.error("Error loading robot model:", err);
         }
-    } catch (err) {
-        console.error("Error loading robot model:", err);
     }
 
     // Fallback if robot loading fails (still allow viewport to function)

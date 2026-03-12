@@ -13,7 +13,7 @@ export const ROBOT_MODELS = [
 
 function App() {
     const [activeTab, setActiveTab] = useState<TabType>("jog");
-    const [modelPath, setModelPath] = useState<string>(ROBOT_MODELS[0].path);
+    const [modelPath, setModelPath] = useState<string | null>(null);
     const [lastLog, setLastLog] = useState<{message: string, type: 'info' | 'success' | 'error' | 'warning'}>({
         message: "System Initialized",
         type: 'info'
@@ -53,6 +53,7 @@ function App() {
             <div className="flex-1 min-h-0 relative">
                 <MainLayout 
                     activeTab={activeTab} 
+                    setActiveTab={setActiveTab}
                     modelPath={modelPath} 
                     lastLog={lastLog}
                     onFileUploaded={handleFileUploaded}
