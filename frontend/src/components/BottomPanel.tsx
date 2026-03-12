@@ -2,12 +2,15 @@ import { useState } from 'react';
 import PlaybackControls from './PlaybackControls';
 import StatusPanel from './StatusPanel';
 import type { BottomPanelMode } from '../App';
+import type { TrajectoryWaypoint } from '../types';
 
 type BottomPanelProps = {
     lastLog: { message: string, type: 'info' | 'success' | 'error' | 'warning' };
+    trajectory: TrajectoryWaypoint[] | null;
+    onJointAnglesUpdate: (angles: number[]) => void;
 };
 
-function BottomPanel({ lastLog }: BottomPanelProps) {
+function BottomPanel({ lastLog, trajectory, onJointAnglesUpdate }: BottomPanelProps) {
     const [bottomPanelMode, setBottomPanelMode] = useState<BottomPanelMode>("both");
     const modes: { id: BottomPanelMode, label: string }[] = [
         { id: "scrubber", label: "SCRUBBER" },
@@ -34,10 +37,13 @@ function BottomPanel({ lastLog }: BottomPanelProps) {
             <div className="flex flex-row h-28">
                 {(bottomPanelMode === "both" || bottomPanelMode === "scrubber") && (
                     <div className={`flex-1 ${bottomPanelMode === "both" ? "border-r border-gray-700" : ""}`}>
-                        <PlaybackControls />
+                        <PlaybackControls
+                            trajectory={trajectory}
+                            onJointAnglesUpdate={onJointAnglesUpdate}
+                        />
                     </div>
                 )}
-                
+
                 {(bottomPanelMode === "both" || bottomPanelMode === "logs") && (
                     <div className="flex-1 overflow-hidden">
                         <StatusPanel lastLog={lastLog} />
@@ -46,7 +52,6 @@ function BottomPanel({ lastLog }: BottomPanelProps) {
             </div>
         </div>
     );
-
-} 
+}
 
 export default BottomPanel;

@@ -3,6 +3,8 @@ import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
 import Viewport3D from "./Viewport3D";
 import type { TabType } from "../App";
+import type { TrajectoryWaypoint } from "../types";
+import { robotIdFromPath } from "../types";
 
 type MainLayoutProps = {
     activeTab: TabType;
@@ -16,37 +18,44 @@ type MainLayoutProps = {
 function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }: MainLayoutProps) {
     const [anglesDeg, setAnglesDeg] = useState<number[]>([0, 0, 0, 0, 0, 0]);
     const [jointLimits, setJointLimits] = useState<{ min: number, max: number }[] | undefined>(undefined);
+    const [trajectory, setTrajectory] = useState<TrajectoryWaypoint[] | null>(null);
 
     const handleJointLimitsExtracted = useCallback((limits: { min: number; max: number }[] | undefined) => {
-    setJointLimits(limits);
+        setJointLimits(limits);
 
-    if (limits) {
-        setAnglesDeg((prev) =>
-            limits.map((limit, i) => {
-                const current = prev[i] ?? 0;
-                return Math.min(limit.max, Math.max(limit.min, current));
-            })
-        );
-    } else {
-        setAnglesDeg([0, 0, 0, 0, 0, 0]);
-    }
-}, []);
+        if (limits) {
+            setAnglesDeg((prev) =>
+                limits.map((limit, i) => {
+                    const current = prev[i] ?? 0;
+                    return Math.min(limit.max, Math.max(limit.min, current));
+                })
+            );
+        } else {
+            setAnglesDeg([0, 0, 0, 0, 0, 0]);
+        }
+    }, []);
 
+    const robotId = robotIdFromPath(modelPath);
+
+    // Reset joint angles and trajectory when robot model changes
     useEffect(() => {
         setAnglesDeg([0, 0, 0, 0, 0, 0]);
+        setTrajectory(null);
     }, [modelPath]);
 
     return (
         <div className="flex flex-row h-full w-full bg-black overflow-hidden ">
             {/* Side Panel */}
             <div className="flex flex-col basis-3/11 border-r border-orange-500/50 h-full shadow-xl overflow-hidden">
-                <SidePanel 
-                    activeTab={activeTab} 
-                    anglesDeg={anglesDeg} 
+                <SidePanel
+                    activeTab={activeTab}
+                    robotId={robotId}
+                    anglesDeg={anglesDeg}
                     jointLimits={jointLimits}
-                    setAnglesDeg={setAnglesDeg} 
+                    setAnglesDeg={setAnglesDeg}
                     onFileUploaded={onFileUploaded}
                     onAddLog={onAddLog}
+                    onTrajectoryReady={setTrajectory}
                 />
             </div>
 
@@ -56,8 +65,12 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
                 <div className="flex-1 relative min-h-0">
                     <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath} onJointLimitsExtracted={handleJointLimitsExtracted} />
                 </div>
-                
-                <BottomPanel lastLog={lastLog} />
+
+                <BottomPanel
+                    lastLog={lastLog}
+                    trajectory={trajectory}
+                    onJointAnglesUpdate={setAnglesDeg}
+                />
             </div>
 
         </div>
