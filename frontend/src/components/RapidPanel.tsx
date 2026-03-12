@@ -58,21 +58,21 @@ const RapidPanel = ({ robotId, onFileUploaded, onAddLog, onTrajectoryReady }: Ra
       }
 
       const parsed = await parseRes.json();
-      const commands: unknown[] = parsed.program?.modules?.[0]?.procedures?.[0]?.commands ?? [];
+      const commandCount: number = parsed.command_count ?? 0;
 
-      if (commands.length === 0) {
+      if (commandCount === 0) {
         onAddLog('No move commands found in RAPID code.', 'warning');
         setIsLoading(false);
         return;
       }
 
-      onAddLog(`Parsed ${commands.length} commands — running simulation...`, 'info');
+      onAddLog(`Parsed ${commandCount} commands — running simulation...`, 'info');
 
-      // Step 2: Simulate → trajectory waypoints
+      // Step 2: Simulate — send full program dict so variable declarations are preserved
       const simRes = await fetch('/api/simulate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ robot_id: robotId, ast: commands }),
+        body: JSON.stringify({ robot_id: robotId, program: parsed.program }),
       });
 
       if (!simRes.ok) {

@@ -51,7 +51,8 @@ class ObstacleTransform(BaseModel):
 
 class SimulateRequest(BaseModel):
     robot_id: str
-    ast: list[dict]          # MoveCommand dicts from the frontend
+    ast: list[dict] = []         # MoveCommand dicts (used when program not provided)
+    program: dict | None = None  # Full parse.py program dict (preserves declarations)
     obstacles: list[ObstacleTransform] = []
 
 
@@ -123,8 +124,9 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
     """
     # Support both 'command_type' (parse.py) and 'type' (OpenAPI)
     cmd_type = cmd_dict.get("command_type") or cmd_dict.get("type", "MoveJ")
-    target_dict = cmd_dict.get("target", {})
-    target = _build_target(target_dict)
+    target_raw = cmd_dict.get("target", {})
+    # String targets are variable references resolved by TrajectoryGenerator's var_table
+    target = target_raw if isinstance(target_raw, str) else _build_target(target_raw)
 
     speed = _parse_speed(cmd_dict.get("speed", [200.0]))
     zone = cmd_dict.get("zone", "z0")
@@ -132,7 +134,7 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
     # MoveC: cir_point (parse.py) or via_point (OpenAPI)
     cir_point = None
     via = cmd_dict.get("cir_point") or cmd_dict.get("via_point")
-    if via:
+    if via and not isinstance(via, str):
         cir_point = _build_robtarget(via)
 
     return MoveCommand(
@@ -146,8 +148,54 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
     )
 
 
+def _build_declaration(decl_dict: dict) -> Declaration | None:
+    """Convert a declaration dict from parse.py _to_dict output to a Declaration dataclass."""
+    value_raw = decl_dict.get("value")
+    if isinstance(value_raw, dict):
+        if "pos" in value_raw or "trans" in value_raw:
+            value = _build_robtarget(value_raw)
+        elif "robax" in value_raw:
+            value = _build_jointtarget(value_raw)
+        else:
+            return None
+    else:
+        return None  # skip non-target declarations (strings, floats, etc.)
+    return Declaration(
+        dtype=decl_dict.get("dtype", "CONST"),
+        type_name=decl_dict.get("type_name", "robtarget"),
+        name=decl_dict["name"],
+        value=value,
+    )
+
+
+def _build_program_from_dict(prog_dict: dict) -> Program:
+    """
+    Reconstruct a full Program from parse.py's _to_dict output.
+    Preserves declarations so variable references (e.g. 'p10') can be resolved.
+    """
+    modules = []
+    for mod_dict in prog_dict.get("modules", []):
+        declarations = []
+        for d in mod_dict.get("declarations", []):
+            decl = _build_declaration(d)
+            if decl:
+                declarations.append(decl)
+
+        procedures = []
+        for proc_dict in mod_dict.get("procedures", []):
+            cmds = [_build_move_command(c, i) for i, c in enumerate(proc_dict.get("commands", []))]
+            procedures.append(Procedure(name=proc_dict.get("name", "main"), commands=cmds))
+
+        modules.append(Module(
+            name=mod_dict.get("name", "MainModule"),
+            procedures=procedures,
+            declarations=declarations,
+        ))
+    return Program(modules=modules)
+
+
 def _build_program(commands: list[dict]) -> Program:
-    """Wrap a flat list of frontend MoveCommands into a minimal Program AST."""
+    """Wrap a flat list of MoveCommand dicts into a minimal Program (no declarations)."""
     move_cmds = [_build_move_command(c, i) for i, c in enumerate(commands)]
     procedure = Procedure(name="main", commands=move_cmds)
     module = Module(name="MainModule", procedures=[procedure], declarations=[])
@@ -175,11 +223,14 @@ async def simulate(request: SimulateRequest):
     if request.robot_id not in ("irb4600", "irb2600", "irb6700"):
         raise HTTPException(status_code=400, detail=f"Unknown robot_id: {request.robot_id!r}")
 
-    if not request.ast:
-        raise HTTPException(status_code=400, detail="ast must contain at least one MoveCommand")
+    if not request.program and not request.ast:
+        raise HTTPException(status_code=400, detail="Provide either 'program' or 'ast'")
 
     try:
-        program = _build_program(request.ast)
+        if request.program:
+            program = _build_program_from_dict(request.program)
+        else:
+            program = _build_program(request.ast)
         raw_waypoints = _generator.generate(program, request.robot_id)
     except TrajectoryError as e:
         raise HTTPException(status_code=400, detail=str(e))

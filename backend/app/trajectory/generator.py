@@ -126,7 +126,7 @@ class TrajectoryGenerator:
 
         speed_mms = self._parse_speed(cmd.speed)
         end_pos_m = self._pos_to_meters(target.pos)
-        orientation = [target.rot.q1, target.rot.q2, target.rot.q3, target.rot.q4]
+        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Determine start position (use FK if we have joints, else start at target)
         if current_joints is not None:
@@ -161,7 +161,7 @@ class TrajectoryGenerator:
 
         speed_mms = self._parse_speed(cmd.speed)
         end_pos_m = self._pos_to_meters(target.pos)
-        orientation = [target.rot.q1, target.rot.q2, target.rot.q3, target.rot.q4]
+        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Solve IK at the target to get end joint angles
         end_joints = self.solver.inverse_kinematics(robot_id, end_pos_m, orientation, current_joints)["joint_angles"]
@@ -239,7 +239,7 @@ class TrajectoryGenerator:
 
         p_via = np.array(self._pos_to_meters(cir.pos))
         p_end = np.array(self._pos_to_meters(target.pos))
-        orientation = [target.rot.q1, target.rot.q2, target.rot.q3, target.rot.q4]
+        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         arc_points = self._arc_interpolate(p_start, p_via, p_end, speed_mms)
 
