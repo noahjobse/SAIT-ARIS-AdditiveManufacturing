@@ -66,12 +66,15 @@
 
 ## Sprint: Weeks 5-6 (Simulation Pipeline)
 
+**Current Week: Week 5 (2026-03-03)**
+
 **Goal:** End-to-end `/api/simulate`, trajectory generation, collision detection
 **Key Milestone:** Upload RAPID -> see trajectory waypoints returned with collision data
 
 **Deliverables:**
 - `/api/simulate` endpoint complete (RAPID -> trajectory JSON)
 - Trajectory generator: MoveL (linear), MoveJ (joint-space), MoveC (circular arc)
+- Obstacle CRUD endpoints: `POST/GET/DELETE /api/obstacles` ← **added to scope**
 - Collision detector (mesh-to-mesh via PyBullet), obstacle mesh loading ✅
 - Frontend animation through trajectory waypoints, basic playback (play/pause/stop)
 - Collision highlighting on robot mesh
@@ -82,9 +85,22 @@
 - [x] **Noah:** Collision detection module with STL/OBJ obstacle loading
 - [x] **Noah:** PyBullet mesh collision detection working
 - [x] **Noah:** Collision tests passing (13 tests)
+- [x] **Jason:** RAPID parser (Lark grammar + AST transformer) — merged to main PR #4
+- [x] **Noah:** CI fixed (ruff lint, ESLint v9 flat config, Node 20/22 matrix) — March 3
+- [x] **Noah:** Docker Compose dev environment working — March 3
+- [x] **Noah:** OpenAPI contract committed `docs/contract/openapi.json` — March 3
+- [ ] **Noah:** `/api/parse` endpoint wiring parser — **IN PROGRESS (Week 5)**
+- [ ] **Noah:** `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data) — **IN PROGRESS**
+- [ ] **Noah:** `/api/simulate` endpoint (parse → trajectory → collision → JSON) — **IN PROGRESS**
+- [ ] **Noah:** Obstacle CRUD (`POST/GET/DELETE /api/obstacles`, in-memory) — **IN PROGRESS**
+- [ ] **Umaya:** RapidPanel → `/api/simulate` wiring — **IN PROGRESS**
+
+**Note:** Dylane is unavailable Week 5. Returns Week 6 for obstacle UI and transform gizmo.
 
 **Blocking Dependencies:**
-- Week 5 Day 1 (Jason): SimulateRequest/Response schemas -> blocks Dylane frontend integration
+- Week 5 (Noah): `/api/simulate` format finalized → blocks Umaya frontend wiring
+- Week 5 (Noah): Obstacle CRUD endpoints → blocks collision testing + Umaya obstacle UI
+- Week 6 (Dylane returns): obstacle STL in scene → blocks obstacle-based collision demos
 
 ## Sprint: Weeks 7-8 (MVP Launch)
 

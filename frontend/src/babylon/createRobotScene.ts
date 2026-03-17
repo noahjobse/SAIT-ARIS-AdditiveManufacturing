@@ -5,6 +5,7 @@ import { GridMaterial } from "@babylonjs/materials/grid";
 type JointControls = {
     engine: Engine;
     scene: Scene;
+    jointLimits?: { min: number; max: number }[];
     setJointAngle: (jointIndex: number, angleRad: number) => void;
     dispose: () => void;
 };
@@ -12,12 +13,12 @@ type JointControls = {
 function createEngineAndScene(canvas: HTMLCanvasElement): { engine: Engine; scene: Scene } {
     const engine = new Engine(canvas, true, {stencil: true});
     const scene = new Scene(engine);
-    scene.clearColor = new Color4(35 / 255, 35 / 255, 55 / 255, 1);
+    scene.clearColor = new Color4(0, 0, 0, 0);
     return { engine, scene };
 }
 
 function createCameraAndLight(scene: Scene, canvas: HTMLCanvasElement) {
-    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 6, new Vector3(0, 1, 0), scene);
+    const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2.4, 6, new Vector3(0, 1, 0), scene);
     camera.attachControl(canvas, true);
     camera.wheelPrecision = 100;            // for gradual zoom
     camera.wheelDeltaPercentage = 0.01;
@@ -29,13 +30,13 @@ function createCameraAndLight(scene: Scene, canvas: HTMLCanvasElement) {
 }
 
 function createGroundGrid(scene: Scene) {
-    const ground = MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
-    ground.position.y = -0.01; 
+    const ground = MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
+    // ground.position.y = -0.01; 
     
     try {
         const gridMat = new GridMaterial("gridMat", scene);
         gridMat.majorUnitFrequency = 5;         
-        gridMat.minorUnitVisibility = 0.5;     
+        gridMat.minorUnitVisibility = 0.75;     
         gridMat.gridRatio = 1;                  
         gridMat.backFaceCulling = false;
 
@@ -60,6 +61,90 @@ function createGroundGrid(scene: Scene) {
 async function loadRobotModel(scene: Scene, modelPath: string) {
     const robotModel = await ImportMeshAsync(modelPath, scene);
     return robotModel;
+}
+
+function findAbbKinematicsXml(scene: Scene): string | undefined {
+    const allNodes = [
+        ...scene.rootNodes,
+        ...scene.transformNodes,
+        ...scene.meshes
+    ];
+
+    for (const node of allNodes) {
+        const xml = node.metadata?.gltf?.extras?.ABB_ro_int_kinematics;
+        if (typeof xml === "string" && xml.length > 0) {
+            return xml;
+        }
+    }
+
+    return undefined;
+}
+
+function getXmlTagValue(xml: string, tagName: string): string | undefined {
+    const match = xml.match(new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`));
+    return match ? match[1].trim() : undefined;
+}
+
+function parseNumberList(text: string): number[] {
+    const bracketMatch = text.match(/\[(.*?)\]/s);
+    if (!bracketMatch) return [];
+
+    return bracketMatch[1]
+        .trim()
+        .split(/\s+/)
+        .map(Number)
+        .filter((n) => !Number.isNaN(n));
+}
+
+function radToDeg(rad: number): number {
+    return (rad * 180) / Math.PI;
+}
+
+function extractJointLimits(scene: Scene) {
+    const xml = findAbbKinematicsXml(scene);
+    if (!xml) {
+        console.warn("ABB_ro_int_kinematics metadata not found.");
+        return undefined;
+    }
+
+    const numActiveJointsText = getXmlTagValue(xml, "NumActiveJoints");
+    const numActiveJoints = numActiveJointsText ? Number(numActiveJointsText) : NaN;
+
+    if (!Number.isFinite(numActiveJoints) || numActiveJoints <= 0) {
+        console.warn("Could not read NumActiveJoints from ABB metadata.");
+        return undefined;
+    }
+
+    const jointLimitsVectorText = getXmlTagValue(xml, "JointLimitsVector");
+    if (!jointLimitsVectorText) {
+        console.warn("Could not read JointLimitsVector from ABB metadata.");
+        return undefined;
+    }
+
+    const numbers = parseNumberList(jointLimitsVectorText);
+
+    if (numbers.length < numActiveJoints * 2) {
+        console.warn(
+            `JointLimitsVector does not contain enough values. Expected at least ${numActiveJoints * 2}, got ${numbers.length}.`
+        );
+        return undefined;
+    }
+
+    const jointLimits = [];
+
+    for (let i = 0; i < numActiveJoints; i++) {
+        const maxRad = numbers[i * 2];
+        const minMagnitudeRad = numbers[i * 2 + 1];
+
+        jointLimits.push({
+            min: radToDeg(-minMagnitudeRad),
+            max: radToDeg(maxRad),
+        });
+    }
+
+    console.log("Extracted joint limits (deg):", jointLimits);
+
+    return jointLimits;
 }
 
 function extractBaseAndLinks(scene: Scene) {
@@ -137,7 +222,7 @@ function computeJointAxes(links: TransformNode[]) {
     return jointAxes;
 }
 
-async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): Promise<JointControls> {
+async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string | null): Promise<JointControls> {
     registerBuiltInLoaders();
 
     const { engine, scene } = createEngineAndScene(canvas);
@@ -166,37 +251,41 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): P
     window.addEventListener("keydown", keydownHandler);
 
     // Load and build robot model
-    try {
-        await loadRobotModel(scene, modelPath);
-        const extracted = extractBaseAndLinks(scene);
-        
-        if (extracted) {
-            const { base, links } = extracted;
-            const { joints } = buildJoints(scene, base, links);
-            const jointAxes = computeJointAxes(links);
-            const jointAngles = [0, 0, 0, 0, 0, 0];
-            const restRotation = joints.map((p) => (p.rotationQuaternion ? p.rotationQuaternion.clone() : Quaternion.Identity()));
+    if (modelPath) {
+        try {
+            await loadRobotModel(scene, modelPath);
+            const jointLimits = extractJointLimits(scene);
+            console.log("Joint limits:", jointLimits);
+            const extracted = extractBaseAndLinks(scene);
+            
+            if (extracted) {
+                const { base, links } = extracted;
+                const { joints } = buildJoints(scene, base, links);
+                const jointAxes = computeJointAxes(links);
+                const jointAngles = [0, 0, 0, 0, 0, 0];
+                const restRotation = joints.map((p) => (p.rotationQuaternion ? p.rotationQuaternion.clone() : Quaternion.Identity()));
 
-            const setJointAngle = (jointIndex: number, angleRad: number) => {
-                jointAngles[jointIndex] = angleRad;
-                const joint = joints[jointIndex];
-                const jointAxis = jointAxes[jointIndex];
-                const q = Quaternion.RotationAxis(jointAxis, angleRad);
-                joint.rotationQuaternion = restRotation[jointIndex].multiply(q);
-            };
+                const setJointAngle = (jointIndex: number, angleRad: number) => {
+                    jointAngles[jointIndex] = angleRad;
+                    const joint = joints[jointIndex];
+                    const jointAxis = jointAxes[jointIndex];
+                    const q = Quaternion.RotationAxis(jointAxis, angleRad);
+                    joint.rotationQuaternion = restRotation[jointIndex].multiply(q);
+                };
 
-            const dispose = () => {
-                engine.stopRenderLoop();
-                window.removeEventListener("keydown", keydownHandler);
-                window.removeEventListener("resize", resizeHandler);
-                scene.dispose();
-                engine.dispose();
-            };
+                const dispose = () => {
+                    engine.stopRenderLoop();
+                    window.removeEventListener("keydown", keydownHandler);
+                    window.removeEventListener("resize", resizeHandler);
+                    scene.dispose();
+                    engine.dispose();
+                };
 
-            return { engine, scene, setJointAngle, dispose };
+                return { engine, scene, jointLimits, setJointAngle, dispose };
+            }
+        } catch (err) {
+            console.error("Error loading robot model:", err);
         }
-    } catch (err) {
-        console.error("Error loading robot model:", err);
     }
 
     // Fallback if robot loading fails (still allow viewport to function)
@@ -211,6 +300,7 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string): P
     return { 
         engine, 
         scene, 
+        jointLimits: undefined,
         setJointAngle: () => {}, 
         dispose 
     };

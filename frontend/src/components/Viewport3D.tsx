@@ -1,14 +1,25 @@
 import { useEffect, useRef } from "react";
 import createRobotScene, { type JointControls } from "../babylon/createRobotScene";
 
-type Viewport3DProps = {
-    anglesDeg: number[];
-    modelPath: string;
+type JointLimits = {
+    min: number;
+    max: number;
 };
 
-function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
+type Viewport3DProps = {
+    anglesDeg: number[];
+    modelPath: string | null;
+    onJointLimitsExtracted?: (limits: JointLimits[] | undefined) => void;
+};
+
+function Viewport3D({ anglesDeg, modelPath, onJointLimitsExtracted }: Viewport3DProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const jointControlsRef = useRef<JointControls | null>(null);
+    const latestAnglesRef = useRef<number[]>(anglesDeg);
+
+    useEffect(() => {
+        latestAnglesRef.current = anglesDeg;
+    }, [anglesDeg]);
 
     // Create scene one time
     useEffect(() => {
@@ -24,9 +35,10 @@ function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
             }
 
             jointControlsRef.current = jointControls;
+            onJointLimitsExtracted?.(jointControls.jointLimits);
 
             // Set initial joint angles
-            anglesDeg.forEach((deg, i) => {
+            latestAnglesRef.current.forEach((deg, i) => {
                 jointControls.setJointAngle(i, (deg * Math.PI) / 180);
             });
             
@@ -36,10 +48,11 @@ function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
             alive = false;
             jointControlsRef.current?.dispose();
             jointControlsRef.current = null;
+            onJointLimitsExtracted?.(undefined);
         };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [modelPath]);
+    }, [modelPath, onJointLimitsExtracted]);
 
     // Update joint angles when sliders change
     useEffect(() => {
@@ -64,13 +77,42 @@ function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
     };
 
     return (
-        <div className="w-full h-full">
+        <div className="relative w-full h-full bg-linear-to-br from-gray-900 via-gray-950 to-black">
+            {/* Grid background */}
+            <div
+                // className="absolute inset-0 opacity-60 pointer-events-none"
+                // style={{
+                //     backgroundImage: `
+                //         linear-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px),
+                //         linear-gradient(90deg, rgba(139, 92, 246, 0.15) 1px, transparent 1px)
+                //     `,
+                //     backgroundSize: "50px 50px",
+                // }}
+
+                className="absolute inset-0 opacity-8 pointer-events-none"
+
+                style={{
+                    backgroundImage: `
+                        url('../public/images/space-bg.avif')
+                        
+                    `,
+                    filter: 'brightness(1.9) contrast(0.9)',
+                }}
+            />
+
+            {/* Glow overlays */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
+            </div>
+
+            {/* Babylon.js Canvas */}
             <canvas 
                 ref={canvasRef} 
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                className="w-full h-full block cursor-grab outline-none" 
+                className="relative z-10 w-full h-full block cursor-grab outline-none" 
             />
         </div>
     );
