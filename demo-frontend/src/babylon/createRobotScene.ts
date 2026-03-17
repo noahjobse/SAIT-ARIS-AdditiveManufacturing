@@ -5,7 +5,6 @@ import { GridMaterial } from "@babylonjs/materials/grid";
 type JointControls = {
     engine: Engine;
     scene: Scene;
-    jointLimits?: { min: number; max: number }[];
     setJointAngle: (jointIndex: number, angleRad: number) => void;
     dispose: () => void;
 };
@@ -61,90 +60,6 @@ function createGroundGrid(scene: Scene) {
 async function loadRobotModel(scene: Scene, modelPath: string) {
     const robotModel = await ImportMeshAsync(modelPath, scene);
     return robotModel;
-}
-
-function findAbbKinematicsXml(scene: Scene): string | undefined {
-    const allNodes = [
-        ...scene.rootNodes,
-        ...scene.transformNodes,
-        ...scene.meshes
-    ];
-
-    for (const node of allNodes) {
-        const xml = node.metadata?.gltf?.extras?.ABB_ro_int_kinematics;
-        if (typeof xml === "string" && xml.length > 0) {
-            return xml;
-        }
-    }
-
-    return undefined;
-}
-
-function getXmlTagValue(xml: string, tagName: string): string | undefined {
-    const match = xml.match(new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`));
-    return match ? match[1].trim() : undefined;
-}
-
-function parseNumberList(text: string): number[] {
-    const bracketMatch = text.match(/\[(.*?)\]/s);
-    if (!bracketMatch) return [];
-
-    return bracketMatch[1]
-        .trim()
-        .split(/\s+/)
-        .map(Number)
-        .filter((n) => !Number.isNaN(n));
-}
-
-function radToDeg(rad: number): number {
-    return (rad * 180) / Math.PI;
-}
-
-function extractJointLimits(scene: Scene) {
-    const xml = findAbbKinematicsXml(scene);
-    if (!xml) {
-        console.warn("ABB_ro_int_kinematics metadata not found.");
-        return undefined;
-    }
-
-    const numActiveJointsText = getXmlTagValue(xml, "NumActiveJoints");
-    const numActiveJoints = numActiveJointsText ? Number(numActiveJointsText) : NaN;
-
-    if (!Number.isFinite(numActiveJoints) || numActiveJoints <= 0) {
-        console.warn("Could not read NumActiveJoints from ABB metadata.");
-        return undefined;
-    }
-
-    const jointLimitsVectorText = getXmlTagValue(xml, "JointLimitsVector");
-    if (!jointLimitsVectorText) {
-        console.warn("Could not read JointLimitsVector from ABB metadata.");
-        return undefined;
-    }
-
-    const numbers = parseNumberList(jointLimitsVectorText);
-
-    if (numbers.length < numActiveJoints * 2) {
-        console.warn(
-            `JointLimitsVector does not contain enough values. Expected at least ${numActiveJoints * 2}, got ${numbers.length}.`
-        );
-        return undefined;
-    }
-
-    const jointLimits = [];
-
-    for (let i = 0; i < numActiveJoints; i++) {
-        const maxRad = numbers[i * 2];
-        const minMagnitudeRad = numbers[i * 2 + 1];
-
-        jointLimits.push({
-            min: radToDeg(-minMagnitudeRad),
-            max: radToDeg(maxRad),
-        });
-    }
-
-    console.log("Extracted joint limits (deg):", jointLimits);
-
-    return jointLimits;
 }
 
 function extractBaseAndLinks(scene: Scene) {
@@ -254,8 +169,6 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string | n
     if (modelPath) {
         try {
             await loadRobotModel(scene, modelPath);
-            const jointLimits = extractJointLimits(scene);
-            console.log("Joint limits:", jointLimits);
             const extracted = extractBaseAndLinks(scene);
             
             if (extracted) {
@@ -281,7 +194,7 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string | n
                     engine.dispose();
                 };
 
-                return { engine, scene, jointLimits, setJointAngle, dispose };
+                return { engine, scene, setJointAngle, dispose };
             }
         } catch (err) {
             console.error("Error loading robot model:", err);
@@ -300,7 +213,6 @@ async function createRobotScene(canvas: HTMLCanvasElement, modelPath: string | n
     return { 
         engine, 
         scene, 
-        jointLimits: undefined,
         setJointAngle: () => {}, 
         dispose 
     };

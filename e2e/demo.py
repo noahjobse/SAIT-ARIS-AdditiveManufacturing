@@ -189,42 +189,27 @@ def scene_intro(page):
 
 
 def scene_joint_jog(page):
-    """Scene 2: Demonstrate manual joint control with dramatic movements."""
-    subtitle(page, "Joint Jog mode — manually control each of the robot's 6 axes")
-    pause(3)
-    clear_subtitle(page)
+    """Scene 2: Demonstrate manual joint control with a single sweep."""
+    subtitle(page, "Joint Jog — manually control each of the robot's 6 axes")
+    pause(2)
 
-    # Ensure Joint Jog tab is active (it's the default, but be explicit)
     page.get_by_role("button", name="Joint Jog").click()
     pause(1)
 
-    # Quick dramatic joint movements
+    # Single base sweep to demonstrate real-time FK
     input_count = page.locator('input[type="text"]').count()
     if input_count >= 6:
-        # J1: Base sweep
         subtitle(page, "Base rotation — real-time forward kinematics in the browser")
-        animate_joint(page, 0, 70, 800)
-        animate_joint(page, 0, -70, 1200)
+        animate_joint(page, 0, 60, 800)
+        animate_joint(page, 0, -60, 1000)
         animate_joint(page, 0, 0, 600)
-
-        # J2 + J5: Shoulder lift + wrist bend together
-        subtitle(page, "Multiple axes moving — shoulder lift and wrist bend")
-        animate_joint(page, 1, -60, 800)
-        animate_joint(page, 4, 80, 800)
-        pause(1)
-        animate_joint(page, 1, 0, 600)
-        animate_joint(page, 4, 0, 600)
-    else:
-        subtitle(page, "Joint sliders control each axis in real time")
-        pause(3)
-
-    # Reset all joints
-    subtitle(page, "Resetting to home position")
     pause(1)
+
+    # Reset
     reset_btn = page.locator("button", has_text="Reset Joints")
     if reset_btn.count() > 0:
         reset_btn.click()
-    pause(2)
+    pause(1)
 
 
 def scene_rapid_upload(page):

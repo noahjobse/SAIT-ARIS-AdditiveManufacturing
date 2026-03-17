@@ -1,18 +1,12 @@
 import { useEffect, useRef } from "react";
 import createRobotScene, { type JointControls } from "../babylon/createRobotScene";
 
-type JointLimits = {
-    min: number;
-    max: number;
-};
-
 type Viewport3DProps = {
     anglesDeg: number[];
     modelPath: string | null;
-    onJointLimitsExtracted?: (limits: JointLimits[] | undefined) => void;
 };
 
-function Viewport3D({ anglesDeg, modelPath, onJointLimitsExtracted }: Viewport3DProps) {
+function Viewport3D({ anglesDeg, modelPath }: Viewport3DProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const jointControlsRef = useRef<JointControls | null>(null);
     const latestAnglesRef = useRef<number[]>(anglesDeg);
@@ -35,7 +29,6 @@ function Viewport3D({ anglesDeg, modelPath, onJointLimitsExtracted }: Viewport3D
             }
 
             jointControlsRef.current = jointControls;
-            onJointLimitsExtracted?.(jointControls.jointLimits);
 
             // Set initial joint angles
             latestAnglesRef.current.forEach((deg, i) => {
@@ -48,11 +41,10 @@ function Viewport3D({ anglesDeg, modelPath, onJointLimitsExtracted }: Viewport3D
             alive = false;
             jointControlsRef.current?.dispose();
             jointControlsRef.current = null;
-            onJointLimitsExtracted?.(undefined);
         };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [modelPath, onJointLimitsExtracted]);
+    }, [modelPath]);
 
     // Update joint angles when sliders change
     useEffect(() => {
@@ -80,23 +72,13 @@ function Viewport3D({ anglesDeg, modelPath, onJointLimitsExtracted }: Viewport3D
         <div className="relative w-full h-full bg-linear-to-br from-gray-900 via-gray-950 to-black">
             {/* Grid background */}
             <div
-                // className="absolute inset-0 opacity-60 pointer-events-none"
-                // style={{
-                //     backgroundImage: `
-                //         linear-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px),
-                //         linear-gradient(90deg, rgba(139, 92, 246, 0.15) 1px, transparent 1px)
-                //     `,
-                //     backgroundSize: "50px 50px",
-                // }}
-
-                className="absolute inset-0 opacity-8 pointer-events-none"
-
+                className="absolute inset-0 opacity-60 pointer-events-none"
                 style={{
                     backgroundImage: `
-                        url('../public/images/space-bg.avif')
-                        
+                        linear-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(139, 92, 246, 0.15) 1px, transparent 1px)
                     `,
-                    filter: 'brightness(1.9) contrast(0.9)',
+                    backgroundSize: "50px 50px",
                 }}
             />
 

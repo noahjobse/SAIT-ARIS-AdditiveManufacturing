@@ -1,7 +1,9 @@
-# Demo docker-compose — full pipeline: backend (FastAPI/PyBullet) + frontend (Vite)
-# Usage: docker-compose -f docker-compose.demo.yml up --build
+# Demo docker-compose — full pipeline: backend (FastAPI/PyBullet) + frontend (Vite legacy)
+# Usage: docker compose -f docker-compose.demo.yml up --build
 # Backend API:  http://localhost:8001/docs
 # Frontend:     http://localhost:5174
+# Note: Uses demo-frontend/ (Vite app) for the automated Playwright demo.
+#       The main frontend/ is the Next.js app under active development.
 
 services:
   backend:
@@ -24,13 +26,13 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./demo-frontend
       dockerfile: Dockerfile
     ports:
       - "5174:5173"
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
+      - ./demo-frontend/src:/app/src
+      - ./demo-frontend/public:/app/public
     environment:
       - VITE_API_URL=http://backend:8000
     depends_on:

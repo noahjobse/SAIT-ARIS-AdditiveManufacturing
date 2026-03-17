@@ -1,0 +1,73 @@
+"use client";
+
+import { useRef, useEffect, useCallback, useState } from "react";
+import type { JointControls } from "./createRobotScene";
+
+type Viewport3DProps = {
+  modelPath: string | null;
+  onJointControlsReady?: (controls: JointControls) => void;
+};
+
+export default function Viewport3D({ modelPath, onJointControlsReady }: Viewport3DProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const controlsRef = useRef<JointControls | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const initScene = useCallback(async () => {
+    if (!canvasRef.current) return;
+
+    // Dispose previous scene
+    if (controlsRef.current) {
+      controlsRef.current.dispose();
+      controlsRef.current = null;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Dynamic import to avoid SSR — this is the key Next.js pattern
+      const { createRobotScene } = await import("./createRobotScene");
+      const controls = await createRobotScene(canvasRef.current, modelPath);
+      controlsRef.current = controls;
+      onJointControlsReady?.(controls);
+    } catch (err) {
+      console.error("Failed to initialize Babylon.js scene:", err);
+      setError(err instanceof Error ? err.message : "Failed to load 3D scene");
+    } finally {
+      setLoading(false);
+    }
+  }, [modelPath, onJointControlsReady]);
+
+  useEffect(() => {
+    initScene();
+
+    return () => {
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+        controlsRef.current = null;
+      }
+    };
+  }, [initScene]);
+
+  return (
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full outline-none"
+        touch-action="none"
+      />
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <span className="text-white text-sm">Loading 3D scene...</span>
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <span className="text-red-400 text-sm">{error}</span>
+        </div>
+      )}
+    </div>
+  );
+}
