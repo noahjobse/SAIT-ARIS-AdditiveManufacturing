@@ -1,5 +1,4 @@
 import { TabType } from "@/App";
-import React from "react";
 import { FileCode as RapidCodeIcon } from 'lucide-react';
 import JointJogIcon from "../assets/icons/joint-jog-icon.svg?react";
 // import RapidCodeIcon from "../assets/icons/rapid-code-icon.svg?react";
