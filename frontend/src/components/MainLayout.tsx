@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
 import Viewport3D from "./Viewport3D";
@@ -15,6 +15,22 @@ type MainLayoutProps = {
 
 function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }: MainLayoutProps) {
     const [anglesDeg, setAnglesDeg] = useState<number[]>([0, 0, 0, 0, 0, 0]);
+    const [jointLimits, setJointLimits] = useState<{ min: number, max: number }[] | undefined>(undefined);
+
+    const handleJointLimitsExtracted = useCallback((limits: { min: number; max: number }[] | undefined) => {
+    setJointLimits(limits);
+
+    if (limits) {
+        setAnglesDeg((prev) =>
+            limits.map((limit, i) => {
+                const current = prev[i] ?? 0;
+                return Math.min(limit.max, Math.max(limit.min, current));
+            })
+        );
+    } else {
+        setAnglesDeg([0, 0, 0, 0, 0, 0]);
+    }
+}, []);
 
     useEffect(() => {
         setAnglesDeg([0, 0, 0, 0, 0, 0]);
@@ -27,6 +43,7 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
                 <SidePanel 
                     activeTab={activeTab} 
                     anglesDeg={anglesDeg} 
+                    jointLimits={jointLimits}
                     setAnglesDeg={setAnglesDeg} 
                     onFileUploaded={onFileUploaded}
                     onAddLog={onAddLog}
@@ -37,7 +54,7 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
             <div className="flex-1 flex flex-col relative overflow-hidden h-full min-h-0">
 
                 <div className="flex-1 relative min-h-0">
-                    <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath}/>
+                    <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath} onJointLimitsExtracted={handleJointLimitsExtracted} />
                 </div>
                 
                 <BottomPanel lastLog={lastLog} />

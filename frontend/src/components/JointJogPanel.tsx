@@ -4,12 +4,18 @@ import { RotateCcw as ResetIcon } from 'lucide-react';
 import PrimaryButton from './ui/PrimaryButton';
 import SidePanelHeader from './ui/SidePanelHeader';
 
+type JointLimit = {
+    min: number;
+    max: number;
+};
+
 type JointJogPanelProps = {
     anglesDeg: number[];
     setAnglesDeg: React.Dispatch<React.SetStateAction<number[]>>;
+    jointLimits?: JointLimit[];
 };
 
-function JointJogPanel({ anglesDeg, setAnglesDeg }: JointJogPanelProps) {
+function JointJogPanel({ anglesDeg, setAnglesDeg, jointLimits }: JointJogPanelProps) {
     const updateAngle = (i: number, deg: number) => {
         setAnglesDeg((prev) => {
             const next = [...prev];
@@ -18,11 +24,10 @@ function JointJogPanel({ anglesDeg, setAnglesDeg }: JointJogPanelProps) {
         });
     };
 
-    const minDeg = -180;
-    const maxDeg = 180;
-
+    
     const resetAngles = () => {
-        setAnglesDeg(anglesDeg.map(() => 0));
+        // setAnglesDeg(anglesDeg.map(() => 0));
+        setAnglesDeg((prev) => prev.map(() => 0));
     };
 
     return (
@@ -33,6 +38,9 @@ function JointJogPanel({ anglesDeg, setAnglesDeg }: JointJogPanelProps) {
                 <div className="flex flex-col gap-2">
                     {/* All joints in separate container */}
                     {anglesDeg.map((deg, i) => {
+                        const minDeg = jointLimits?.[i]?.min ?? -180;
+                        const maxDeg = jointLimits?.[i]?.max ?? 180;
+
                         return (
                         <div key={i} className="flex flex-1 flex-col py-2 px-3 bg-black/40 rounded-lg overflow-y-auto justify-center border border-white/10 shadow-lg hover:border-purple-500/40 shadow-white/5">
                             
@@ -77,8 +85,8 @@ function JointJogPanel({ anglesDeg, setAnglesDeg }: JointJogPanelProps) {
 
                             {/* Min/Max Labels */}
                             <div className="flex justify-between text-[10px] text-gray-400 font-medium -mt-1 leading-none">
-                                <span>-180°</span>
-                                <span>180°</span>
+                                <span>{Math.round(minDeg)}°</span>
+                                <span>{Math.round(maxDeg)}°</span>
                             </div>
                 
                         </div>
