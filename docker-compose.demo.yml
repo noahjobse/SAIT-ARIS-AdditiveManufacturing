@@ -1,9 +1,7 @@
-version: '3.8'
-
 # Demo docker-compose — full pipeline: backend (FastAPI/PyBullet) + frontend (Vite)
 # Usage: docker-compose -f docker-compose.demo.yml up --build
-# Backend API:  http://localhost:8000/docs
-# Frontend:     http://localhost:5173
+# Backend API:  http://localhost:8001/docs
+# Frontend:     http://localhost:5174
 
 services:
   backend:
@@ -11,7 +9,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - ./backend:/app
       - ./models:/models
@@ -29,7 +27,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "5174:5173"
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
