@@ -14,6 +14,7 @@
     "@babylonjs/materials": "^8.55.3",
     "babylonjs-gltf2interface": "^8.55.3",
     "next": "16.1.7",
+    "openapi-fetch": "^0.17.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

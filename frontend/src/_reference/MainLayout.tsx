@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
 import Viewport3D from "./Viewport3D";
@@ -19,6 +19,14 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
     const [anglesDeg, setAnglesDeg] = useState<number[]>([0, 0, 0, 0, 0, 0]);
     const [jointLimits, setJointLimits] = useState<{ min: number, max: number }[] | undefined>(undefined);
     const [trajectory, setTrajectory] = useState<TrajectoryWaypoint[] | null>(null);
+    const prevModelPath = useRef(modelPath);
+
+    // Reset joint angles and trajectory when robot model changes
+    if (modelPath !== prevModelPath.current) {
+        prevModelPath.current = modelPath;
+        setAnglesDeg([0, 0, 0, 0, 0, 0]);
+        setTrajectory(null);
+    }
 
     const handleJointLimitsExtracted = useCallback((limits: { min: number; max: number }[] | undefined) => {
         setJointLimits(limits);
@@ -36,12 +44,6 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
     }, []);
 
     const robotId = robotIdFromPath(modelPath);
-
-    // Reset joint angles and trajectory when robot model changes
-    useEffect(() => {
-        setAnglesDeg([0, 0, 0, 0, 0, 0]);
-        setTrajectory(null);
-    }, [modelPath]);
 
     return (
         <div className="flex flex-row h-full w-full bg-black overflow-hidden ">

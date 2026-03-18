@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ported Vite components — reference only, not compiled
+    "src/_reference/**",
   ]),
 ]);
 
