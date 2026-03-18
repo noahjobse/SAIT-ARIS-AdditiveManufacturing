@@ -1,10 +1,12 @@
 FROM node:20-slim
 
+RUN npm install -g pnpm
+
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json ./
-RUN npm install
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copy source
 COPY . .
@@ -12,4 +14,4 @@ COPY . .
 EXPOSE 3000
 
 # Run Next.js dev server
-CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "-p", "3000"]
+CMD ["pnpm", "dev", "-H", "0.0.0.0", "-p", "3000"]
