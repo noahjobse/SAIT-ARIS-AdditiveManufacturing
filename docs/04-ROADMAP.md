@@ -8,13 +8,23 @@
 
 ## Phase Overview
 
-| Phase | Weeks | Goal | MVP Impact |
-|-------|-------|------|-----------|
-| **1: Visualization** | 1-3 | 3D scene, robot models, obstacles, gizmo | Foundation |
-| **2: Logic Engine** | 4-6 | RAPID parser, IK/FK, trajectory, `/api/simulate` | Critical |
-| **3: Student MVP** | 7-8 | Playback, collision, polish, UAT, sign-off | **MVP LAUNCH** |
-| **4: Expansion** | 9-10 | Control flow (IF/FOR/WHILE), multi-robot validation | Stretch |
-| **5: Finalization** | 11 | Docs, deployment, demo, presentation | Handoff |
+| Phase | Weeks | Goal | Status |
+|-------|-------|------|--------|
+| **1: Visualization** | 1-3 | 3D scene, robot models, obstacles, gizmo | ✅ Complete |
+| **2: Logic Engine** | 4-6 | RAPID parser, IK/FK, trajectory, `/api/simulate` | ✅ Complete |
+| **3: Next.js Migration** | 7 | Port frontend to Next.js App Router | 🔄 In Progress |
+| **4: SaaS + Polish** | 8-9 | Supabase auth/persistence, Stripe, editor upgrade, UX polish | Upcoming |
+| **5: Deploy + Handoff** | 10-11 | Vercel/Render deploy, ARIS docs, capstone poster, UAT | Upcoming |
+
+### Production Stack (decided Week 7)
+| Layer | Service |
+|-------|---------|
+| Frontend | Vercel (Next.js) |
+| Backend | Render (FastAPI + PyBullet container) |
+| Auth + DB | Supabase (auth + Postgres) |
+| Payments | Stripe (single subscription tier) |
+
+> See `09-SPRINT-PLAN-W7-W11.md` for detailed weekly breakdown.
 
 ## Sprint: Weeks 1-2 (Foundation)
 
@@ -206,4 +216,4 @@ Extensions (ABB controller API, RobotStudio integration) can be added beyond cor
 
 ---
 
-**Last Updated:** 2026-03-03
+**Last Updated:** 2026-03-17

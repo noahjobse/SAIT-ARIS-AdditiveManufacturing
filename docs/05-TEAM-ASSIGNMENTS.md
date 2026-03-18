@@ -6,14 +6,14 @@
 
 ---
 
-## Team Structure
+## Team Structure (Updated Week 7)
 
-| Person | Primary Role | Key Focus |
-|--------|-------------|-----------|
-| **Dylane** | Frontend - Babylon.js | 3D scene, robot loading, animation, gizmo, timeline scrubber, collision highlighting |
-| **Umaya** | Frontend - React UI | Layout, upload UI, playback controls, status panel, responsive design, accessibility |
-| **Jason** | Backend Lead | FastAPI routes, RAPID parser (Lark), trajectory generator, `/api/simulate`, IK caching |
-| **Noah** | Backend (IK/Collision) + PM + QA | PyBullet FK/IK, collision detection, URDFs, upload endpoints, testing, docs, sprint planning |
+| Person | Primary Role | Key Focus (Weeks 7-11) |
+|--------|-------------|------------------------|
+| **Noah** | Backend + PM + Deploy | Supabase setup, Stripe, production deploy (Vercel/Render), CI/CD, integration tests |
+| **Jason** | Frontend + Migration + Docker | Next.js component port, CodeMirror editor, Docker setup, landing page, e2e demo, handoff docs |
+| **Umaya** | Frontend + Auth UX | Component port (Week 7), execution UX, joint jog polish, collision/obstacle UI, handoff docs |
+| **Dylane** | Frontend + Deliverables | Playback improvements, drag-to-resize, dashboard, capstone poster (returns Week 8) |
 
 ## Phase-by-Phase Breakdown
 
@@ -99,6 +99,39 @@ A task is DONE when:
 - **Daily Standup:** 9:00 AM (15 min)
 - **Sprint Reviews:** End of each 2-week sprint (30 min); Week 8 MVP sign-off (1 hour)
 
+## Weeks 7-11 Assignments
+
+> See `09-SPRINT-PLAN-W7-W11.md` for the full weekly breakdown with task IDs.
+
+### Noah — Backend + PM + Deploy
+- Supabase project setup, DB schema, auth integration
+- Stripe PoC (single subscription, paywall gate)
+- Save/load persistence (programs, simulations, obstacles)
+- Simulate integration tests
+- Production deploy: Vercel (frontend) + Render (backend)
+- CI/CD pipeline
+
+### Jason — Frontend + Migration + Docker (heavy load)
+- Port all React components into Next.js App Router (M1-M2, M6)
+- CodeMirror editor upgrade (F1-F6)
+- Docker: production Dockerfile, new docker-compose, demo migration (M8-M12)
+- Marketing landing page
+- ARIS handoff docs (Week 10)
+
+### Umaya — Frontend + Polish (lighter load)
+- Port PlaybackControls, JointJogPanel, StatusPanel into Next.js (M3-M5)
+- Execution UX improvements (F7-F11)
+- Joint jog fixes (F18-F21)
+- Collision highlighting, obstacle UI, loading states (F24-F27)
+- Save obstacle setups per user
+- ARIS handoff docs (Week 10)
+
+### Dylane — Frontend + Deliverables (returns Week 8)
+- Playback improvements (F12-F17) + tool tip trace (F28)
+- Drag-to-resize panels, log filtering (F22-F23)
+- User dashboard (U1)
+- Capstone poster (D5)
+
 ---
 
-**Last Updated:** 2026-03-03
+**Last Updated:** 2026-03-17
