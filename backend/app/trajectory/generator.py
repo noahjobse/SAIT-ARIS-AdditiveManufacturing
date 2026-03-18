@@ -4,6 +4,7 @@ time-stamped joint-angle waypoints via PyBullet IK.
 """
 import logging
 import math
+import time
 
 import numpy as np
 
@@ -47,13 +48,15 @@ class TrajectoryGenerator:
     def __init__(self, solver: KinematicsSolver):
         self.solver = solver
 
-    def generate(self, program: Program, robot_id: str) -> list[dict]:
+    def generate(self, program: Program, robot_id: str, deadline: float | None = None) -> list[dict]:
         """
         Generate waypoints for the first procedure in the program.
 
         Args:
             program: Parsed RAPID program
             robot_id: Robot identifier (e.g. 'irb4600')
+            deadline: Monotonic clock deadline (seconds). If exceeded, returns
+                      partial results with whatever waypoints were generated.
 
         Returns:
             List of waypoint dicts
@@ -80,7 +83,13 @@ class TrajectoryGenerator:
         current_time = 0.0
         current_joints: list[float] | None = None
 
+        timed_out = False
         for cmd in procedure.commands:
+            if deadline is not None and time.monotonic() > deadline:
+                logger.warning("Trajectory generation timed out after %d waypoints", len(waypoints))
+                timed_out = True
+                break
+
             new_waypoints, current_joints = self._process_command(
                 cmd, var_table, robot_id, current_joints, current_time
             )
@@ -88,7 +97,7 @@ class TrajectoryGenerator:
                 current_time = new_waypoints[-1]["timestamp"]
             waypoints.extend(new_waypoints)
 
-        return waypoints
+        return waypoints, timed_out
 
     # ------------------------------------------------------------------
     # Command dispatch

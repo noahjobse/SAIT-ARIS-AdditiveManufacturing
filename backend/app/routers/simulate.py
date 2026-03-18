@@ -11,6 +11,7 @@ import time
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app.collision.detector import CollisionDetector
 from app.kinematics.solver import KinematicsSolver
 from app.parser.ast_nodes import (
     Declaration,
@@ -38,6 +39,7 @@ logger = logging.getLogger(__name__)
 # Shared solver (PyBullet headless) — created once at import time
 _solver = KinematicsSolver()
 _generator = TrajectoryGenerator(_solver)
+_detector = CollisionDetector(loader=_solver.loader)
 
 # ---------------------------------------------------------------------------
 # Request schema
@@ -226,29 +228,70 @@ async def simulate(request: SimulateRequest):
     if not request.program and not request.ast:
         raise HTTPException(status_code=400, detail="Provide either 'program' or 'ast'")
 
+    simulate_timeout_s = 10.0
+    deadline = time.monotonic() + simulate_timeout_s
+
     try:
         if request.program:
             program = _build_program_from_dict(request.program)
         else:
             program = _build_program(request.ast)
-        raw_waypoints = _generator.generate(program, request.robot_id)
+        raw_waypoints, timed_out = _generator.generate(program, request.robot_id, deadline=deadline)
     except TrajectoryError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.exception("Unexpected error during simulation")
         raise HTTPException(status_code=500, detail=f"Simulation failed: {e}")
 
-    # Build response waypoints — convert joints rad→deg, position m→mm
+    # ----- Collision detection (skip if no obstacles) -----
+    collision_map: dict[int, list[dict]] = {}  # waypoint_index → collisions
+    loaded_obstacle_ids: list[str] = []
+
+    if request.obstacles:
+        try:
+            for obs in request.obstacles:
+                stl_path = f"/tmp/obstacles/{obs.obstacle_id}.stl"
+                _detector.load_obstacle(obs.obstacle_id, stl_path, obs.position, obs.rotation)
+                loaded_obstacle_ids.append(obs.obstacle_id)
+
+            joint_trajectory = [wp["joints"] for wp in raw_waypoints]
+            collision_results = _detector.check_trajectory_collisions(
+                request.robot_id, joint_trajectory
+            )
+            for result in collision_results:
+                collision_map[result["waypoint_index"]] = result["collisions"]
+        except FileNotFoundError as e:
+            logger.warning(f"Obstacle file not found, skipping collision check: {e}")
+        except Exception as e:
+            logger.warning(f"Collision detection failed, skipping: {e}")
+        finally:
+            for obs_id in loaded_obstacle_ids:
+                _detector.remove_obstacle(obs_id)
+
+    # ----- Build response waypoints -----
+    total_collisions = 0
     waypoints: list[TrajectoryWaypoint] = []
     for i, wp in enumerate(raw_waypoints):
         joints_deg = [math.degrees(j) for j in wp["joints"]]
         pos_mm = [c * MM_PER_M for c in wp["position"]]
+
+        wp_collisions = []
+        if i in collision_map:
+            for c in collision_map[i]:
+                wp_collisions.append(CollisionInfo(
+                    obstacle_id=c["obstacle_id"],
+                    link=f"Link{c['link_index']}",
+                    penetration_depth=c["penetration_depth"],
+                    contact_point=c["contact_point"],
+                ))
+            total_collisions += len(wp_collisions)
+
         waypoints.append(TrajectoryWaypoint(
             index=i,
             timestamp=wp["timestamp"],
             joints=joints_deg,
             tcp_pose=TCPPose(position=pos_mm, orientation=[1.0, 0.0, 0.0, 0.0]),
-            collisions=[],
+            collisions=wp_collisions,
         ))
 
     duration = raw_waypoints[-1]["timestamp"] if raw_waypoints else 0.0
@@ -257,9 +300,10 @@ async def simulate(request: SimulateRequest):
     stats = SimulationStats(
         total_waypoints=len(waypoints),
         duration_seconds=round(duration, 3),
-        collisions_detected=0,
+        collisions_detected=total_collisions,
         ik_failures=0,
         computation_time_ms=round(elapsed_ms, 1),
+        timed_out=timed_out,
     )
 
     return SimulateResponse(trajectory=waypoints, stats=stats)

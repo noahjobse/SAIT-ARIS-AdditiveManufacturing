@@ -30,6 +30,7 @@ class SimulationStats(BaseModel):
     collisions_detected: int
     ik_failures: int
     computation_time_ms: float
+    timed_out: bool = False
 
 
 class SimulateResponse(BaseModel):

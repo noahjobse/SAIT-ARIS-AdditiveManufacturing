@@ -1,5 +1,6 @@
 """Forward and inverse kinematics solver using PyBullet."""
 import logging
+from collections import OrderedDict
 
 import numpy as np
 import pybullet as p
@@ -8,6 +9,19 @@ from .exceptions import IKSolutionNotFoundError, InvalidJointAnglesError
 from .robot_loader import RobotLoader
 
 logger = logging.getLogger(__name__)
+
+IK_CACHE_MAX = 1000
+IK_CACHE_ROUND_DECIMALS = 4  # 0.1mm precision (positions in meters)
+
+
+def _ik_cache_key(
+    robot_id: str,
+    position: list[float],
+    orientation: list[float] | None,
+) -> tuple:
+    pos = tuple(round(v, IK_CACHE_ROUND_DECIMALS) for v in position)
+    ori = tuple(round(v, IK_CACHE_ROUND_DECIMALS) for v in orientation) if orientation else ()
+    return (robot_id, pos, ori)
 
 
 class KinematicsSolver:
@@ -21,6 +35,7 @@ class KinematicsSolver:
             headless: If True, run PyBullet without GUI
         """
         self.loader = RobotLoader(headless=headless)
+        self._ik_cache: OrderedDict[tuple, list[float]] = OrderedDict()
 
     def disconnect(self):
         """Disconnect from PyBullet."""
@@ -101,6 +116,12 @@ class KinematicsSolver:
         Raises:
             IKSolutionNotFoundError: If IK cannot find a solution
         """
+        # Check IK cache
+        cache_key = _ik_cache_key(robot_id, target_position, target_orientation)
+        if cache_key in self._ik_cache:
+            self._ik_cache.move_to_end(cache_key)
+            return {"joint_angles": list(self._ik_cache[cache_key])}
+
         if not self.loader.is_loaded(robot_id):
             self.loader.load_robot(robot_id)
 
@@ -169,9 +190,14 @@ class KinematicsSolver:
         if distance > 0.01:  # 1cm tolerance
             raise IKSolutionNotFoundError(robot_id, target_position)
 
-        return {
-            "joint_angles": list(joint_angles[:num_joints]),
-        }
+        result = list(joint_angles[:num_joints])
+
+        # Store in LRU cache
+        self._ik_cache[cache_key] = result
+        if len(self._ik_cache) > IK_CACHE_MAX:
+            self._ik_cache.popitem(last=False)
+
+        return {"joint_angles": result}
 
     def _validate_joint_limits(self, robot_id: str, joint_angles: list[float]):
         """Validate joint angles against joint limits."""
