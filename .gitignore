@@ -84,5 +84,10 @@ frontend/public/models/robots/**/*.STEP
 frontend/public/models/robots/**/*.zip
 frontend/public/models/robots/**/*_STEP_j/
 
+# === Local/System ===
+.npmrc
+docker
+.playwright-mcp/
+
 CLAUDE.md
 backend/blog_demo.py
