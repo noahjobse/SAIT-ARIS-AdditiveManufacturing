@@ -11,6 +11,7 @@ from .ast_nodes import (
     Procedure,
     Program,
     RobTarget,
+    ToolData,
 )
 
 
@@ -166,6 +167,17 @@ class RapidTransformer(Transformer):
 
     def joint_values(self, args):
         return [float(x) for x in args]
+
+    def tooldata(self, args):
+        robhold = args[0].value == "TRUE" if isinstance(args[0], Token) else bool(args[0])
+        tool_frame = args[1]  # (Position, Orientation) tuple from tool_frame rule
+        return ToolData(tcp_pos=tool_frame[0], tcp_rot=tool_frame[1], robhold=robhold)
+
+    def tool_frame(self, args):
+        return (args[0], args[1])  # (Position, Orientation)
+
+    def load_data(self, args):
+        return args  # Ignored for MVP — just consume the tokens
 
     def confdata(self, args): return args
     def extax(self, args): return [float(x) for x in args]

@@ -36,7 +36,7 @@ wobj: "\\WObj" ":=" IDENTIFIER
 // Types and values
 
 type: IDENTIFIER
-value: robtarget | jointtarget | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
+value: robtarget | jointtarget | tooldata | speeddata | zonedata | NUMBER | BOOLEAN | IDENTIFIER
 
 // "robtarget" is our primary coordinate type. Structured as:
 // [position, rotation, configuration, external_axes]
@@ -54,7 +54,15 @@ extax: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 jointtarget: "[" joint_values "," extax "]"
 joint_values: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 
-// Placeholders for other data types (simplified for MVP, we can expand on this later) 
+// "tooldata" defines a tool center point (TCP) relative to the robot flange.
+// Structured as: [robhold, [tcp_pos, tcp_rot], [mass, cog, aom, ix, iy, iz]]
+// We parse the full structure but only use robhold + TCP frame.
+
+tooldata: "[" BOOLEAN "," tool_frame "," load_data "]"
+tool_frame: "[" pos "," rot "]"
+load_data: "[" NUMBER "," pos "," rot "," NUMBER "," NUMBER "," NUMBER "]"
+
+// Placeholders for other data types (simplified for MVP, we can expand on this later)
 
 speeddata: "[" NUMBER "," NUMBER "," NUMBER "," NUMBER "]"
 zonedata: "[" BOOLEAN "," NUMBER "," NUMBER "," NUMBER "," NUMBER "," NUMBER "]"

@@ -23,6 +23,7 @@ from app.parser.ast_nodes import (
     Procedure,
     Program,
     RobTarget,
+    ToolData,
 )
 from app.schemas.simulate import (
     CollisionInfo,
@@ -150,11 +151,24 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
     )
 
 
+def _build_tooldata(td: dict) -> ToolData:
+    """Convert a tooldata dict to ToolData dataclass."""
+    tcp = td.get("tcp_pos", {})
+    rot = td.get("tcp_rot", {})
+    return ToolData(
+        tcp_pos=Position(x=tcp.get("x", 0), y=tcp.get("y", 0), z=tcp.get("z", 0)),
+        tcp_rot=Orientation(q1=rot.get("q1", 1), q2=rot.get("q2", 0), q3=rot.get("q3", 0), q4=rot.get("q4", 0)),
+        robhold=td.get("robhold", True),
+    )
+
+
 def _build_declaration(decl_dict: dict) -> Declaration | None:
     """Convert a declaration dict from parse.py _to_dict output to a Declaration dataclass."""
     value_raw = decl_dict.get("value")
     if isinstance(value_raw, dict):
-        if "pos" in value_raw or "trans" in value_raw:
+        if "tcp_pos" in value_raw:
+            value = _build_tooldata(value_raw)
+        elif "pos" in value_raw or "trans" in value_raw:
             value = _build_robtarget(value_raw)
         elif "robax" in value_raw:
             value = _build_jointtarget(value_raw)

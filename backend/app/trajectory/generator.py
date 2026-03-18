@@ -9,7 +9,7 @@ import time
 import numpy as np
 
 from app.kinematics.solver import KinematicsSolver
-from app.parser.ast_nodes import JointTarget, MoveCommand, Program, RobTarget
+from app.parser.ast_nodes import JointTarget, MoveCommand, Program, RobTarget, ToolData
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +69,10 @@ class TrajectoryGenerator:
 
         module = program.modules[0]
 
-        # Build variable lookup: name -> RobTarget or JointTarget
-        var_table: dict[str, RobTarget | JointTarget] = {}
+        # Build variable lookup: name -> RobTarget, JointTarget, or ToolData
+        var_table: dict[str, RobTarget | JointTarget | ToolData] = {}
         for decl in module.declarations:
-            if isinstance(decl.value, (RobTarget, JointTarget)):
+            if isinstance(decl.value, (RobTarget, JointTarget, ToolData)):
                 var_table[decl.name] = decl.value
 
         if not module.procedures:
@@ -137,6 +137,11 @@ class TrajectoryGenerator:
         end_pos_m = self._pos_to_meters(target.pos)
         orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
+        # Apply tool TCP offset — IK solves for flange, not tool tip
+        tool = self._resolve_tool(cmd.tool, var_table)
+        if tool:
+            end_pos_m = self._apply_tool_offset(end_pos_m, orientation, tool)
+
         # Determine start position (use FK if we have joints, else start at target)
         if current_joints is not None:
             fk = self.solver.forward_kinematics(robot_id, current_joints)
@@ -171,6 +176,11 @@ class TrajectoryGenerator:
         speed_mms = self._parse_speed(cmd.speed)
         end_pos_m = self._pos_to_meters(target.pos)
         orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
+
+        # Apply tool TCP offset
+        tool = self._resolve_tool(cmd.tool, var_table)
+        if tool:
+            end_pos_m = self._apply_tool_offset(end_pos_m, orientation, tool)
 
         # Solve IK at the target to get end joint angles
         end_joints = self.solver.inverse_kinematics(robot_id, end_pos_m, orientation, current_joints)["joint_angles"]
@@ -238,6 +248,7 @@ class TrajectoryGenerator:
             raise TrajectoryError("MoveC requires robtargets for both target and cir_point")
 
         speed_mms = self._parse_speed(cmd.speed)
+        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Three points defining the arc: start (current EE) → via → end
         if current_joints is not None:
@@ -248,7 +259,12 @@ class TrajectoryGenerator:
 
         p_via = np.array(self._pos_to_meters(cir.pos))
         p_end = np.array(self._pos_to_meters(target.pos))
-        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
+
+        # Apply tool TCP offset to all arc points
+        tool = self._resolve_tool(cmd.tool, var_table)
+        if tool:
+            p_via = np.array(self._apply_tool_offset(p_via.tolist(), orientation, tool))
+            p_end = np.array(self._apply_tool_offset(p_end.tolist(), orientation, tool))
 
         arc_points = self._arc_interpolate(p_start, p_via, p_end, speed_mms)
 
@@ -282,8 +298,9 @@ class TrajectoryGenerator:
         normal = normal / norm_len
 
         # Find circumcenter of the triangle p1, p2, p3
-        ax, ay = np.dot(v1, v1), np.dot(v1, v2)
-        bx, by = np.dot(v1, v2), np.dot(v2, v2)
+        ax = np.dot(v1, v1)
+        bx = np.dot(v1, v2)
+        by = np.dot(v2, v2)
         cx, cy = ax / 2, bx / 2  # RHS for the circumcenter system
         denom = ax * by - bx * bx
         if abs(denom) < 1e-12:
@@ -359,3 +376,56 @@ class TrajectoryGenerator:
     def _pos_to_meters(self, pos) -> list[float]:
         """Convert RAPID position (mm) to meters."""
         return [pos.x * MM_TO_M, pos.y * MM_TO_M, pos.z * MM_TO_M]
+
+    def _resolve_tool(self, tool_name: str, var_table: dict) -> ToolData | None:
+        """Look up a tool by name. Returns None for tool0 (no offset)."""
+        if tool_name == "tool0":
+            return None
+        tool = var_table.get(tool_name)
+        if isinstance(tool, ToolData):
+            return tool
+        return None
+
+    def _apply_tool_offset(
+        self, target_pos_m: list[float], target_ori_xyzw: list[float], tool: ToolData
+    ) -> list[float]:
+        """
+        Compute flange position from TCP target and tool offset.
+
+        The tool TCP offset is defined in the tool frame (rotates with end-effector).
+        flange_pos = target_pos - R(target_orientation) * tool_offset
+
+        Args:
+            target_pos_m: Desired TCP position in meters [x, y, z]
+            target_ori_xyzw: Target orientation as [qx, qy, qz, qw]
+            tool: ToolData with TCP offset in mm
+
+        Returns:
+            Flange position in meters [x, y, z]
+        """
+        # Tool offset in meters
+        tool_offset_m = np.array([
+            tool.tcp_pos.x * MM_TO_M,
+            tool.tcp_pos.y * MM_TO_M,
+            tool.tcp_pos.z * MM_TO_M,
+        ])
+
+        if np.linalg.norm(tool_offset_m) < 1e-9:
+            return target_pos_m
+
+        # Rotate tool offset by target orientation using quaternion rotation
+        # q * v * q_conjugate
+        qx, qy, qz, qw = target_ori_xyzw
+        q = np.array([qw, qx, qy, qz])  # scipy convention [w, x, y, z]
+
+        # Quaternion rotation: v' = q * v * q*
+        # Using Rodrigues-like formula for efficiency
+        u = q[1:4]  # vector part
+        s = q[0]     # scalar part
+        rotated = 2.0 * np.dot(u, tool_offset_m) * u \
+                  + (s * s - np.dot(u, u)) * tool_offset_m \
+                  + 2.0 * s * np.cross(u, tool_offset_m)
+
+        # Flange = TCP target - rotated tool offset
+        flange_pos = np.array(target_pos_m) - rotated
+        return flange_pos.tolist()
