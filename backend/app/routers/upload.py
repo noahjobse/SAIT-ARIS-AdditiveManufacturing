@@ -5,6 +5,7 @@ import json
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
+from app.obstacles.registry import ObstacleRecord, obstacle_registry
 from app.schemas.responses import BoundingBox, ObstacleUploadResponse, RapidUploadResponse
 from app.utils.file_handler import (
     generate_file_id,
@@ -118,9 +119,6 @@ async def upload_obstacle(
     # Generate unique obstacle ID
     obstacle_id = generate_file_id("obs")
 
-    # Save file
-    save_temp_file(obstacle_id, contents, ".stl")
-
     # Parse position/rotation (default to origin)
     try:
         pos = json.loads(position) if position else [0.0, 0.0, 0.0]
@@ -138,8 +136,16 @@ async def upload_obstacle(
             detail=f"Invalid position or rotation format: {str(e)}"
         )
 
-    # Placeholder bounds - real mesh analysis will compute this in Week 5-6
-    # For now, just return a dummy bounding box
+    # Register in obstacle registry
+    file_path = str(save_temp_file(obstacle_id, contents, ".stl"))
+    obstacle_registry.register(ObstacleRecord(
+        obstacle_id=obstacle_id,
+        filename=file.filename,
+        file_path=file_path,
+        position=pos,
+        rotation=rot,
+    ))
+
     return ObstacleUploadResponse(
         obstacle_id=obstacle_id,
         filename=file.filename,
