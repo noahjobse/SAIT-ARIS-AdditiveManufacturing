@@ -6,6 +6,8 @@ export type JointControls = {
     engine: Engine;
     scene: Scene;
     setJointAngle: (jointIndex: number, angleRad: number) => void;
+    setAngles?: (anglesDeg: number[]) => void;
+    getJointLimits?: () => { min: number; max: number }[] | undefined;
     dispose: () => void;
 };
 
@@ -166,6 +168,26 @@ export async function createRobotScene(canvas: HTMLCanvasElement, modelPath: str
                     joint.rotationQuaternion = restRotation[jointIndex].multiply(q);
                 };
 
+                const setAngles = (anglesDeg: number[]) => {
+                    anglesDeg.forEach((angleDeg, i) => {
+                        if (i < joints.length) {
+                            setJointAngle(i, angleDeg * (Math.PI / 180));
+                        }
+                    });
+                };
+
+                const getJointLimits = () => {
+                    // Default realistic limits for typical ABB 6-axis robots
+                    return [
+                        { min: -180, max: 180 }, // J1
+                        { min: -90, max: 150 },  // J2
+                        { min: -180, max: 75 },  // J3
+                        { min: -400, max: 400 }, // J4
+                        { min: -125, max: 120 }, // J5
+                        { min: -400, max: 400 }, // J6
+                    ];
+                };
+
                 const dispose = () => {
                     engine.stopRenderLoop();
                     window.removeEventListener("keydown", keydownHandler);
@@ -174,7 +196,7 @@ export async function createRobotScene(canvas: HTMLCanvasElement, modelPath: str
                     engine.dispose();
                 };
 
-                return { engine, scene, setJointAngle, dispose };
+                return { engine, scene, setJointAngle, setAngles, getJointLimits, dispose };
             }
         } catch (err) {
             console.error("Error loading robot model:", err);

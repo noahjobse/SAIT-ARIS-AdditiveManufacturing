@@ -1,8 +1,10 @@
+'use client'
+
 import { useState, useRef, useCallback } from "react";
 import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
-import Viewport3D from "./Viewport3D";
-import type { TabType } from "../App";
+import Viewport3D from "./babylon/Viewport3D";
+import type { TabType } from "@/app/page";
 import type { TrajectoryWaypoint } from "../types";
 import { robotIdFromPath } from "../types";
 

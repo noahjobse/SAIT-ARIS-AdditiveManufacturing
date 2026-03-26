@@ -1,5 +1,7 @@
-import type { TabType } from "../App";
-import { ROBOT_MODELS } from "../App";
+'use client'
+
+import type { TabType } from "@/app/page";
+import { ROBOT_MODELS } from "@/app/page";
 import SidePanelTabs from "./SidePanelTabs";
 
 type HeaderProps = {
