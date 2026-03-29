@@ -33,18 +33,18 @@ function JointJogPanel({ anglesDeg, setAnglesDeg, jointLimits }: JointJogPanelPr
     };
 
     return (
-        <div className='flex flex-col flex-1'>
+        <div className='flex flex-col flex-1 min-h-0'>
             <SidePanelHeader title="Joint Jogging" description="Slide the sliders to adjust joint angles." />
 
-            <div className='flex flex-col h-full justify-between '>
-                <div className="flex flex-col gap-2">
+            <div className='flex flex-col flex-1 min-h-0 justify-between'>
+                <div className="flex flex-col gap-2 min-h-0 overflow-y-auto py-2">
                     {/* All joints in separate container */}
                     {anglesDeg.map((deg, i) => {
                         const minDeg = jointLimits?.[i]?.min ?? -180;
                         const maxDeg = jointLimits?.[i]?.max ?? 180;
 
                         return (
-                        <div key={i} className="flex flex-1 flex-col py-2 px-3 bg-black/40 rounded-lg overflow-y-auto justify-center border border-white/10 shadow-lg hover:border-purple-500/40 shadow-white/5">
+                        <div key={i} className="flex flex-col py-2 px-3 bg-black/40 rounded-lg justify-center border border-white/10 shadow-lg hover:border-purple-500/40 shadow-white/5">
                             
                             {/* Joint Number + Editable Deg */}
                             <div className="flex justify-between items-center px-1">

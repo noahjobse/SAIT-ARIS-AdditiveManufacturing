@@ -3,8 +3,8 @@
 import React from "react";
 import JointJogPanel from "./JointJogPanel";
 import RapidPanel from "./RapidPanel";
-import type { TabType } from "@/app/page";
-import type { TrajectoryWaypoint } from "../types";
+import type { TabType } from "@/types";
+import type { TrajectoryWaypoint } from "@/types";
 
 type JointLimit = {
     min: number;
@@ -24,7 +24,7 @@ type SidePanelProps = {
 
 function SidePanel({ activeTab, robotId, anglesDeg, jointLimits, setAnglesDeg, onFileUploaded, onAddLog, onTrajectoryReady }: SidePanelProps) {
     return (
-        <div className="flex flex-col bg-linear-to-b from-gray-900 via-gray-950 via-85% to-black py-4 px-6 h-full ">
+        <div className="flex flex-col min-h-0 bg-linear-to-b from-gray-900 via-gray-950 via-85% to-black py-4 px-6 h-full overflow-y-auto">
             {activeTab === "rapid" ? (
                 <RapidPanel
                     robotId={robotId}
