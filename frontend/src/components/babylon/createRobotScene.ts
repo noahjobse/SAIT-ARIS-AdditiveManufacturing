@@ -1,4 +1,4 @@
-import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, MeshBuilder, ImportMeshAsync, Color3, TransformNode, Quaternion, Color4, StandardMaterial } from "@babylonjs/core";
+import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, MeshBuilder, ImportMeshAsync, Color3, TransformNode, Quaternion, Color4, StandardMaterial, SolidParticleSystem } from "@babylonjs/core";
 import { registerBuiltInLoaders } from "@babylonjs/loaders/dynamic";
 import { GridMaterial } from "@babylonjs/materials/grid";
 
@@ -50,6 +50,43 @@ function createGroundGrid(scene: Scene) {
         fallbackMat.specularColor = new Color3(0, 0, 0);
         ground.material = fallbackMat;
     }
+}
+
+function createStarfield(scene: Scene) {
+    const starCount = 800;
+    const spread = 40;
+
+    const starMesh = MeshBuilder.CreateIcoSphere("starModel", { radius: 0.02, subdivisions: 1 }, scene);
+    starMesh.isVisible = false;
+
+    const sps = new SolidParticleSystem("starfield", scene);
+    sps.addShape(starMesh, starCount);
+    const mesh = sps.buildMesh();
+    starMesh.dispose();
+
+    const starMat = new StandardMaterial("starMat", scene);
+    starMat.emissiveColor = new Color3(1, 1, 1);
+    starMat.disableLighting = true;
+    mesh.material = starMat;
+
+    sps.initParticles = () => {
+        for (let i = 0; i < sps.nbParticles; i++) {
+            const p = sps.particles[i];
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = spread * (0.5 + Math.random() * 0.5);
+            p.position.x = r * Math.sin(phi) * Math.cos(theta);
+            p.position.y = r * Math.sin(phi) * Math.sin(theta);
+            p.position.z = r * Math.cos(phi);
+            const s = 0.5 + Math.random() * 2.0;
+            p.scaling.setAll(s);
+        }
+    };
+
+    sps.initParticles();
+    sps.setParticles();
+    sps.isAlwaysVisible = true;
+    mesh.freezeWorldMatrix();
 }
 
 function extractBaseAndLinks(scene: Scene) {
@@ -129,6 +166,7 @@ export async function createRobotScene(canvas: HTMLCanvasElement, modelPath: str
     const { engine, scene } = createEngineAndScene(canvas);
     createCameraAndLight(scene, canvas);
     createGroundGrid(scene);
+    createStarfield(scene);
 
     engine.runRenderLoop(() => {
         scene.render();
