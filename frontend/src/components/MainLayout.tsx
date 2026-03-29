@@ -1,10 +1,11 @@
+'use client'
+
 import { useState, useRef, useCallback } from "react";
 import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
-import Viewport3D from "./Viewport3D";
-import type { TabType } from "../App";
-import type { TrajectoryWaypoint } from "../types";
-import { robotIdFromPath } from "../types";
+import Viewport3D from "./babylon/Viewport3D";
+import type { TabType, TrajectoryWaypoint } from "@/types";
+import { robotIdFromPath } from "@/types";
 
 type MainLayoutProps = {
     activeTab: TabType;
@@ -45,10 +46,38 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
 
     const robotId = robotIdFromPath(modelPath);
 
+    // ── Vertical resize (bottom panel height) ──
+    const [bottomHeight, setBottomHeight] = useState(110);
+    const columnRef = useRef<HTMLDivElement>(null);
+    const vDragging = useRef(false);
+
+    const handleVDrag = useCallback((e: MouseEvent) => {
+        if (!columnRef.current) return;
+        const rect = columnRef.current.getBoundingClientRect();
+        const fromBottom = rect.bottom - e.clientY;
+        setBottomHeight(Math.min(rect.height * 0.6, Math.max(80, fromBottom)));
+    }, []);
+
+    const stopVDrag = useCallback(() => {
+        vDragging.current = false;
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        window.removeEventListener('mousemove', handleVDrag);
+        window.removeEventListener('mouseup', stopVDrag);
+    }, [handleVDrag]);
+
+    const startVDrag = useCallback(() => {
+        vDragging.current = true;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'row-resize';
+        window.addEventListener('mousemove', handleVDrag);
+        window.addEventListener('mouseup', stopVDrag);
+    }, [handleVDrag, stopVDrag]);
+
     return (
         <div className="flex flex-row h-full w-full bg-black overflow-hidden ">
             {/* Side Panel */}
-            <div className="flex flex-col basis-3/11 border-r border-orange-500/50 h-full shadow-xl overflow-hidden">
+            <div className="flex flex-col basis-3/11 border-r border-orange-500/50 h-full shadow-xl overflow-y-auto">
                 <SidePanel
                     activeTab={activeTab}
                     robotId={robotId}
@@ -62,16 +91,23 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
             </div>
 
             {/* Viewport + Bottom Panel */}
-            <div className="flex-1 flex flex-col relative overflow-hidden h-full min-h-0">
+            <div ref={columnRef} className="flex-1 flex flex-col relative overflow-hidden h-full min-h-0">
 
                 <div className="flex-1 relative min-h-0">
                     <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath} onJointLimitsExtracted={handleJointLimitsExtracted} />
                 </div>
 
+                {/* Vertical drag handle */}
+                <div
+                    onMouseDown={startVDrag}
+                    className="h-1.5 cursor-row-resize bg-gray-700 hover:bg-purple-500 active:bg-purple-400 transition-colors shrink-0 border-t border-orange-500/50"
+                />
+
                 <BottomPanel
                     lastLog={lastLog}
                     trajectory={trajectory}
                     onJointAnglesUpdate={setAnglesDeg}
+                    height={bottomHeight}
                 />
             </div>
 

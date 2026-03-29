@@ -5,10 +5,11 @@ import type { JointControls } from "./createRobotScene";
 
 type Viewport3DProps = {
   modelPath: string | null;
-  onJointControlsReady?: (controls: JointControls) => void;
+  anglesDeg: number[];
+  onJointLimitsExtracted?: (limits: { min: number; max: number }[] | undefined) => void;
 };
 
-export default function Viewport3D({ modelPath, onJointControlsReady }: Viewport3DProps) {
+export default function Viewport3D({ modelPath, anglesDeg, onJointLimitsExtracted }: Viewport3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const controlsRef = useRef<JointControls | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,14 +32,19 @@ export default function Viewport3D({ modelPath, onJointControlsReady }: Viewport
       const { createRobotScene } = await import("./createRobotScene");
       const controls = await createRobotScene(canvasRef.current, modelPath);
       controlsRef.current = controls;
-      onJointControlsReady?.(controls);
+      
+      if (controls.getJointLimits) {
+        onJointLimitsExtracted?.(controls.getJointLimits());
+      } else {
+        onJointLimitsExtracted?.(undefined);
+      }
     } catch (err) {
       console.error("Failed to initialize Babylon.js scene:", err);
       setError(err instanceof Error ? err.message : "Failed to load 3D scene");
     } finally {
       setLoading(false);
     }
-  }, [modelPath, onJointControlsReady]);
+  }, [modelPath, onJointLimitsExtracted]);
 
   useEffect(() => {
     initScene();
@@ -50,6 +56,13 @@ export default function Viewport3D({ modelPath, onJointControlsReady }: Viewport
       }
     };
   }, [initScene]);
+
+  // React to joint angle changes and push them to the imperative Babylon scene
+  useEffect(() => {
+    if (controlsRef.current && controlsRef.current.setAngles) {
+      controlsRef.current.setAngles(anglesDeg);
+    }
+  }, [anglesDeg]);
 
   return (
     <div className="relative w-full h-full">

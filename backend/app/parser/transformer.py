@@ -111,7 +111,7 @@ class RapidTransformer(Transformer):
         tool = args[3]
         wobj = args[4] if len(args) > 4 else None
 
-        # Convert lark tokens into Python strings (e.g. Token('p10') -> 'p10')
+        # converts lark tokens into Python strings (e.g. Token('p10') -> 'p10')
         if isinstance(target, Token):
             target = str(target)
         if isinstance(speed, Token):
