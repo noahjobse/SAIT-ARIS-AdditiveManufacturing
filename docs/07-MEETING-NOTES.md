@@ -1,6 +1,6 @@
 # Meeting Notes
 
-**Project:** ABB Online Simulation Platform
+**Project:** ArmStudio
 
 ---
 
@@ -55,7 +55,7 @@ Full breakdown in `docs/08-SPRINT-PLAN-W5-W8.md`.
 
 ### Action Items
 
-- [ ] **Noah:** Build `/api/parse`, `TrajectoryGenerator`, `/api/simulate`, obstacle CRUD (Week 5)
+- [x] **Noah:** Build `/api/parse`, `TrajectoryGenerator`, `/api/simulate`, obstacle CRUD (Week 5)
 - [ ] **Umaya:** Wire `RapidPanel` → `/api/simulate`, build `PlaybackControls` (Week 5-6)
 - [ ] **Jason:** Parser test coverage review, edge case additions
 - [ ] **Dylane:** Return Week 6 — obstacle UI + gizmo + `TimelineScrubber`
@@ -121,9 +121,9 @@ Integration of parser (jason) into the noah backend is a pending action item bef
 
 ### Action Items
 
-- [ ] **All:** Freeze `docs/contract/openapi.json` before C# development begins
-- [ ] **Jason:** Integrate RAPID parser from `jason` branch into `noah` backend upload endpoint
-- [ ] **Noah:** Complete trajectory generator (`app/kinematics/trajectory.py`) to unblock `/api/simulate`
+- [x] **All:** Freeze `docs/contract/openapi.json` before C# development begins — committed to repo
+- [x] **Jason:** Integrate RAPID parser from `jason` branch into `noah` backend upload endpoint — merged via PR #4
+- [x] **Noah:** Complete trajectory generator (`app/kinematics/trajectory.py`) to unblock `/api/simulate`
 - [ ] **Team:** MVP sign-off by Week 8 per roadmap
 
 ---

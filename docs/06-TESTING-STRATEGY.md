@@ -22,7 +22,8 @@
 ## Tools
 
 **Backend:** pytest 9.0.2, pytest-asyncio, pytest-cov, pytest-mock
-**Frontend:** Vitest 4.0.17, @testing-library/react, @testing-library/jest-dom, jsdom
+**Frontend:** Frontend testing setup needs to be configured for Next.js (Vitest or Jest with next/jest transform). @testing-library/react and @testing-library/jest-dom are the intended assertion libraries once configured.
+**E2E:** Playwright (`e2e/demo.py`) — smoke tests covering the full upload-simulate-playback workflow.
 
 ## Unit Test Areas
 
@@ -42,8 +43,8 @@
 - `test_timestamps_ascending`: all waypoint timestamps strictly ascending, starting at 0.0
 - `test_joints_within_limits`: all joint values stay within URDF joint limits for all waypoints
 
-**Frontend Components** (`src/components/*.test.tsx`): Robot selector, upload buttons, playback controls, timeline scrubber, collision alerts, loading spinner.
-> **Note (Week 5):** `PlaybackControls` and `RapidPanel` tests cannot be written until their stub implementations are replaced with real API-wired versions. Blocked until Umaya completes wiring (Week 6).
+**Frontend Components** (`frontend/src/components/*.test.tsx`): Robot selector, upload buttons, playback controls, timeline scrubber, collision alerts, loading spinner.
+> **Note:** Frontend tests require a working Next.js-compatible test runner setup before component tests can run. `PlaybackControls` and `RapidPanel` tests should be written once the test infrastructure is configured.
 
 ## Integration Tests
 
@@ -82,4 +83,4 @@ GitHub Actions on push/PR: backend (`pytest --cov`), frontend (`pnpm test --cove
 
 ---
 
-**Last Updated:** 2026-03-03
+**Last Updated:** 2026-03-28

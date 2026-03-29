@@ -1,6 +1,6 @@
-# Project Specification
+# ArmStudio — ABB Online Simulation Platform
 
-**Project:** ABB Online Simulation Platform
+**Project:** ArmStudio — ABB Online Simulation Platform
 **Version:** 2.0
 **Date:** 2026-02-12
 **Team:** SAIT Research Applications x ARIS Robotics
@@ -24,8 +24,11 @@ Browser-based "Digital Twin" for **ABB IRB 4600, 2600, and 6700** industrial rob
 | **Data Model** | File-based (no database for MVP) | Server-side trajectory computation |
 | **Parser** | Lark (Python parser generator) | RAPID grammar -> AST transformation |
 | **Robot Models** | GLB (frontend) + URDF (backend) | Dual format for rendering + physics |
-| **Build Tools** | Vite 7 (frontend), pip (backend) | Fast development and production builds |
+| **Build Tools** | Next.js 16 (frontend), pip (backend) | Fast development and production builds |
 | **Styling** | Tailwind CSS 4 | Utility-first responsive design |
+| **HTTP Client** | openapi-fetch / fetch | Type-safe API requests from frontend to backend |
+| **Auth & DB** | Supabase | Authentication, user persistence, and database (SaaS expansion) |
+| **Payments** | Stripe | Subscription billing for SaaS tier (SaaS expansion) |
 
 ## Functional Requirements
 
@@ -90,4 +93,4 @@ Browser-based "Digital Twin" for **ABB IRB 4600, 2600, and 6700** industrial rob
 
 ---
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-03-28
