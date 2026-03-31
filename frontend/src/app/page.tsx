@@ -23,7 +23,10 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen w-screen bg-black overflow-y-auto">
+    <main
+      className="flex flex-col w-full bg-black overflow-hidden"
+      style={{ height: 'calc(100vh - var(--mrb-height, 0px))' }}
+    >
       <Header 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
