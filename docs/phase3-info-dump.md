@@ -240,7 +240,7 @@ Home (page) → composes Viewport3D + control panels
 ## Part E: Shell Scripts
 
 ### Scripts
-1. **`start-dev.sh`** — Checks prerequisites (Python 3.11+, Node 20+, pnpm), auto-installs dependencies on first run, then runs backend (FastAPI) and frontend (Next.js) concurrently with color-coded output and graceful shutdown. Supports `--check` flag for prereq validation only.
+1. **`start.sh`** — Checks prerequisites (Python 3.11+, Node 20+, pnpm), auto-installs dependencies on first run, then runs backend (FastAPI) and frontend (Next.js) concurrently with color-coded output and graceful shutdown. Supports `--check` flag for prereq validation only.
 2. **`demo.sh`** — Launches Docker environment and runs Playwright e2e demo
 3. **`scripts/deploy.sh`** — Preview and production deployment automation (Docker build, lint, test, smoke test)
 4. **`scripts/seed-scenarios.sh`** — Seeds test scenarios by uploading sample RAPID programs to the running backend API

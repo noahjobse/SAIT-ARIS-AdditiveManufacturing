@@ -38,7 +38,7 @@ echo "Checking API health..."
 HEALTH=$(curl -s -o /dev/null -w "%{http_code}" "$API_BASE/health" 2>/dev/null || echo "000")
 if [ "$HEALTH" != "200" ]; then
     echo -e "${RED}ERROR:${NC} API not reachable at $API_BASE (HTTP $HEALTH)"
-    echo "Start the backend first: ./start-dev.sh"
+    echo "Start the backend first: ./start.sh"
     exit 1
 fi
 log_ok "API is healthy"

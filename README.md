@@ -25,9 +25,9 @@ This platform allows users to:
 ## Technical Architecture
 
 **Frontend:**
-- **React + TypeScript** - UI framework and type safety
+- **Next.js 16 + React + TypeScript** - UI framework and type safety
 - **Babylon.js** - WebGL/WebGPU 3D rendering engine
-- **Vite** - Fast build tool and dev server
+- **Tailwind CSS 4** - Utility-first styling
 
 **Backend:**
 - **FastAPI** - Modern Python web framework
@@ -42,7 +42,7 @@ This platform allows users to:
 5. Backend returns trajectory data (JSON)
 6. Frontend animates robot in Babylon.js 3D scene
 
-See [docs/architecture/system-design.md](docs/architecture/system-design.md) for details.
+See [docs/02-ARCHITECTURE.md](docs/02-ARCHITECTURE.md) for details.
 
 ---
 
@@ -99,7 +99,14 @@ pnpm install
 
 ### Development
 
-**Option 1: Manual (Two Terminals)**
+**Option 1: Start Script (Recommended)**
+
+```bash
+./start.sh
+# Auto-installs dependencies on first run, starts both services
+```
+
+**Option 2: Manual (Two Terminals)**
 
 ```bash
 # Terminal 1: Backend
@@ -112,14 +119,14 @@ cd frontend
 pnpm dev
 ```
 
-**Option 2: Docker**
+**Option 3: Docker**
 
 ```bash
 docker-compose up
 ```
 
 **Access:**
-- Frontend: http://localhost:5173
+- Frontend: http://localhost:3000
 - Backend API: http://localhost:8000/docs (Swagger UI)
 
 ---
@@ -127,16 +134,14 @@ docker-compose up
 ## Project Structure
 
 ```
-frontend/        - React + Babylon.js visualization layer
+frontend/        - Next.js + React + Babylon.js visualization layer
 backend/         - FastAPI + PyBullet simulation engine
 models/          - 3D robot models (GLB) + obstacle STLs
   robots/        - ABB IRB 4600/2600/6700 models + metadata
   obstacles/     - User-uploaded STL/OBJ obstacles
-docs/            - Architecture, API specs, research notes
-  architecture/  - System design, API specification
-  guides/        - Development setup, deployment
-  roadmap/       - 11-week development plan
-  team/          - Team structure and roles
+docs/            - Numbered docs (spec, architecture, API, roadmap, sprints)
+  contract/      - OpenAPI contract (openapi.json)
+  diagrams/      - SVG sequence diagrams
 scripts/         - Development utilities (setup, conversion tools)
 .github/         - CI/CD workflows
 ```
@@ -148,7 +153,7 @@ scripts/         - Development utilities (setup, conversion tools)
 **Commitment:** Focus on **Student View MVP** (Weeks 1-8) with high polish and reliability.
 **Stretch Goals:** Engineer View and Production Readiness as Phase 2 (Weeks 9-11) if time permits.
 
-See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete scope and success criteria.
+See **[Project Specification](docs/01-PROJECT-SPECIFICATION.md)** for complete scope and success criteria.
 
 ### 11-Week Staged Roadmap
 
@@ -170,40 +175,31 @@ See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete s
 
 ## Documentation
 
-### 📍 **[START HERE - Documentation Hub](docs/START_HERE.md)** ⭐
+### 📍 **[Documentation Hub](docs/README.md)** ⭐
 
-**New to the project?** The Documentation Hub is your single entry point for all project documentation, organized by role and task.
-
-**Quick links from the hub:**
-- **By Role:** Frontend dev, Backend dev, QA/PM guides
-- **Sprint Plans:** Week-by-week detailed task breakdowns
-- **Architecture:** System design and API specs
-- **Getting Help:** Slack channels, daily standups, troubleshooting
+**New to the project?** The Documentation Hub is your single entry point for all project documentation.
 
 ---
 
 ### Core Documents
 
 #### Project Overview
-- **[Project Specification](docs/PROJECT_SPECIFICATION.md)** - Complete MVP requirements (FR-1 to FR-7)
+- **[Project Specification](docs/01-PROJECT-SPECIFICATION.md)** - Complete MVP requirements (FR-1 to FR-12)
 - **[CLAUDE.md](CLAUDE.md)** - Development commands and project instructions
 
 #### Architecture & Design
-- **[System Architecture](docs/architecture/system-design.md)** - Full pipeline workflow and component design
-- **[API Specification](docs/architecture/api-specification.md)** - REST endpoints and schemas
+- **[System Architecture](docs/02-ARCHITECTURE.md)** - Full pipeline workflow and component design
+- **[API Specification](docs/03-API-SPECIFICATION.md)** - REST endpoints and schemas
+- **[OpenAPI Contract](docs/contract/openapi.json)** - Source of truth for frontend/backend boundary
 
 #### Planning & Roadmap
-- **[11-Week Roadmap](docs/roadmap/11-week-plan.md)** - High-level phase overview
-- **[Implementation Timeline](docs/roadmap/implementation-timeline.md)** - Person-by-person breakdown
-- **[Task Assignments](docs/team/task-assignments.md)** - Current task assignments
+- **[Roadmap](docs/04-ROADMAP.md)** - 11-week plan with phase overview
+- **[Team Assignments](docs/05-TEAM-ASSIGNMENTS.md)** - Roles and phase-by-phase breakdown
+- **[Testing Strategy](docs/06-TESTING-STRATEGY.md)** - Test pyramid and coverage targets
 
-#### Sprint Plans (Detailed 2-Week Plans)
-- **[Week 1-2 Sprint Plan](docs/roadmap/week-1-2-sprint-plan.md)** - Foundation (3D scene, robot loading)
-- **[Week 3-4 Sprint Plan](docs/roadmap/week-3-4-sprint-plan.md)** - Parser & kinematics
-- **[Week 5-6 Sprint Plan](docs/roadmap/week-5-6-sprint-plan.md)** - Simulation pipeline
-- **[Week 7-8 Sprint Plan](docs/roadmap/week-7-8-sprint-plan.md)** - MVP launch ⭐
-- **[Week 9-10 Sprint Plan](docs/roadmap/week-9-10-sprint-plan.md)** - Stretch goals
-- **[Week 11 Finalization](docs/roadmap/week-11-finalization.md)** - Handoff & presentation
+#### Sprint Plans
+- **[Sprint Plan W5–W8](docs/08-SPRINT-PLAN-W5-W8.md)** - Weeks 5-8 detailed plan
+- **[Sprint Plan W7–W11](docs/09-SPRINT-PLAN-W7-W11.md)** - Weeks 7-11 detailed plan
 
 ---
 
@@ -211,7 +207,7 @@ See **[PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md)** for complete s
 
 **SAIT Research Applications - ARIS Robotics Partnership**
 
-See [docs/team/README.md](docs/team/README.md) for current team structure and roles.
+See [docs/05-TEAM-ASSIGNMENTS.md](docs/05-TEAM-ASSIGNMENTS.md) for current team structure and roles.
 
 **Previous Work:** This project builds on experience from the SAIT-ARIS Additive Manufacturing project. See `archive-20260129-3dp-project/` for historical 3D printing robot work (local archive, not tracked in git).
 
@@ -225,7 +221,7 @@ See [docs/team/README.md](docs/team/README.md) for current team structure and ro
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-See [docs/guides/contributing.md](docs/guides/contributing.md) for detailed guidelines.
+See [CLAUDE.md](CLAUDE.md) for development workflow and coding guidelines.
 
 ---
 
