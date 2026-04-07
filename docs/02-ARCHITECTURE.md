@@ -71,7 +71,6 @@ src/types.ts                    (centralized shared types)
 **State Management:** React `useState` + `useContext` only (no Redux for MVP). Three global states: `currentRobot`, `trajectory`, `playbackState`.
 
 **Legacy directories (do not use for new work):**
-- `demo-frontend/` — frozen Vite app kept for e2e reference; not actively developed
 - `_reference/` — old Vite components pending deletion after team review
 
 **Babylon.js:** Single scene, ArcRotateCamera, HemisphericLight, ground plane + grid. One robot mesh (skeleton-animated), multiple obstacle meshes. No shadows/post-processing for MVP.

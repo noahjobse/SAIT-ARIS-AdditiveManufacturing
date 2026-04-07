@@ -31,7 +31,6 @@
 - Next.js 16 scaffold with Babylon.js verified (GLB loading + joint control)
 - Vite components moved to `_reference/` for porting
 - Lint and build passing
-- `demo-frontend/` frozen Vite app for Playwright e2e demo
 
 ---
 
@@ -58,9 +57,6 @@
 |---|------|
 | M8 | Production Next.js Dockerfile (multi-stage build) |
 | M9 | New `docker-compose.yml` — 2 services, networking, health checks |
-| M10 | Update `docker-compose.demo.yml` to point at Next.js |
-| M11 | Update `e2e/demo.py` — new port, new UI selectors |
-| M12 | Delete root Dockerfile, `demo-frontend/`, old compose |
 
 ### Frontend — Code Editor
 | # | Task |
@@ -169,7 +165,7 @@
 | Owner | Tasks |
 |-------|-------|
 | **Noah** | D1: Vercel deploy. D2: Render deploy. D3: CI/CD pipeline. |
-| **Jason** | M10: Update demo compose. M11: Update e2e demo. M12: Cleanup old files. |
+| **Jason** | L1: Landing page. |
 | **Umaya** | D4: ARIS handoff docs. |
 | **Dylane** | D5: Capstone poster. |
 
