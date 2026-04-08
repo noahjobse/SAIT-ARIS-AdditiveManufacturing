@@ -16,13 +16,13 @@ class Orientation:
 
 @dataclass
 class RobTarget:
-    pos: Position
-    rot: Orientation
+    position: Position
+    orientation: Orientation
 
 @dataclass
 class JointTarget:
-    robax: list[float]
-    extax: list[float]
+    robot_axes: list[float]
+    external_axes: list[float]
 
 @dataclass
 class ToolData:
@@ -42,14 +42,40 @@ class MoveCommand:
     speed: str | list[float]
     zone: str | list[bool | float]
     tool: str
-    wobj: str | None = None
-    cir_point: str | RobTarget | JointTarget | None = None
+    work_object: str | None = None
+    circular_point: str | RobTarget | JointTarget | None = None
     line_number: int = 0  # Just for error reporting
+
+@dataclass
+class Expression:
+    tokens: list[str | float | bool]
+
+@dataclass
+class IfStatement:
+    condition: Expression
+    true_branch: list["Statement"]
+    elif_branches: list[tuple[Expression, list["Statement"]]] = field(default_factory=list)
+    false_branch: list["Statement"] = field(default_factory=list)
+
+@dataclass
+class ForStatement:
+    var_name: str
+    start: Expression
+    end: Expression
+    step: Expression | None
+    body: list["Statement"]
+
+@dataclass
+class WhileStatement:
+    condition: Expression
+    body: list["Statement"]
+
+Statement = MoveCommand | IfStatement | ForStatement | WhileStatement
 
 @dataclass
 class Procedure:
     name: str
-    commands: list[MoveCommand] = field(default_factory=list)
+    commands: list[Statement] = field(default_factory=list)
     params: list[str] = field(default_factory=list)
 
 @dataclass
