@@ -1,6 +1,6 @@
-# Architecture & Design Decisions
+# ArmStudio — Architecture & Design Decisions
 
-**Project:** ABB Online Simulation Platform
+**Project:** ArmStudio — ABB Online Simulation Platform
 **Version:** 2.0
 **Date:** 2026-02-12
 
@@ -46,28 +46,33 @@ Data Layer (File-based, no database)
 
 ## Frontend Architecture
 
+The frontend uses the **Next.js App Router** (Next.js 16). Global state is lifted into `src/app/page.tsx` and passed down via props.
+
 ```
-App
-+-- Header
-|   +-- Robot selector dropdown (IRB 4600 / 2600 / 6700)
-|   +-- Upload RAPID button
-|   +-- Upload Obstacle button
-+-- MainLayout (split pane - 70/30)
-|   +-- Viewport3D (Babylon.js canvas - 70%)
-|   |   +-- Loads robot GLB from /api/robots/{id}/model
-|   |   +-- Renders obstacle STL meshes
-|   |   +-- Animates through trajectory waypoints
-|   |   +-- Highlights collisions (red overlay)
-|   +-- SidePanel (30%)
-|       +-- RapidEditor (code textarea)
-|       +-- SimulationControls (play/pause/stop/speed/step)
-|       +-- StatusPanel (errors, warnings, collision alerts)
-+-- TimelineScrubber (bottom bar)
-    +-- Seek slider (0 to trajectory.length)
-    +-- Current timestamp display
+src/app/layout.tsx              (RootLayout — font loading, global metadata)
+src/app/page.tsx                (Home — lifts global state: robot, trajectory, playback)
+src/app/globals.css
+src/components/Header.tsx       (robot selector, upload buttons)
+src/components/MainLayout.tsx   (split pane 70/30)
+src/components/SidePanel.tsx    (30% right panel container)
+src/components/SidePanelTabs.tsx (tab switcher: RAPID / Jog)
+src/components/RapidPanel.tsx   (RAPID code textarea + run button)
+src/components/JointJogPanel.tsx (manual joint angle controls)
+src/components/BottomPanel.tsx  (resizable, horizontal split)
+src/components/PlaybackControls.tsx (play/pause/stop/speed/step)
+src/components/StatusPanel.tsx  (errors, warnings, collision alerts)
+src/components/babylon/Viewport3D.tsx        (Babylon.js canvas, 70%)
+src/components/babylon/createRobotScene.ts   (starfield, grid, robot loading)
+src/components/ui/PrimaryButton.tsx
+src/components/ui/SidePanelHeader.tsx
+src/types.ts                    (centralized shared types)
 ```
 
 **State Management:** React `useState` + `useContext` only (no Redux for MVP). Three global states: `currentRobot`, `trajectory`, `playbackState`.
+
+**Legacy directories (do not use for new work):**
+- `demo-frontend/` — frozen Vite app kept for e2e reference; not actively developed
+- `_reference/` — old Vite components pending deletion after team review
 
 **Babylon.js:** Single scene, ArcRotateCamera, HemisphericLight, ground plane + grid. One robot mesh (skeleton-animated), multiple obstacle meshes. No shadows/post-processing for MVP.
 
@@ -121,11 +126,11 @@ Noah creates 3 sets of configuration files; the single controller consumes them 
 |-------|-----------|---------|---------|
 | **Frontend** | React | 19.2.4 | UI components |
 | | TypeScript | 5.9.3 | Type safety |
-| | Vite | 7.3.1 | Dev server + bundler |
+| | Next.js | 16 | App Router, dev server + bundler |
 | | Babylon.js | 8.46.2 | WebGL 3D visualization |
-| | axios | 1.13.4 | API requests |
+| | openapi-fetch | — | Type-safe API requests |
 | | Tailwind CSS | 4.1.18 | Utility-first CSS |
-| | Vitest | 4.0.17 | Unit tests |
+| | Unit tests | TBD | — |
 | | ESLint | 9.39.2 | Code quality |
 | **Backend** | FastAPI | 0.128.0 | Web framework |
 | | Uvicorn | 0.40.0 | ASGI server |
@@ -153,7 +158,7 @@ Noah creates 3 sets of configuration files; the single controller consumes them 
 
 ## Deployment
 
-- **Development:** Docker Compose (backend :8000, frontend :5173, Vite proxy `/api/*`)
+- **Development:** Docker Compose (backend :8000, frontend :3000, Next.js dev server proxies `/api/*`)
 - **Production:** FastAPI on Uvicorn+Gunicorn, static frontend via Nginx/Vercel, Docker on cloud VM
 
 ---

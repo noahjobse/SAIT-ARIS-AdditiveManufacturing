@@ -67,9 +67,11 @@ pytest tests/test_kinematics.py tests/test_robot_loader.py tests/test_kinematics
 pytest tests/test_kinematics.py::TestForwardKinematics::test_fk_zero_position -v
 ```
 
-## Adding New Robots
+## Supported Robots
 
-To add support for IRB 2600 or IRB 6700:
+IRB 4600, IRB 2600, and IRB 6700 are all implemented and supported. Each robot has a URDF file and config in `models/robots/{robot_id}/`.
+
+To add support for an additional robot model:
 
 1. Create URDF file: `models/robots/{robot_id}/{robot_id}.urdf`
 2. Create config file: `models/robots/{robot_id}/config.json`
@@ -103,12 +105,16 @@ Check `config.json` joint limits match URDF `<limit>` tags.
 - IK: ~5-20ms per call (depends on solver iterations)
 - URDF loading: ~50ms (cached after first load)
 
+### IK LRU Cache
+
+An LRU cache (1000 entries) has been added to the IK solver. Cache keys are derived from the target position rounded to the nearest 0.1mm, so repeated or near-identical IK queries are served from cache rather than re-solved by PyBullet. This significantly reduces latency for trajectory playback that revisits similar poses.
+
 ## Integration with Trajectory Generator
 
-This module is designed to be used by Jason's trajectory generator (Weeks 5-6):
+This module is used by Noah's trajectory generator (built in Weeks 5-6):
 
 ```python
-# Jason's trajectory generator will use IK like this:
+# The trajectory generator uses IK like this:
 from app.kinematics.solver import KinematicsSolver
 
 solver = KinematicsSolver()

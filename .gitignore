@@ -91,3 +91,5 @@ docker
 
 CLAUDE.md
 backend/blog_demo.py
+docs/uml-diagrams.html
+docs/phase3-info-dump.md

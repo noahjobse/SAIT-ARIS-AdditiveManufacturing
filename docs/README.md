@@ -1,4 +1,4 @@
-# ABB Online Simulation Platform - Documentation
+# ArmStudio — ABB Online Simulation Platform — Documentation
 
 **Version:** 2.0
 **Date:** 2026-02-12
@@ -16,18 +16,28 @@
 4. **[Roadmap](04-ROADMAP.md)** - 11-week plan, 6 sprint summaries with deliverables and dependencies
 5. **[Team Assignments](05-TEAM-ASSIGNMENTS.md)** - Roles, phase-by-phase breakdown, integration dependencies
 6. **[Testing Strategy](06-TESTING-STRATEGY.md)** - Test pyramid, coverage targets, tools, test areas, CI/CD
+7. **[Meeting Notes](07-MEETING-NOTES.md)** - Running log of team meetings and decisions
+8. **[Sprint Plan W5–W8](08-SPRINT-PLAN-W5-W8.md)** - Detailed sprint plan for weeks 5 through 8
+9. **[Sprint Plan W7–W11](09-SPRINT-PLAN-W7-W11.md)** - Detailed sprint plan for weeks 7 through 11
 
 ### Additional Resources
 
-- **[MONODOC.md](MONODOC.md)** - Single-page version of all documentation (749 lines)
+- **[kinematics-setup.md](kinematics-setup.md)** - PyBullet kinematics setup and configuration guide
+- **[phase3-info-dump.md](phase3-info-dump.md)** - Phase 3 context, decisions, and reference notes
+- **[uml-diagrams.html](uml-diagrams.html)** - UML diagram viewer (open in browser)
+- **[contract/openapi.json](contract/openapi.json)** - OpenAPI contract (source of truth for frontend/backend boundary)
+- **[diagrams/](diagrams/)** - 4 SVG sequence diagrams:
+  - `end-to-end-flow.svg`
+  - `obstacle-management.svg`
+  - `playback-controls.svg`
+  - `rapid-upload-parse.svg`
 - **[research/](research/)** - Technical references and research materials
 
 ---
 
 ## Document Summary
 
-**Total Pages:** 6 core documents + 1 monodoc
-**Total Lines:** ~750 (88% reduction from original 6428 lines)
+**Total Documents:** 14 files (9 core docs + 5 supplementary)
 **Content:** 100% of important data preserved
 
 ### What's Included
@@ -48,16 +58,6 @@
 ✅ MVP sign-off acceptance criteria
 ✅ Risk management, performance targets, security considerations
 
-### What Was Removed
-
-❌ Redundant boilerplate (Definition of Done repeated 6x, Communication repeated 6x)
-❌ Navigation links (useless in split docs)
-❌ Empty templates (retrospectives, presentation outlines)
-❌ Granular checkbox tasks (hundreds of `- [ ]` items)
-❌ Duplicate roadmap views (kept sprint summaries only)
-❌ Learning resource links (external docs)
-❌ Change logs and version footers
-
 ---
 
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-03-28

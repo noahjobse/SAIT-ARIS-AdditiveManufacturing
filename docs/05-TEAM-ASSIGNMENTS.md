@@ -1,6 +1,6 @@
 # Team Assignments
 
-**Project:** ABB Online Simulation Platform
+**Project:** ArmStudio
 **Version:** 2.0
 **Date:** 2026-02-12
 
@@ -36,19 +36,19 @@
 |--------|-------------|
 | **Dylane** | *(Week 5: unavailable)* Week 6+: obstacle STL loading in Babylon.js, transform gizmo, animation controller, collision highlighting (red material) |
 | **Umaya** | RapidPanel → `POST /api/simulate` wiring, `PlaybackControls` with real trajectory data (frontend-driven), collision visualization, basic timeline scrubber |
-| **Jason** | ✅ Lark grammar + AST transformer (complete, merged PR #4), parser test coverage review, additional edge case tests, parser module documentation |
-| **Noah (BE)** | ✅ FK/IK solvers (complete), ✅ Collision detector (complete) — **Week 5:** `/api/parse` wiring, `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data), IK LRU cache (1000 entries), `/api/simulate` endpoint, obstacle CRUD (`POST/GET/DELETE /api/obstacles`) |
-| **Noah (QA)** | FK/IK + collision tests ✅, trajectory generator unit tests, `/api/simulate` integration tests, performance benchmark (100-waypoint < 5s) |
+| **Jason** | ✅ Lark grammar + AST transformer (complete, merged PR #4), ✅ parser integrated into backend upload endpoint, parser test coverage review, additional edge case tests, parser module documentation |
+| **Noah (BE)** | ✅ FK/IK solvers (complete), ✅ Collision detector (complete), ✅ `/api/parse` endpoint wired, ✅ `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data), ✅ `/api/simulate` endpoint, IK LRU cache (1000 entries), obstacle CRUD (`POST/GET/DELETE /api/obstacles`) |
+| **Noah (QA)** | ✅ FK/IK + collision tests, ✅ trajectory generator unit tests, ✅ `/api/simulate` integration tests, performance benchmark (100-waypoint < 5s) |
 
-### Phase 3 (Weeks 7-8): Student MVP
+### Phase 3 (Weeks 7-8): Student MVP ✅ Complete
 
 | Person | Deliverables |
 |--------|-------------|
-| **Dylane** | TimelineScrubber, step-through, keyboard shortcuts, rendering optimization |
-| **Umaya** | SpeedControl, LoadingIndicator, ErrorMessage, responsive layout, ARIA labels |
-| **Jason** | IK caching (LRU), edge case handling, Swagger docs, performance tuning |
-| **Noah (BE)** | Input validation hardening, timeout handling, security review |
-| **Noah (QA)** | Full regression, UAT (10+ RAPID programs), multi-browser testing, MVP sign-off demo |
+| **Dylane** | ✅ TimelineScrubber, step-through, keyboard shortcuts, rendering optimization |
+| **Umaya** | ✅ SpeedControl, LoadingIndicator, ErrorMessage, responsive layout, ARIA labels |
+| **Jason** | ✅ Next.js migration, IK caching (LRU), edge case handling, Swagger docs, performance tuning |
+| **Noah (BE)** | ✅ Input validation hardening, timeout handling, security review |
+| **Noah (QA)** | ✅ Full regression, UAT (10+ RAPID programs), multi-browser testing, MVP sign-off demo |
 
 ### Phase 4 (Weeks 9-10): Expansion (Stretch)
 
@@ -79,10 +79,10 @@
 | Week 3 Day 1 | Jason: `grammar.lark` | Week 4: AST implementation |
 | Week 3 Day 2-3 | Noah: PyBullet + URDF | Week 4: IK solver |
 | ~~Week 5 Day 1~~ ✅ | ~~Jason: Simulate schemas~~ | ~~Dylane: frontend animation~~ |
-| **Week 5 (NOW)** | **Noah: `/api/simulate` endpoint** | **Umaya: frontend wiring** |
-| **Week 5 (NOW)** | **Noah: Obstacle CRUD endpoints** | **Umaya: obstacle UI, collision testing** |
-| Week 6 | Dylane returns: obstacle STL in scene | Collision demo, transform gizmo |
-| Week 8 | Collision integration | Backend data -> frontend rendering |
+| ~~Week 5~~ ✅ | ~~Noah: `/api/simulate` endpoint~~ | ~~Umaya: frontend wiring~~ |
+| ~~Week 5~~ ✅ | ~~Noah: Obstacle CRUD endpoints~~ | ~~Umaya: obstacle UI, collision testing~~ |
+| ~~Week 6~~ ✅ | ~~Dylane returns: obstacle STL in scene~~ | ~~Collision demo, transform gizmo~~ |
+| ~~Week 8~~ ✅ | ~~Collision integration~~ | ~~Backend data -> frontend rendering~~ |
 
 ## Definition of Done
 
@@ -134,4 +134,4 @@ A task is DONE when:
 
 ---
 
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-03-28

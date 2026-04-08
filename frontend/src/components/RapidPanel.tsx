@@ -5,7 +5,7 @@ import { Upload as UploadIcon } from 'lucide-react';
 import { CodeXml as CodeIcon } from 'lucide-react';
 import PrimaryButton from './ui/PrimaryButton';
 import SidePanelHeader from './ui/SidePanelHeader';
-import type { TrajectoryWaypoint } from '../types';
+import type { TrajectoryWaypoint } from '@/types';
 
 type RapidPanelProps = {
   robotId: string | null;
@@ -143,7 +143,7 @@ const RapidPanel = ({ robotId, onFileUploaded, onAddLog, onTrajectoryReady }: Ra
 
       <PrimaryButton
         onClick={handleExecute}
-        className="mb-2 mt-10 self-center"
+        className="mb-2 mt-4 self-center shrink-0"
         disabled={isLoading}
       >
         {isLoading ? 'Running...' : 'Execute RAPID'}

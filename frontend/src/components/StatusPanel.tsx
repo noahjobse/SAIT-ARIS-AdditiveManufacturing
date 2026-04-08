@@ -23,12 +23,19 @@ const logTypeColours = {
 
 const StatusPanel = ({ lastLog }: StatusPanelProps) => {
 const nextId = useRef(2);
-const [logs, setLogs] = useState<LogEntry[]>([
-    { id: 1, timestamp: new Date().toLocaleTimeString(), message: "Robot Models Ready", type: 'success' },
-    { id: 0, timestamp: new Date().toLocaleTimeString(), message: "System Initialized", type: 'info' }
-]);
+// Start empty to avoid hydration mismatch — Date().toLocaleTimeString() differs between server and client
+const [logs, setLogs] = useState<LogEntry[]>([]);
 
-// Update logs when a new one comes in via props
+// Populate initial logs on mount (client-only)
+useEffect(() => {
+    const now = new Date().toLocaleTimeString();
+    setLogs([
+        { id: 1, timestamp: now, message: "Robot Models Ready", type: 'success' },
+        { id: 0, timestamp: now, message: "System Initialized", type: 'info' }
+    ]);
+}, []);
+
+// Append new logs when they come in via props
 useEffect(() => {
     if (lastLog) {
     setLogs(prev => [{
@@ -77,8 +84,6 @@ return (
         <span>READY</span>
         <span className="opacity-50">|</span>
         <span>WEBGL 2.0 ACTIVE</span>
-        <span className="opacity-50">|</span>
-        <span className="ml-auto">LATENCY: 12ms</span>
     </div>
     </div>
 );

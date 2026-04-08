@@ -1,18 +1,9 @@
 "use client";
 
 import { useState } from "react";
-// Note: You will need to copy Header and MainLayout into src/components/ next
 import { Header } from "@/components/Header";
 import MainLayout from "@/components/MainLayout";
-
-// Export TabType so other components can import it, just like the old App.tsx
-export type TabType = "rapid" | "jog";
-
-export const ROBOT_MODELS = [
-  { path: "/models/robots/irb4600/Model_IRB_4600.glb", label: "ABB IRB 4600" },
-  { path: "/models/robots/irb2600/Model_IRB_2600.glb", label: "ABB IRB 2600" },
-  { path: "/models/robots/irb6700/Model_IRB_6700.glb", label: "ABB IRB 6700" },
-];
+import type { TabType } from "@/types";
 
 export default function Home() {
   // Lifted global state
@@ -32,7 +23,10 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col h-screen w-screen bg-black overflow-hidden">
+    <main
+      className="flex flex-col w-full bg-black overflow-hidden"
+      style={{ height: 'calc(100vh - var(--mrb-height, 0px))' }}
+    >
       <Header 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 

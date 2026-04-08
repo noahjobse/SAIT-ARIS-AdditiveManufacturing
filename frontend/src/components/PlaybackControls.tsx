@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { TrajectoryWaypoint } from '../types';
+import type { TrajectoryWaypoint } from '@/types';
 
 type PlaybackControlsProps = {
   trajectory: TrajectoryWaypoint[] | null;
@@ -80,7 +80,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
       stopLoop();
     }
     return stopLoop;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-run when isPlaying toggles; currentTime/duration are read via refs to avoid restarting the animation loop on every frame
   }, [isPlaying]);
 
   useEffect(() => {
@@ -110,7 +110,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
   const hasTrajectory = trajectory && trajectory.length > 0;
 
   return (
-    <div className=" px-6 py-1 flex flex-col justify-center gap-2 h-full z-50 relative">
+    <div className="px-4 flex flex-col justify-center gap-0.5 h-full z-50 relative">
       {!hasTrajectory && (
         <div className="absolute top-0 left-6 mb-2">
           <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
@@ -119,7 +119,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
         </div>
       )}
 
-      <div className="flex items-center gap-6 mt-2">
+      <div className="flex items-center gap-6">
         {/* Play/Pause Button */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
@@ -145,7 +145,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
 
         {/* Speed Selector */}
         <select
-          value={playbackSpeed}
+          value={playbackSpeed.toFixed(1)}
           onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
           className="bg-gray-700 text-gray-300 text-[10px] font-bold px-2 py-1 rounded border-none outline-none focus:ring-1 focus:ring-purple-500 uppercase tracking-widest cursor-pointer ml-auto"
         >
@@ -157,7 +157,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
       </div>
 
       {/* Scrubber */}
-      <div className="w-full flex flex-col gap-1 relative pt-2">
+      <div className="w-full flex flex-col gap-0.5 relative pt-1">
         <input
           type="range"
           min="0"

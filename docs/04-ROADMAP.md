@@ -1,6 +1,6 @@
 # Roadmap & Sprint Plans
 
-**Project:** ABB Online Simulation Platform
+**Project:** ArmStudio
 **Version:** 2.0
 **Date:** 2026-02-12
 
@@ -12,7 +12,7 @@
 |-------|-------|------|--------|
 | **1: Visualization** | 1-3 | 3D scene, robot models, obstacles, gizmo | ✅ Complete |
 | **2: Logic Engine** | 4-6 | RAPID parser, IK/FK, trajectory, `/api/simulate` | ✅ Complete |
-| **3: Next.js Migration** | 7 | Port frontend to Next.js App Router | 🔄 In Progress |
+| **3: Next.js Migration** | 7 | Port frontend to Next.js App Router | ✅ Complete |
 | **4: SaaS + Polish** | 8-9 | Supabase auth/persistence, Stripe, editor upgrade, UX polish | Upcoming |
 | **5: Deploy + Handoff** | 10-11 | Vercel/Render deploy, ARIS docs, capstone poster, UAT | Upcoming |
 
@@ -66,8 +66,8 @@
 - [x] **Noah:** 21 kinematics tests passing (unit + integration)
 - [x] **Noah:** IRB 2600 + IRB 6700 URDFs — `models/robots/irb2600/`, `models/robots/irb6700/`
 - [x] **Noah:** Collision detector + obstacle mesh loader — `app/collision/detector.py`
-- [ ] **Jason:** Lark grammar skeleton
-- [ ] **Jason:** AST transformer
+- [x] **Jason:** Lark grammar skeleton — merged via PR #4
+- [x] **Jason:** AST transformer — merged via PR #4
 
 **Blocking Dependencies:**
 - ~~Week 3 Day 2-3 (Noah): PyBullet + IRB 4600 URDF -> blocks Week 4 IK solver~~ ✅ DONE
@@ -75,8 +75,6 @@
 - Week 3 Day 1 (Jason): `grammar.lark` skeleton -> blocks Week 4 AST implementation
 
 ## Sprint: Weeks 5-6 (Simulation Pipeline)
-
-**Current Week: Week 5 (2026-03-03)**
 
 **Goal:** End-to-end `/api/simulate`, trajectory generation, collision detection
 **Key Milestone:** Upload RAPID -> see trajectory waypoints returned with collision data
@@ -99,9 +97,9 @@
 - [x] **Noah:** CI fixed (ruff lint, ESLint v9 flat config, Node 20/22 matrix) — March 3
 - [x] **Noah:** Docker Compose dev environment working — March 3
 - [x] **Noah:** OpenAPI contract committed `docs/contract/openapi.json` — March 3
-- [ ] **Noah:** `/api/parse` endpoint wiring parser — **IN PROGRESS (Week 5)**
-- [ ] **Noah:** `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data) — **IN PROGRESS**
-- [ ] **Noah:** `/api/simulate` endpoint (parse → trajectory → collision → JSON) — **IN PROGRESS**
+- [x] **Noah:** `/api/parse` endpoint wiring parser
+- [x] **Noah:** `TrajectoryGenerator` (MoveL/MoveJ/MoveC, time-based speed data)
+- [x] **Noah:** `/api/simulate` endpoint (parse → trajectory → collision → JSON)
 - [ ] **Noah:** Obstacle CRUD (`POST/GET/DELETE /api/obstacles`, in-memory) — **IN PROGRESS**
 - [ ] **Umaya:** RapidPanel → `/api/simulate` wiring — **IN PROGRESS**
 
@@ -216,4 +214,4 @@ Extensions (ABB controller API, RobotStudio integration) can be added beyond cor
 
 ---
 
-**Last Updated:** 2026-03-17
+**Last Updated:** 2026-03-28

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UML Diagrams — ABB Online Simulation Platform</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a12;
+      color: #e0ddf5;
+    }
+
+    .page {
+      page-break-after: always;
+      min-height: 100vh;
+      padding: 40px 50px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .page:last-child { page-break-after: avoid; }
+
+    /* Starfield background */
+    .page::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 25% 35%, rgba(255,200,100,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 40% 80%, rgba(200,180,255,0.6), transparent),
+        radial-gradient(1px 1px at 55% 20%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 70% 65%, rgba(255,180,100,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 85% 45%, rgba(180,160,255,0.6), transparent),
+        radial-gradient(1px 1px at 15% 70%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 90% 10%, rgba(255,200,150,0.4), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1.5px 1.5px at 30% 90%, rgba(200,150,255,0.5), transparent),
+        radial-gradient(1px 1px at 65% 40%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 80% 85%, rgba(255,180,80,0.4), transparent),
+        radial-gradient(1px 1px at 5% 50%, rgba(200,200,255,0.5), transparent),
+        radial-gradient(1px 1px at 45% 5%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 95% 75%, rgba(180,140,255,0.5), transparent),
+        radial-gradient(1px 1px at 20% 55%, rgba(255,220,150,0.4), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Nebula glow */
+    .page::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 15% 85%, rgba(180,80,220,0.08), transparent),
+        radial-gradient(ellipse 500px 350px at 85% 15%, rgba(255,140,50,0.06), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page > * { position: relative; z-index: 1; }
+
+    /* Header area */
+    .header {
+      margin-bottom: 24px;
+    }
+    .header-line {
+      height: 3px;
+      background: linear-gradient(90deg, #e8740e, #c44dff, #7b2fff, transparent);
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ff8c1a, #e8740e, #c44dff, #9b5fff);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      font-weight: 300;
+      color: #9994c2;
+      letter-spacing: 0.5px;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #ff9f43;
+      border: 1px solid rgba(255,159,67,0.3);
+      border-radius: 4px;
+      background: rgba(255,159,67,0.08);
+    }
+
+    /* Diagram area */
+    .diagram-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      background: rgba(15,14,30,0.6);
+      border: 1px solid rgba(196,77,255,0.15);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(8px);
+      box-shadow:
+        0 0 40px rgba(196,77,255,0.05),
+        0 0 80px rgba(232,116,14,0.03),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .mermaid { width: 100%; }
+
+    /* Corner accents */
+    .diagram-container::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 20px;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, #e8740e, transparent);
+      border-radius: 1px;
+    }
+    .diagram-container::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: 20px;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c44dff);
+      border-radius: 1px;
+    }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #5d5880;
+      letter-spacing: 0.5px;
+    }
+    .page-footer::before {
+      content: '';
+      position: absolute;
+      bottom: 50px;
+      left: 50px;
+      right: 50px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(196,77,255,0.2), rgba(232,116,14,0.2), transparent);
+    }
+
+    /* Force dark fills on all Mermaid elements */
+    .mermaid .node rect,
+    .mermaid .node polygon,
+    .mermaid .node circle,
+    .mermaid .node ellipse,
+    .mermaid .label-container,
+    .mermaid .cluster rect,
+    .mermaid .classGroup rect,
+    .mermaid .classLabel .box,
+    .mermaid .entityBox,
+    .mermaid .attributeBoxOdd,
+    .mermaid .attributeBoxEven,
+    .mermaid .classTitle,
+    .mermaid g.classGroup rect {
+      fill: #1a1535 !important;
+      stroke: #7b5fbf !important;
+    }
+    .mermaid .classGroup .title {
+      fill: #ffb366 !important;
+    }
+    .mermaid .classLabel .label,
+    .mermaid .nodeLabel,
+    .mermaid .classGroup text,
+    .mermaid .classLabel text,
+    .mermaid text,
+    .mermaid .label text,
+    .mermaid span {
+      fill: #e0ddf5 !important;
+      color: #e0ddf5 !important;
+    }
+    .mermaid .edgeLabel rect,
+    .mermaid .edgeLabel span,
+    .mermaid .edgeLabel .label rect {
+      fill: #13122a !important;
+      background-color: #13122a !important;
+      color: #d4a8ff !important;
+    }
+    .mermaid .relation,
+    .mermaid .edgePath path,
+    .mermaid .flowchart-link {
+      stroke: #9b5fff !important;
+    }
+    .mermaid .edgeLabel text,
+    .mermaid .edgeLabel tspan {
+      fill: #d4a8ff !important;
+    }
+    .mermaid marker path {
+      fill: #9b5fff !important;
+      stroke: #9b5fff !important;
+    }
+    /* Sequence diagram overrides */
+    .mermaid rect.actor {
+      fill: #2a1848 !important;
+      stroke: #e8740e !important;
+    }
+    .mermaid .actor text,
+    .mermaid text.actor {
+      fill: #ffb366 !important;
+    }
+    .mermaid .loopLine {
+      stroke: #c44dff !important;
+    }
+    .mermaid .loopText tspan,
+    .mermaid .loopText text {
+      fill: #ffb366 !important;
+    }
+    .mermaid .messageLine0,
+    .mermaid .messageLine1 {
+      stroke: #c44dff !important;
+    }
+    .mermaid .messageText {
+      fill: #e0ddf5 !important;
+    }
+    .mermaid .note rect {
+      fill: #1f1230 !important;
+      stroke: #9b5fff !important;
+    }
+    .mermaid .note text {
+      fill: #d4a8ff !important;
+    }
+    .mermaid .activation0,
+    .mermaid .activation1,
+    .mermaid .activation2 {
+      fill: #2a1848 !important;
+      stroke: #e8740e !important;
+    }
+    .mermaid .labelBox {
+      fill: #1a1535 !important;
+      stroke: #c44dff !important;
+    }
+    .mermaid .labelText {
+      fill: #d4a8ff !important;
+    }
+    .mermaid line {
+      stroke: #5d5880 !important;
+    }
+    .mermaid .messageLine0,
+    .mermaid .messageLine1 {
+      stroke: #9b5fff !important;
+    }
+    /* Flowchart (use case) overrides */
+    .mermaid .cluster rect {
+      fill: #13122a !important;
+      stroke: #c44dff !important;
+    }
+    .mermaid .cluster span,
+    .mermaid .cluster text {
+      fill: #ffb366 !important;
+      color: #ffb366 !important;
+    }
+
+    @media print {
+      .page { padding: 20px 30px; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PAGE 1: CLASS DIAGRAM -->
+<div class="page">
+  <div class="header">
+    <div class="header-line"></div>
+    <h1>Class Diagram</h1>
+    <p class="subtitle">ABB Online Simulation Platform — Backend architecture with classes, attributes, methods, and relationships</p>
+    <span class="badge">Object-Oriented Design</span>
+  </div>
+  <div class="diagram-container">
+    <pre class="mermaid" id="class-diagram-pre">
+classDiagram
+    direction TB
+    class Program {
+        +modules : list~Module~
+    }
+    class Module {
+        +name : str
+        +procedures : list~Procedure~
+        +declarations : list~Declaration~
+    }
+    class Procedure {
+        +name : str
+        +commands : list~MoveCommand~
+        +params : list~str~
+    }
+    class Declaration {
+        +dtype : str
+        +type_name : str
+        +name : str
+        +value : str | RobTarget | JointTarget | ToolData | float | bool | None
+    }
+    class MoveCommand {
+        +command_type : str
+        +target : str | RobTarget | JointTarget
+        +speed : str | list~float~
+        +zone : str | list
+        +tool : str
+        +wobj : str | None
+        +cir_point : str | RobTarget | JointTarget | None
+        +line_number : int
+    }
+    class Position {
+        +x : float
+        +y : float
+        +z : float
+    }
+    class Orientation {
+        +q1 : float
+        +q2 : float
+        +q3 : float
+        +q4 : float
+    }
+    class RobTarget {
+        +pos : Position
+        +rot : Orientation
+    }
+    class JointTarget {
+        +robax : list~float~
+        +extax : list~float~
+    }
+    class ToolData {
+        +tcp_pos : Position
+        +tcp_rot : Orientation
+        +robhold : bool
+    }
+    Program "1" *-- "1..*" Module
+    Module "1" *-- "0..*" Procedure
+    Module "1" *-- "0..*" Declaration
+    Procedure "1" *-- "0..*" MoveCommand
+    MoveCommand "1" o-- "0..1" RobTarget : target
+    MoveCommand "1" o-- "0..1" JointTarget : target
+    RobTarget "1" *-- "1" Position
+    RobTarget "1" *-- "1" Orientation
+    ToolData "1" *-- "1" Position : tcp_pos
+    ToolData "1" *-- "1" Orientation : tcp_rot
+    Declaration "1" o-- "0..1" RobTarget : value
+    Declaration "1" o-- "0..1" JointTarget : value
+    Declaration "1" o-- "0..1" ToolData : value
+    class RapidParser {
+        -grammar : str
+        -parser : Lark
+        -transformer : RapidTransformer
+        +parse(code : str) Program
+    }
+    class RapidTransformer {
+        +start(modules) Program
+        +module(args) Module
+        +procedure(args) Procedure
+        +declaration(args) Declaration
+        +const_decl(args) Declaration
+        +var_decl(args) Declaration
+        +pers_decl(args) Declaration
+        +move_l(args) MoveCommand
+        +move_j(args) MoveCommand
+        +move_abs_j(args) MoveCommand
+        +move_c(args) MoveCommand
+        +target(args) str | RobTarget | JointTarget
+        +speed(args) str | list
+        +zone(args) str | list
+        +tool(args) str
+        +wobj(args) str | None
+        +robtarget(args) RobTarget
+        +jointtarget(args) JointTarget
+        +tooldata(args) ToolData
+        +pos(args) Position
+        +rot(args) Orientation
+        +speeddata(args) list~float~
+        +zonedata(args) list
+        -_create_move(cmd_type, args) MoveCommand
+    }
+    class Transformer {
+        &lt;&lt;Lark&gt;&gt;
+    }
+    RapidParser "1" *-- "1" RapidTransformer
+    RapidTransformer --|> Transformer
+    RapidParser ..> Program : produces
+    class RobotLoader {
+        +headless : bool
+        -physics_client : int
+        +loaded_robots : dict
+        +robot_configs : dict
+        -_movable_joints : dict
+        -_ee_link_index : dict
+        +connect() void
+        +disconnect() void
+        +load_robot(robot_id : str) int
+        +is_loaded(robot_id : str) bool
+        +get_pybullet_id(robot_id : str) int
+        +get_joint_count(robot_id : str) int
+        +get_movable_joint_indices(robot_id : str) list
+        +get_ee_link_index(robot_id : str) int
+        +get_joint_limits(robot_id : str) list
+    }
+    class KinematicsSolver {
+        +loader : RobotLoader
+        -_ik_cache : OrderedDict
+        +forward_kinematics(robot_id, joint_angles) dict
+        +inverse_kinematics(robot_id, target_pos, target_ori, current_joints) dict
+        +disconnect() void
+        -_validate_joint_limits(robot_id, joint_angles) void
+    }
+    class TrajectoryGenerator {
+        -solver : KinematicsSolver
+        +generate(program, robot_id, deadline) tuple
+        -_process_command(cmd, var_table, robot_id, current_joints, start_time) tuple
+        -_move_l(cmd, var_table, robot_id, current_joints, start_time) tuple
+        -_move_j(cmd, var_table, robot_id, current_joints, start_time) tuple
+        -_move_abs_j(cmd, var_table, robot_id, current_joints, start_time) tuple
+        -_move_c(cmd, var_table, robot_id, current_joints, start_time) tuple
+        -_arc_interpolate(p1, p2, p3, speed_mms) list
+        -_resolve_target(target, var_table, context) RobTarget
+        -_resolve_tool(tool_name, var_table) ToolData
+        -_parse_speed(speed) float
+        -_pos_to_meters(pos) list
+        -_apply_tool_offset(target_pos, target_ori, tool) list
+    }
+    class CollisionDetector {
+        +loader : RobotLoader
+        -obstacles : dict
+        +load_obstacle(obstacle_id, stl_path, position, orientation) int
+        +remove_obstacle(obstacle_id) void
+        +check_collisions(robot_id, joint_angles, threshold) list
+        +check_trajectory_collisions(robot_id, trajectory, threshold) list
+        +disconnect() void
+    }
+    KinematicsSolver "1" *-- "1" RobotLoader : has-a
+    TrajectoryGenerator "1" *-- "1" KinematicsSolver : injected
+    CollisionDetector "1" *-- "1" RobotLoader : shared
+    TrajectoryGenerator ..> Program : consumes
+    class ObstacleRegistry {
+        -_obstacles : dict
+        +register(record : ObstacleRecord) void
+        +get(obstacle_id : str) ObstacleRecord
+        +list_all() list
+        +delete(obstacle_id : str) bool
+    }
+    class ObstacleRecord {
+        +obstacle_id : str
+        +filename : str
+        +file_path : str
+        +position : list~float~
+        +rotation : list~float~
+        +created_at : str
+    }
+    ObstacleRegistry "1" o-- "0..*" ObstacleRecord
+    class KinematicsError {
+        &lt;&lt;exception&gt;&gt;
+    }
+    class RobotNotLoadedError {
+        +robot_id : str
+    }
+    class IKSolutionNotFoundError {
+        +robot_id : str
+        +target_position : list
+    }
+    class InvalidJointAnglesError {
+        +robot_id : str
+        +joint_index : int
+        +value : float
+        +limit_range : tuple
+    }
+    class RapidParseError {
+        +message : str
+    }
+    class TrajectoryError {
+        &lt;&lt;exception&gt;&gt;
+    }
+    KinematicsError --|> Exception
+    RobotNotLoadedError --|> KinematicsError
+    IKSolutionNotFoundError --|> KinematicsError
+    InvalidJointAnglesError --|> KinematicsError
+    RapidParseError --|> Exception
+    TrajectoryError --|> Exception
+    </pre>
+  </div>
+  <div class="page-footer">
+    <span>ABB Online Simulation Platform</span>
+    <span>Group 12 — Phase 3</span>
+    <span>Page 1 of 3</span>
+  </div>
+</div>
+
+<!-- PAGE 2: USE CASE DIAGRAM -->
+<div class="page">
+  <div class="header">
+    <div class="header-line"></div>
+    <h1>Use Case Diagram</h1>
+    <p class="subtitle">ABB Online Simulation Platform — Student interactions with the simulation system</p>
+    <span class="badge">System Boundary</span>
+  </div>
+  <div class="diagram-container">
+    <pre class="mermaid">
+flowchart LR
+    Student(("Student"))
+
+    subgraph System["ABB Online Simulation Platform"]
+        direction TB
+
+        subgraph Code["Code Input"]
+            UC1["Upload RAPID Code"]
+            UC2["Parse RAPID Code"]
+        end
+
+        subgraph Sim["Simulation"]
+            UC3["Run Simulation"]
+            UC4["View 3D Animation"]
+            UC5["Control Playback"]
+        end
+
+        subgraph Robot["Robot Interaction"]
+            UC6["Jog Robot Joints"]
+            UC7["Select Robot Model"]
+        end
+
+        subgraph Obstacle["Obstacle Management"]
+            UC8["Upload Obstacle"]
+            UC9["Manage Obstacles"]
+            UC10["View Collision Results"]
+        end
+    end
+
+    Student --> UC1
+    Student --> UC3
+    Student --> UC4
+    Student --> UC6
+    Student --> UC7
+    Student --> UC8
+    Student --> UC9
+    Student --> UC10
+
+    UC1 -.->|"includes"| UC2
+    UC3 -.->|"includes"| UC2
+    UC3 -.->|"includes"| UC4
+    UC4 -.->|"extends"| UC5
+    UC8 -.->|"extends"| UC9
+
+    style System fill:#13122a,stroke:#c44dff,stroke-width:2px,color:#e0ddf5,rx:12
+    style Code fill:#1a1535,stroke:#e8740e,color:#ffb366,rx:8
+    style Sim fill:#1a1535,stroke:#9b5fff,color:#c9a8ff,rx:8
+    style Robot fill:#1a1535,stroke:#e8740e,color:#ffb366,rx:8
+    style Obstacle fill:#1a1535,stroke:#c44dff,color:#d98fff,rx:8
+    </pre>
+  </div>
+  <div class="page-footer">
+    <span>ABB Online Simulation Platform</span>
+    <span>Group 12 — Phase 3</span>
+    <span>Page 2 of 3</span>
+  </div>
+</div>
+
+<!-- PAGE 3: SEQUENCE DIAGRAM -->
+<div class="page">
+  <div class="header">
+    <div class="header-line"></div>
+    <h1>Sequence Diagram</h1>
+    <p class="subtitle">ABB Online Simulation Platform — Full simulation pipeline from RAPID upload to 3D animation</p>
+    <span class="badge">Dynamic Behaviour</span>
+  </div>
+  <div class="diagram-container">
+    <pre class="mermaid">
+sequenceDiagram
+    actor Student
+    participant FE as Frontend<br/>Next.js
+    participant API as FastAPI<br/>Router
+    participant RP as RapidParser
+    participant RT as RapidTransformer
+    participant TG as TrajectoryGenerator
+    participant KS as KinematicsSolver
+    participant CD as CollisionDetector
+    participant PB as PyBullet<br/>Engine
+
+    Student->>FE: Upload .mod file
+    FE->>API: POST /api/upload/rapid
+    API->>RP: parse(code)
+    RP->>RT: transform(parse_tree)
+    RT-->>RP: Program (AST)
+    RP-->>API: Program + errors/warnings
+    API-->>FE: RapidUploadResponse (AST JSON)
+
+    Student->>FE: Click Run Simulation
+    FE->>API: POST /api/simulate
+    Note right of API: Build Program from AST dict
+
+    API->>TG: generate(program, robot_id)
+    loop For each MoveCommand
+        TG->>TG: _resolve_target()
+        TG->>KS: inverse_kinematics(robot_id, target_pos)
+        KS->>PB: calculateInverseKinematics()
+        PB-->>KS: joint_angles
+        KS-->>TG: joint_angles dict
+        TG->>KS: forward_kinematics(robot_id, joints)
+        KS->>PB: getLinkState()
+        PB-->>KS: position + orientation
+        KS-->>TG: TCP pose dict
+        TG->>TG: Interpolate waypoints
+    end
+    TG-->>API: waypoints list + timed_out flag
+
+    API->>CD: check_trajectory_collisions(robot_id, trajectory)
+    loop For each waypoint
+        CD->>PB: resetJointState()
+        CD->>PB: performCollisionDetection()
+        CD->>PB: getClosestPoints()
+        PB-->>CD: contact_points
+    end
+    CD-->>API: collision results
+
+    API->>API: Assemble SimulateResponse
+    API-->>FE: SimulateResponse JSON
+    FE->>FE: Animate in Babylon.js viewport
+    FE-->>Student: 3D animation with collision highlights
+    </pre>
+  </div>
+  <div class="page-footer">
+    <span>ABB Online Simulation Platform</span>
+    <span>Group 12 — Phase 3</span>
+    <span>Page 3 of 3</span>
+  </div>
+</div>
+
+<script>
+  // After Mermaid renders, force-patch class diagram SVG colors
+  function patchClassDiagram() {
+    var container = document.getElementById('class-diagram-pre');
+    if (!container) return;
+    var svgEl = container.querySelector('svg') || (container.closest('[data-processed]') ? container.closest('[data-processed]').querySelector('svg') : null);
+    if (!svgEl) return;
+
+    // Nuke all light-colored rects
+    svgEl.querySelectorAll('rect').forEach(function(el) {
+      var f = (el.getAttribute('fill') || '').toLowerCase();
+      if (!f || f === 'none' || f === '#fff' || f === '#ffffff' || f === 'white' || f === '#ececff' || f.match(/^#[c-f]/i) || f === 'rgb(255, 255, 255)' || f === 'rgb(236, 236, 255)') {
+        el.setAttribute('fill', '#1a1535');
+        el.setAttribute('stroke', '#7b5fbf');
+      }
+    });
+    svgEl.querySelectorAll('.classGroup rect').forEach(function(el) {
+      el.setAttribute('fill', '#1a1535');
+      el.setAttribute('stroke', '#7b5fbf');
+    });
+    svgEl.querySelectorAll('.classLabel .box').forEach(function(el) {
+      el.setAttribute('fill', '#1a1535');
+      el.setAttribute('stroke', '#7b5fbf');
+      el.style.opacity = '1';
+    });
+    svgEl.querySelectorAll('.classGroup line').forEach(function(el) {
+      el.setAttribute('stroke', '#5d5880');
+    });
+    svgEl.querySelectorAll('text, tspan').forEach(function(el) {
+      el.setAttribute('fill', '#e0ddf5');
+    });
+    svgEl.querySelectorAll('.classLabel text, .classLabel tspan, .classTitleText').forEach(function(el) {
+      el.setAttribute('fill', '#ffb366');
+    });
+    svgEl.querySelectorAll('.relation').forEach(function(el) {
+      el.setAttribute('stroke', '#9b5fff');
+    });
+    svgEl.querySelectorAll('marker path').forEach(function(el) {
+      el.setAttribute('fill', '#9b5fff');
+      el.setAttribute('stroke', '#9b5fff');
+    });
+    svgEl.querySelectorAll('.edgeLabel rect').forEach(function(el) {
+      el.setAttribute('fill', '#13122a');
+      el.style.opacity = '1';
+    });
+    svgEl.querySelectorAll('.edgeLabel text, .edgeLabel tspan').forEach(function(el) {
+      el.setAttribute('fill', '#d4a8ff');
+    });
+  }
+
+  // Use MutationObserver to detect when Mermaid replaces <pre> with SVG
+  var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      m.addedNodes.forEach(function(node) {
+        if (node.nodeName === 'svg' || (node.querySelector && node.querySelector('svg'))) {
+          setTimeout(patchClassDiagram, 100);
+        }
+      });
+    });
+  });
+  var target = document.querySelector('.page');
+  if (target) observer.observe(target, { childList: true, subtree: true });
+  // Also run after a delay as fallback
+  window.addEventListener('load', function() {
+    setTimeout(patchClassDiagram, 500);
+    setTimeout(patchClassDiagram, 1500);
+  });
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      darkMode: true,
+      background: '#0a0a12',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: '13px',
+
+      // Primary = class boxes, main nodes
+      primaryColor: '#1a1535',
+      primaryTextColor: '#e0ddf5',
+      primaryBorderColor: '#7b5fbf',
+
+      // Secondary
+      secondaryColor: '#1f1230',
+      secondaryTextColor: '#d4a8ff',
+      secondaryBorderColor: '#e8740e',
+
+      // Tertiary
+      tertiaryColor: '#15112a',
+      tertiaryTextColor: '#ffb366',
+      tertiaryBorderColor: '#9b5fff',
+
+      // Global
+      lineColor: '#9b5fff',
+      textColor: '#e0ddf5',
+      mainBkg: '#1a1535',
+      nodeBorder: '#7b5fbf',
+      nodeTextColor: '#e0ddf5',
+
+      // Class diagram
+      classText: '#e0ddf5',
+      relationColor: '#9b5fff',
+      relationLabelColor: '#d4a8ff',
+      titleColor: '#ffb366',
+
+      // Sequence diagram
+      actorBkg: '#2a1848',
+      actorBorder: '#e8740e',
+      actorTextColor: '#ffb366',
+      actorLineColor: '#5d5880',
+      signalColor: '#9b5fff',
+      signalTextColor: '#e0ddf5',
+      labelBoxBkgColor: '#1a1535',
+      labelBoxBorderColor: '#c44dff',
+      labelTextColor: '#d4a8ff',
+      loopTextColor: '#ffb366',
+      activationBorderColor: '#e8740e',
+      activationBkgColor: '#2a1848',
+      sequenceNumberColor: '#ff9f43',
+      noteBkgColor: '#1f1230',
+      noteBorderColor: '#9b5fff',
+      noteTextColor: '#d4a8ff',
+
+      // Flowchart
+      clusterBkg: '#13122a',
+      clusterBorder: '#c44dff',
+      edgeLabelBackground: '#13122a',
+    },
+    themeCSS: `
+      /* Class diagram boxes */
+      g.classGroup rect { fill: #1a1535 !important; stroke: #7b5fbf !important; }
+      g.classGroup text { fill: #e0ddf5 !important; }
+      g.classGroup line { stroke: #5d5880 !important; }
+      .classLabel .box { fill: #1a1535 !important; stroke: #7b5fbf !important; opacity: 1 !important; }
+      .classLabel .label { fill: #ffb366 !important; font-weight: 600; }
+      .classLabel text { fill: #ffb366 !important; }
+      .classTitleText { fill: #ffb366 !important; }
+      .relation { stroke: #9b5fff !important; }
+      .cardinality text { fill: #d4a8ff !important; }
+      defs marker path { fill: #9b5fff !important; stroke: #9b5fff !important; }
+      .edgeLabel rect { fill: #13122a !important; opacity: 1 !important; }
+      .edgeLabel text, .edgeLabel span, .edgeLabel tspan { fill: #d4a8ff !important; color: #d4a8ff !important; }
+      /* Sequence diagram */
+      .actor { fill: #2a1848 !important; stroke: #e8740e !important; }
+      text.actor > tspan { fill: #ffb366 !important; }
+      .messageLine0 { stroke: #9b5fff !important; }
+      .messageLine1 { stroke: #9b5fff !important; stroke-dasharray: 3; }
+      .messageText { fill: #e0ddf5 !important; }
+      .loopLine { stroke: #c44dff !important; fill: #13122a !important; }
+      .loopText, .loopText tspan { fill: #ffb366 !important; }
+      .labelBox { fill: #1a1535 !important; stroke: #c44dff !important; }
+      .labelText, .labelText tspan { fill: #d4a8ff !important; }
+      .note rect, .note path { fill: #1f1230 !important; stroke: #9b5fff !important; }
+      .note text, .note tspan { fill: #d4a8ff !important; }
+      .activation0, .activation1, .activation2 { fill: #2a1848 !important; stroke: #e8740e !important; }
+      line[class*="actor"] { stroke: #5d5880 !important; }
+      /* Flowchart / use case */
+      .cluster rect { fill: #13122a !important; stroke: #c44dff !important; }
+      .cluster span { color: #ffb366 !important; }
+      .nodeLabel { color: #e0ddf5 !important; }
+      .node rect, .node circle, .node ellipse, .node polygon { fill: #1a1535 !important; stroke: #7b5fbf !important; }
+      .edgePath path { stroke: #9b5fff !important; }
+    `,
+    flowchart: { htmlLabels: true, curve: 'basis' },
+    sequence: { mirrorActors: false, messageAlign: 'center', width: 180 }
+  });
+</script>
+
+</body>
+</html>

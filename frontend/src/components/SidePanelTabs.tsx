@@ -1,6 +1,6 @@
 'use client'
 
-import type { TabType } from "@/app/page";
+import type { TabType } from "@/types";
 import { FileCode as RapidCodeIcon } from 'lucide-react';
 import JointJogIcon from "@/assets/joint-jog-icon.svg";
 
@@ -11,8 +11,8 @@ type SidePanelTabsProps = {
 
 function SidePanelTabs({ activeTab, setActiveTab }: SidePanelTabsProps) {
     const tabs = [
-        { id: "jog" as TabType, label: "Joint Jog", icon: JointJogIcon },
         { id: "rapid" as TabType, label: "RAPID Code", icon: RapidCodeIcon },
+        { id: "jog" as TabType, label: "Joint Jog", icon: JointJogIcon },
     ];
 
     return (
