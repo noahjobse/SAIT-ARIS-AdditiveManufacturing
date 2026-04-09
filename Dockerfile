@@ -21,6 +21,6 @@ RUN cd frontend && pnpm install --frozen-lockfile
 # Copy rest of project
 COPY . .
 
-EXPOSE 8000 5173
+EXPOSE 8000 3000
 
 CMD ["sh", "start.sh"]
