@@ -179,6 +179,6 @@ def test_parse_jointtarget_ast():
     cmd = program.modules[0].procedures[0].commands[0]
     assert cmd.command_type == "MoveJ"
     assert isinstance(cmd.target, JointTarget)
-    assert cmd.target.robax == [0, -90, 30, 0, 45, 0]
-    assert len(cmd.target.extax) == 6
-    assert cmd.target.extax[0] == 9E9
+    assert cmd.target.robot_axes == [0, -90, 30, 0, 45, 0]
+    assert len(cmd.target.external_axes) == 6
+    assert cmd.target.external_axes[0] == 9E9

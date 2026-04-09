@@ -68,37 +68,37 @@ def _build_robtarget(target: dict) -> RobTarget:
     Convert a RobTarget dict to the Python dataclass.
 
     Handles two formats:
-    - parse.py output: { pos: {x,y,z}, rot: {q1,q2,q3,q4} }
+    - parse.py output: { position: {x,y,z}, orientation: {q1,q2,q3,q4} }
     - OpenAPI schema:  { type: "RobTarget", trans: [x,y,z], rot: [q1,q2,q3,q4] }
     """
-    if "pos" in target:
+    if "position" in target:
         # Python dataclass dict (from parse.py _to_dict)
-        p = target["pos"]
-        r = target["rot"]
+        p = target["position"]
+        r = target["orientation"]
         return RobTarget(
-            pos=Position(x=p["x"], y=p["y"], z=p["z"]),
-            rot=Orientation(q1=r["q1"], q2=r["q2"], q3=r["q3"], q4=r["q4"]),
+            position=Position(x=p["x"], y=p["y"], z=p["z"]),
+            orientation=Orientation(q1=r["q1"], q2=r["q2"], q3=r["q3"], q4=r["q4"]),
         )
     # OpenAPI schema format (trans array, rot array)
     trans = target.get("trans", [0.0, 0.0, 0.0])
     rot = target.get("rot", [1.0, 0.0, 0.0, 0.0])
     return RobTarget(
-        pos=Position(x=trans[0], y=trans[1], z=trans[2]),
-        rot=Orientation(q1=rot[0], q2=rot[1], q3=rot[2], q4=rot[3]),
+        position=Position(x=trans[0], y=trans[1], z=trans[2]),
+        orientation=Orientation(q1=rot[0], q2=rot[1], q3=rot[2], q4=rot[3]),
     )
 
 
 def _build_jointtarget(target: dict) -> JointTarget:
     return JointTarget(
-        robax=target.get("robax", [0.0] * 6),
-        extax=target.get("extax", [0.0] * 6),
+        robot_axes=target.get("robot_axes", [0.0] * 6),
+        external_axes=target.get("external_axes", [0.0] * 6),
     )
 
 
 def _build_target(target: dict) -> RobTarget | JointTarget:
     """Detect and convert a target dict, supporting both dict formats."""
-    # Python dataclass dict has 'robax' key for JointTarget
-    if "robax" in target:
+    # Python dataclass dict has 'robot_axes' key for JointTarget
+    if "robot_axes" in target:
         return _build_jointtarget(target)
     # OpenAPI schema uses 'type' discriminator
     if target.get("type") == "JointTarget":
@@ -134,9 +134,9 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
     speed = _parse_speed(cmd_dict.get("speed", [200.0]))
     zone = cmd_dict.get("zone", "z0")
 
-    # MoveC: cir_point (parse.py) or via_point (OpenAPI)
+    # MoveC: circular_point (parse.py) or via_point (OpenAPI)
     cir_point = None
-    via = cmd_dict.get("cir_point") or cmd_dict.get("via_point")
+    via = cmd_dict.get("circular_point") or cmd_dict.get("via_point")
     if via and not isinstance(via, str):
         cir_point = _build_robtarget(via)
 
@@ -146,7 +146,7 @@ def _build_move_command(cmd_dict: dict, index: int) -> MoveCommand:
         speed=speed,
         zone=zone,
         tool=cmd_dict.get("tool", "tool0"),
-        cir_point=cir_point,
+        circular_point=cir_point,
         line_number=index,
     )
 
@@ -168,9 +168,9 @@ def _build_declaration(decl_dict: dict) -> Declaration | None:
     if isinstance(value_raw, dict):
         if "tcp_pos" in value_raw:
             value = _build_tooldata(value_raw)
-        elif "pos" in value_raw or "trans" in value_raw:
+        elif "position" in value_raw or "trans" in value_raw:
             value = _build_robtarget(value_raw)
-        elif "robax" in value_raw:
+        elif "robot_axes" in value_raw:
             value = _build_jointtarget(value_raw)
         else:
             return None

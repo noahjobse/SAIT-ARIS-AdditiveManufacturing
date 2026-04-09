@@ -134,8 +134,8 @@ class TrajectoryGenerator:
             raise TrajectoryError(f"MoveL requires a robtarget, got {type(target).__name__}")
 
         speed_mms = self._parse_speed(cmd.speed)
-        end_pos_m = self._pos_to_meters(target.pos)
-        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
+        end_pos_m = self._pos_to_meters(target.position)
+        orientation = [target.orientation.q2, target.orientation.q3, target.orientation.q4, target.orientation.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Apply tool TCP offset — IK solves for flange, not tool tip
         tool = self._resolve_tool(cmd.tool, var_table)
@@ -174,8 +174,8 @@ class TrajectoryGenerator:
             raise TrajectoryError(f"MoveJ requires a robtarget, got {type(target).__name__}")
 
         speed_mms = self._parse_speed(cmd.speed)
-        end_pos_m = self._pos_to_meters(target.pos)
-        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
+        end_pos_m = self._pos_to_meters(target.position)
+        orientation = [target.orientation.q2, target.orientation.q3, target.orientation.q4, target.orientation.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Apply tool TCP offset
         tool = self._resolve_tool(cmd.tool, var_table)
@@ -215,7 +215,7 @@ class TrajectoryGenerator:
             raise TrajectoryError(f"MoveAbsJ requires a jointtarget, got {type(target).__name__}")
 
         speed_mms = self._parse_speed(cmd.speed)
-        end_joints = target.robax  # Already joint angles in degrees — convert to radians
+        end_joints = target.robot_axes  # Already joint angles in degrees — convert to radians
         end_joints_rad = [math.radians(j) for j in end_joints]
 
         if current_joints is None:
@@ -242,23 +242,23 @@ class TrajectoryGenerator:
 
     def _move_c(self, cmd, var_table, robot_id, current_joints, start_time):
         target = self._resolve_target(cmd.target, var_table, cmd.command_type)
-        cir = self._resolve_target(cmd.cir_point, var_table, "MoveC.cir_point")
+        cir = self._resolve_target(cmd.circular_point, var_table, "MoveC.cir_point")
 
         if not isinstance(target, RobTarget) or not isinstance(cir, RobTarget):
             raise TrajectoryError("MoveC requires robtargets for both target and cir_point")
 
         speed_mms = self._parse_speed(cmd.speed)
-        orientation = [target.rot.q2, target.rot.q3, target.rot.q4, target.rot.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
+        orientation = [target.orientation.q2, target.orientation.q3, target.orientation.q4, target.orientation.q1]  # RAPID [w,x,y,z] → PyBullet [x,y,z,w]
 
         # Three points defining the arc: start (current EE) → via → end
         if current_joints is not None:
             fk = self.solver.forward_kinematics(robot_id, current_joints)
             p_start = np.array(fk["position"])
         else:
-            p_start = np.array(self._pos_to_meters(cir.pos))  # fallback
+            p_start = np.array(self._pos_to_meters(cir.position))  # fallback
 
-        p_via = np.array(self._pos_to_meters(cir.pos))
-        p_end = np.array(self._pos_to_meters(target.pos))
+        p_via = np.array(self._pos_to_meters(cir.position))
+        p_end = np.array(self._pos_to_meters(target.position))
 
         # Apply tool TCP offset to all arc points
         tool = self._resolve_tool(cmd.tool, var_table)
