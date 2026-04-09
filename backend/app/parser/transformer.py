@@ -131,7 +131,7 @@ class RapidTransformer(Transformer):
         end = args[2]
         step = args[3] if len(args) > 3 and isinstance(args[3], Expression) else None
         body_start = 4 if step else 3
-        
+
         return ForStatement(var_name=var_name, start=start, end=end, step=step, body=args[body_start:])
 
     def while_stmt(self, args):
