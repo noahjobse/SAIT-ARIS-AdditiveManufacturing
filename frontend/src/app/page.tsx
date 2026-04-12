@@ -117,7 +117,7 @@ export default function MarketingPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative z-10 flex flex-col items-center justify-center min-h-[92vh] px-6 text-center gap-8">
+      <section className="relative z-10 flex flex-col items-center pt-[12vh] min-h-[92vh] px-6 text-center gap-8">
         <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col items-center gap-6">
 
           <motion.div variants={fadeUp}>
