@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import PlaybackControls from './PlaybackControls';
 import StatusPanel from './StatusPanel';
 import type { TrajectoryWaypoint } from '@/types';
+import type { HeatmapMode } from './babylon/ExtrusionTrail';
 
 type BottomPanelMode = "scrubber" | "both" | "logs";
 
@@ -12,9 +13,14 @@ type BottomPanelProps = {
     trajectory: TrajectoryWaypoint[] | null;
     onJointAnglesUpdate: (angles: number[]) => void;
     height?: number;
+    addTrailPoint?: (pos: number[], penDown: boolean) => void;
+    clearTrail?: () => void;
+    addExtrusionPoint?: (pos: number[], cumulativeExtrusion: number) => void;
+    clearExtrusion?: () => void;
+    setHeatmapMode?: (mode: HeatmapMode) => void;
 };
 
-function BottomPanel({ lastLog, trajectory, onJointAnglesUpdate, height }: BottomPanelProps) {
+function BottomPanel({ lastLog, trajectory, onJointAnglesUpdate, height, addTrailPoint, clearTrail, addExtrusionPoint, clearExtrusion, setHeatmapMode }: BottomPanelProps) {
     const [bottomPanelMode, setBottomPanelMode] = useState<BottomPanelMode>("both");
     const [splitPercent, setSplitPercent] = useState(50);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -74,6 +80,11 @@ function BottomPanel({ lastLog, trajectory, onJointAnglesUpdate, height }: Botto
                         <PlaybackControls
                             trajectory={trajectory}
                             onJointAnglesUpdate={onJointAnglesUpdate}
+                            addTrailPoint={addTrailPoint}
+                            clearTrail={clearTrail}
+                            addExtrusionPoint={addExtrusionPoint}
+                            clearExtrusion={clearExtrusion}
+                            setHeatmapMode={setHeatmapMode}
                         />
                     </div>
                 )}

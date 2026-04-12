@@ -22,6 +22,7 @@ class TrajectoryWaypoint(BaseModel):
     joints: list[float]      # degrees (j1-j6)
     tcp_pose: TCPPose
     collisions: list[CollisionInfo]
+    extrusion: float | None = None  # cumulative extrusion in mm (None for non-print trajectories)
 
 
 class SimulationStats(BaseModel):

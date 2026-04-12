@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import BottomPanel from "./BottomPanel";
 import SidePanel from "./SidePanel";
-import Viewport3D from "./babylon/Viewport3D";
+import Viewport3D, { type TrailControls } from "./babylon/Viewport3D";
 import type { TabType, TrajectoryWaypoint } from "@/types";
 import { robotIdFromPath } from "@/types";
 
@@ -20,13 +20,16 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
     const [anglesDeg, setAnglesDeg] = useState<number[]>([0, 0, 0, 0, 0, 0]);
     const [jointLimits, setJointLimits] = useState<{ min: number, max: number }[] | undefined>(undefined);
     const [trajectory, setTrajectory] = useState<TrajectoryWaypoint[] | null>(null);
+    const [stlPreviewUrl, setStlPreviewUrl] = useState<string | null>(null);
+    const [trailControls, setTrailControls] = useState<TrailControls | null>(null);
     const prevModelPath = useRef(modelPath);
 
-    // Reset joint angles and trajectory when robot model changes
+    // Reset joint angles, trajectory, and trail when robot model changes
     if (modelPath !== prevModelPath.current) {
         prevModelPath.current = modelPath;
         setAnglesDeg([0, 0, 0, 0, 0, 0]);
         setTrajectory(null);
+        trailControls?.clearTrail();
     }
 
     const handleJointLimitsExtracted = useCallback((limits: { min: number; max: number }[] | undefined) => {
@@ -87,6 +90,7 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
                     onFileUploaded={onFileUploaded}
                     onAddLog={onAddLog}
                     onTrajectoryReady={setTrajectory}
+                    onStlPreviewUrl={setStlPreviewUrl}
                 />
             </div>
 
@@ -94,7 +98,7 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
             <div ref={columnRef} className="flex-1 flex flex-col relative overflow-hidden h-full min-h-0">
 
                 <div className="flex-1 relative min-h-0">
-                    <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath} onJointLimitsExtracted={handleJointLimitsExtracted} />
+                    <Viewport3D anglesDeg={anglesDeg} modelPath={modelPath} stlPreviewUrl={stlPreviewUrl} onJointLimitsExtracted={handleJointLimitsExtracted} onTrailControlsReady={setTrailControls} />
                 </div>
 
                 {/* Vertical drag handle */}
@@ -108,6 +112,11 @@ function MainLayout({ activeTab, modelPath, lastLog, onFileUploaded, onAddLog }:
                     trajectory={trajectory}
                     onJointAnglesUpdate={setAnglesDeg}
                     height={bottomHeight}
+                    addTrailPoint={trailControls?.addTrailPoint}
+                    clearTrail={trailControls?.clearTrail}
+                    addExtrusionPoint={trailControls?.addExtrusionPoint}
+                    clearExtrusion={trailControls?.clearExtrusion}
+                    setHeatmapMode={trailControls?.setHeatmapMode}
                 />
             </div>
 

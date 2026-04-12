@@ -1,6 +1,8 @@
 import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, MeshBuilder, ImportMeshAsync, Color3, TransformNode, Quaternion, Color4, StandardMaterial, SolidParticleSystem } from "@babylonjs/core";
 import { registerBuiltInLoaders } from "@babylonjs/loaders/dynamic";
 import { GridMaterial } from "@babylonjs/materials/grid";
+import { TcpTrail } from "./TcpTrail";
+import { ExtrusionTrail, type HeatmapMode } from "./ExtrusionTrail";
 
 export type JointControls = {
     engine: Engine;
@@ -8,6 +10,13 @@ export type JointControls = {
     setJointAngle: (jointIndex: number, angleRad: number) => void;
     setAngles?: (anglesDeg: number[]) => void;
     getJointLimits?: () => { min: number; max: number }[] | undefined;
+    addTrailPoint?: (tcpPosition: number[], penDown: boolean) => void;
+    clearTrail?: () => void;
+    addExtrusionPoint?: (tcpPosition: number[], cumulativeExtrusion: number) => void;
+    clearExtrusion?: () => void;
+    setHeatmapMode?: (mode: HeatmapMode) => void;
+    loadStlPreview?: (blobUrl: string) => Promise<void>;
+    clearStlPreview?: () => void;
     dispose: () => void;
 };
 
@@ -226,7 +235,57 @@ export async function createRobotScene(canvas: HTMLCanvasElement, modelPath: str
                     ];
                 };
 
+                const trail = new TcpTrail(scene);
+                const extrusionTrail = new ExtrusionTrail(scene);
+                let stlPreviewNode: TransformNode | null = null;
+
+                const clearStlPreview = () => {
+                    if (stlPreviewNode) {
+                        stlPreviewNode.dispose(false, true);
+                        stlPreviewNode = null;
+                    }
+                };
+
+                const loadStlPreview = async (blobUrl: string) => {
+                    clearStlPreview();
+                    try {
+                        const result = await ImportMeshAsync(blobUrl, scene, { pluginExtension: ".stl" });
+                        const root = result.meshes[0];
+                        if (!root) return;
+
+                        // Create pivot for coordinate transform
+                        const pivot = new TransformNode("stlPreview", scene);
+
+                        // Center the loaded mesh
+                        const bounds = root.getHierarchyBoundingVectors();
+                        const center = bounds.min.add(bounds.max).scale(0.5);
+                        root.position = center.negate();
+                        root.parent = pivot;
+
+                        // STL Z-up → Babylon Y-up, scale mm→m, place at working position
+                        pivot.rotation.x = -Math.PI / 2;
+                        pivot.scaling.setAll(0.001);
+                        pivot.position = new Vector3(-1.2, 0.5, 0);
+
+                        // Semi-transparent blue material
+                        const mat = new StandardMaterial("stlPreviewMat", scene);
+                        mat.diffuseColor = new Color3(0.3, 0.5, 1.0);
+                        mat.alpha = 0.3;
+                        mat.backFaceCulling = false;
+                        for (const m of result.meshes) {
+                            if (m.material) m.material = mat;
+                        }
+
+                        stlPreviewNode = pivot;
+                    } catch (err) {
+                        console.error("Failed to load STL preview:", err);
+                    }
+                };
+
                 const dispose = () => {
+                    trail.dispose();
+                    extrusionTrail.dispose();
+                    clearStlPreview();
                     engine.stopRenderLoop();
                     window.removeEventListener("keydown", keydownHandler);
                     window.removeEventListener("resize", resizeHandler);
@@ -234,7 +293,17 @@ export async function createRobotScene(canvas: HTMLCanvasElement, modelPath: str
                     engine.dispose();
                 };
 
-                return { engine, scene, setJointAngle, setAngles, getJointLimits, dispose };
+                return {
+                    engine, scene, setJointAngle, setAngles, getJointLimits,
+                    addTrailPoint: (pos, penDown) => trail.addPoint(pos, penDown),
+                    clearTrail: () => trail.clear(),
+                    addExtrusionPoint: (pos, e) => extrusionTrail.addPoint(pos, e),
+                    clearExtrusion: () => extrusionTrail.clear(),
+                    setHeatmapMode: (mode: HeatmapMode) => extrusionTrail.setHeatmapMode(mode),
+                    loadStlPreview,
+                    clearStlPreview,
+                    dispose,
+                };
             }
         } catch (err) {
             console.error("Error loading robot model:", err);

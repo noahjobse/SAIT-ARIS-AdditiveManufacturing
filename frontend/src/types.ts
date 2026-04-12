@@ -2,7 +2,7 @@
  * Types derived from the OpenAPI contract for the frontend MVP.
  */
 
-export type TabType = "rapid" | "jog";
+export type TabType = "rapid" | "jog" | "print";
 
 export const ROBOT_MODELS = [
   { path: "/models/robots/irb4600/Model_IRB_4600.glb", label: "ABB IRB 4600" },
@@ -26,6 +26,7 @@ export type TrajectoryWaypoint = {
     orientation: number[];
   };
   collisions: CollisionInfo[];
+  extrusion?: number | null;
 };
 
 // Utility to extract "irb4600" from "/models/robots/irb4600/Model_IRB_4600.glb"

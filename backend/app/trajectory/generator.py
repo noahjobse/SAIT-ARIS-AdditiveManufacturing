@@ -84,7 +84,7 @@ class TrajectoryGenerator:
         current_joints: list[float] | None = None
 
         timed_out = False
-        for cmd in procedure.commands:
+        for i, cmd in enumerate(procedure.commands):
             if deadline is not None and time.monotonic() > deadline:
                 logger.warning("Trajectory generation timed out after %d waypoints", len(waypoints))
                 timed_out = True
@@ -93,6 +93,8 @@ class TrajectoryGenerator:
             new_waypoints, current_joints = self._process_command(
                 cmd, var_table, robot_id, current_joints, current_time
             )
+            for wp in new_waypoints:
+                wp["command_index"] = i
             if new_waypoints:
                 current_time = new_waypoints[-1]["timestamp"]
             waypoints.extend(new_waypoints)

@@ -2,11 +2,52 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { TrajectoryWaypoint } from '@/types';
+import type { HeatmapMode } from './babylon/ExtrusionTrail';
 
 type PlaybackControlsProps = {
   trajectory: TrajectoryWaypoint[] | null;
   onJointAnglesUpdate: (angles: number[]) => void;
+  addTrailPoint?: (tcpPosition: number[], penDown: boolean) => void;
+  clearTrail?: () => void;
+  addExtrusionPoint?: (tcpPosition: number[], cumulativeExtrusion: number) => void;
+  clearExtrusion?: () => void;
+  setHeatmapMode?: (mode: HeatmapMode) => void;
 };
+
+function interpolateExtrusion(traj: TrajectoryWaypoint[], t: number): number | null {
+  if (traj[0]?.extrusion == null) return null;
+  if (t <= traj[0].timestamp) return traj[0].extrusion ?? null;
+  const last = traj[traj.length - 1];
+  if (t >= last.timestamp) return last.extrusion ?? null;
+
+  let lo = 0, hi = traj.length - 2;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (traj[mid + 1].timestamp < t) lo = mid + 1;
+    else hi = mid;
+  }
+  const a = traj[lo], b = traj[lo + 1];
+  if (a.extrusion == null || b.extrusion == null) return null;
+  const alpha = (t - a.timestamp) / (b.timestamp - a.timestamp);
+  return a.extrusion + alpha * (b.extrusion - a.extrusion);
+}
+
+function interpolateTcpPosition(traj: TrajectoryWaypoint[], t: number): number[] | null {
+  if (!traj[0]?.tcp_pose?.position) return null;
+  if (t <= traj[0].timestamp) return [...traj[0].tcp_pose.position];
+  const last = traj[traj.length - 1];
+  if (t >= last.timestamp) return [...last.tcp_pose.position];
+
+  let lo = 0, hi = traj.length - 2;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (traj[mid + 1].timestamp < t) lo = mid + 1;
+    else hi = mid;
+  }
+  const a = traj[lo], b = traj[lo + 1];
+  const alpha = (t - a.timestamp) / (b.timestamp - a.timestamp);
+  return a.tcp_pose.position.map((v, k) => v + alpha * (b.tcp_pose.position[k] - v));
+}
 
 function interpolateJoints(traj: TrajectoryWaypoint[], t: number): number[] {
   if (t <= traj[0].timestamp) return [...traj[0].joints];
@@ -24,10 +65,11 @@ function interpolateJoints(traj: TrajectoryWaypoint[], t: number): number[] {
   return a.joints.map((j, k) => j + alpha * (b.joints[k] - j));
 }
 
-const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsProps) => {
+const PlaybackControls = ({ trajectory, onJointAnglesUpdate, addTrailPoint, clearTrail, addExtrusionPoint, clearExtrusion, setHeatmapMode }: PlaybackControlsProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [heatmap, setHeatmap] = useState<HeatmapMode>("none");
 
   const rafRef = useRef<number | null>(null);
   const wallClockStartRef = useRef<number | null>(null);
@@ -37,6 +79,14 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
   trajectoryRef.current = trajectory;
   const speedRef = useRef(playbackSpeed);
   speedRef.current = playbackSpeed;
+  const addTrailPointRef = useRef(addTrailPoint);
+  addTrailPointRef.current = addTrailPoint;
+  const clearTrailRef = useRef(clearTrail);
+  clearTrailRef.current = clearTrail;
+  const addExtrusionPointRef = useRef(addExtrusionPoint);
+  addExtrusionPointRef.current = addExtrusionPoint;
+  const clearExtrusionRef = useRef(clearExtrusion);
+  clearExtrusionRef.current = clearExtrusion;
 
   const duration = trajectory ? trajectory[trajectory.length - 1].timestamp : 0;
   const durationRef = useRef(duration);
@@ -67,6 +117,19 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
 
     setCurrentTime(simTime);
     onJointAnglesUpdate(interpolateJoints(traj, simTime));
+
+    const tcpPos = interpolateTcpPosition(traj, simTime);
+    if (tcpPos) {
+      const extrusionVal = interpolateExtrusion(traj, simTime);
+      if (extrusionVal !== null && addExtrusionPointRef.current) {
+        // Print trajectory — use extrusion trail
+        addExtrusionPointRef.current(tcpPos, extrusionVal);
+      } else if (addTrailPointRef.current) {
+        // RAPID trajectory — use Z-threshold trail
+        addTrailPointRef.current(tcpPos, tcpPos[2] < 715);
+      }
+    }
+
     rafRef.current = requestAnimationFrame(tick);
   }, [onJointAnglesUpdate, stopLoop]);
 
@@ -87,6 +150,8 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
     stopLoop();
     setIsPlaying(false);
     setCurrentTime(0);
+    clearTrailRef.current?.();
+    clearExtrusionRef.current?.();
     if (trajectory && trajectory.length > 0) {
       onJointAnglesUpdate([...trajectory[0].joints]);
     }
@@ -98,6 +163,23 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
     setCurrentTime(value);
     if (trajectory && trajectory.length > 0) {
       onJointAnglesUpdate(interpolateJoints(trajectory, value));
+
+      const hasExtrusionData = trajectory[0]?.extrusion != null;
+      if (hasExtrusionData) {
+        clearExtrusionRef.current?.();
+        for (const wp of trajectory) {
+          if (wp.timestamp > value) break;
+          if (wp.extrusion != null) {
+            addExtrusionPointRef.current?.(wp.tcp_pose.position, wp.extrusion);
+          }
+        }
+      } else {
+        clearTrailRef.current?.();
+        for (const wp of trajectory) {
+          if (wp.timestamp > value) break;
+          addTrailPointRef.current?.(wp.tcp_pose.position, wp.tcp_pose.position[2] < 715);
+        }
+      }
     }
   };
 
@@ -108,6 +190,7 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
   };
 
   const hasTrajectory = trajectory && trajectory.length > 0;
+  const hasExtrusionData = hasTrajectory && trajectory[0]?.extrusion != null;
 
   return (
     <div className="px-4 flex flex-col justify-center gap-0.5 h-full z-50 relative">
@@ -142,6 +225,23 @@ const PlaybackControls = ({ trajectory, onJointAnglesUpdate }: PlaybackControlsP
           <span className="mx-1 text-gray-600">/</span>
           <span>{formatTime(duration)}</span>
         </div>
+
+        {/* Heatmap Toggle (print trajectories only) */}
+        {hasExtrusionData && setHeatmapMode && (
+          <select
+            value={heatmap}
+            onChange={(e) => {
+              const mode = e.target.value as HeatmapMode;
+              setHeatmap(mode);
+              setHeatmapMode(mode);
+            }}
+            className="bg-gray-700 text-gray-300 text-[10px] font-bold px-2 py-1 rounded border-none outline-none focus:ring-1 focus:ring-purple-500 uppercase tracking-widest cursor-pointer"
+          >
+            <option value="none">Solid</option>
+            <option value="speed">Speed</option>
+            <option value="layer">Layer</option>
+          </select>
+        )}
 
         {/* Speed Selector */}
         <select
