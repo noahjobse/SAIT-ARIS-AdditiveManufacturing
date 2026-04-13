@@ -49,7 +49,13 @@ export const Header = ({
           <SidePanelTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
 
-        <h1 className="drop-shadow-sm bg-linear-to-r from-orange-500 to-purple-600 bg-clip-text text-transparent text-3xl">ArmStudio</h1>
+        {/* Logo */}
+        <div className="flex items-center gap-2 mr-4">
+          <img src="/ArmStudio-Logo.png" alt="ArmStudio" width={28} height={28} style={{ height: "auto" }} />
+          <span style={{ fontFamily: "var(--font-geist-mono)", fontSize: "18px", fontWeight: 700, letterSpacing: "-0.3px" }}>
+            Arm<span style={{ background: "linear-gradient(135deg,#f97316,#9333ea)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Studio</span>
+          </span>
+        </div>
       </div>
 
     </header>
