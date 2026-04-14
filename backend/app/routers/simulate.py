@@ -4,6 +4,8 @@ POST /api/simulate — full pipeline: MoveCommand[] → trajectory waypoints.
 Bridges the frontend's flat MoveCommand list to the internal Program AST,
 runs TrajectoryGenerator (IK-backed), and returns timestamped waypoints.
 """
+import asyncio
+import functools
 import logging
 import math
 import time
@@ -32,6 +34,7 @@ from app.schemas.simulate import (
     TCPPose,
     TrajectoryWaypoint,
 )
+from app.thread_pool import executor, pybullet_lock
 from app.trajectory.generator import TrajectoryError, TrajectoryGenerator
 
 router = APIRouter()
@@ -219,29 +222,18 @@ def _build_program(commands: list[dict]) -> Program:
 
 
 # ---------------------------------------------------------------------------
-# Endpoint
+# Sync helper (runs in thread pool)
 # ---------------------------------------------------------------------------
 
 MM_PER_M = 1000.0
 
 
-@router.post("/api/simulate", response_model=SimulateResponse)
-async def simulate(request: SimulateRequest):
+def _run_simulation_sync(request: SimulateRequest, start_ms: float) -> SimulateResponse:
     """
-    Full pipeline: MoveCommand[] → IK → trajectory waypoints.
+    CPU-bound simulation work — executed in a thread pool via run_in_executor.
 
-    1. Reconstruct Program AST from flat MoveCommand list
-    2. Run TrajectoryGenerator to get joint-angle waypoints (radians)
-    3. Convert to TrajectoryWaypoint response (joints in degrees)
+    Raises HTTPException for known error cases so the executor propagates it.
     """
-    start_ms = time.monotonic() * 1000
-
-    if request.robot_id not in ("irb4600", "irb2600", "irb6700"):
-        raise HTTPException(status_code=400, detail=f"Unknown robot_id: {request.robot_id!r}")
-
-    if not request.program and not request.ast:
-        raise HTTPException(status_code=400, detail="Provide either 'program' or 'ast'")
-
     simulate_timeout_s = 10.0
     deadline = time.monotonic() + simulate_timeout_s
 
@@ -321,3 +313,38 @@ async def simulate(request: SimulateRequest):
     )
 
     return SimulateResponse(trajectory=waypoints, stats=stats)
+
+
+# ---------------------------------------------------------------------------
+# Endpoint
+# ---------------------------------------------------------------------------
+
+@router.post("/api/simulate", response_model=SimulateResponse)
+async def simulate(request: SimulateRequest):
+    """
+    Full pipeline: MoveCommand[] → IK → trajectory waypoints.
+
+    1. Reconstruct Program AST from flat MoveCommand list
+    2. Run TrajectoryGenerator to get joint-angle waypoints (radians)
+    3. Convert to TrajectoryWaypoint response (joints in degrees)
+    """
+    start_ms = time.monotonic() * 1000
+
+    if request.robot_id not in ("irb4600", "irb2600", "irb6700"):
+        raise HTTPException(status_code=400, detail=f"Unknown robot_id: {request.robot_id!r}")
+
+    if not request.program and not request.ast:
+        raise HTTPException(status_code=400, detail="Provide either 'program' or 'ast'")
+
+    loop = asyncio.get_event_loop()
+    async with pybullet_lock:
+        try:
+            result = await loop.run_in_executor(
+                executor, functools.partial(_run_simulation_sync, request, start_ms)
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Unexpected error during simulation")
+            raise HTTPException(status_code=500, detail=f"Simulation failed: {e}")
+    return result

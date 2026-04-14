@@ -1,5 +1,6 @@
 """Collision detection between robot and obstacles using PyBullet."""
 import logging
+import threading
 from pathlib import Path
 
 import pybullet as p
@@ -22,6 +23,7 @@ class CollisionDetector:
         """
         self.loader = loader or RobotLoader(headless=True)
         self.obstacles: dict[str, int] = {}  # obstacle_id -> pybullet_body_id
+        self._obstacles_lock = threading.Lock()
 
     def disconnect(self):
         """Disconnect from PyBullet."""
@@ -73,18 +75,20 @@ class CollisionDetector:
             physicsClientId=self.loader.physics_client,
         )
 
-        self.obstacles[obstacle_id] = body_id
+        with self._obstacles_lock:
+            self.obstacles[obstacle_id] = body_id
         logger.info(f"Loaded obstacle '{obstacle_id}' (body ID: {body_id})")
         return body_id
 
     def remove_obstacle(self, obstacle_id: str):
         """Remove an obstacle from PyBullet."""
-        if obstacle_id in self.obstacles:
-            p.removeBody(
-                self.obstacles[obstacle_id],
-                physicsClientId=self.loader.physics_client,
-            )
-            del self.obstacles[obstacle_id]
+        with self._obstacles_lock:
+            if obstacle_id in self.obstacles:
+                p.removeBody(
+                    self.obstacles[obstacle_id],
+                    physicsClientId=self.loader.physics_client,
+                )
+                del self.obstacles[obstacle_id]
 
     def check_collisions(
         self,
@@ -123,8 +127,12 @@ class CollisionDetector:
         # Step simulation to update collision state
         p.performCollisionDetection(physicsClientId=self.loader.physics_client)
 
+        # Snapshot obstacles dict to avoid holding lock during PyBullet calls
+        with self._obstacles_lock:
+            obstacle_snapshot = dict(self.obstacles)
+
         collisions = []
-        for obstacle_id, obstacle_body_id in self.obstacles.items():
+        for obstacle_id, obstacle_body_id in obstacle_snapshot.items():
             contacts = p.getClosestPoints(
                 pybullet_id,
                 obstacle_body_id,

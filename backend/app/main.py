@@ -1,12 +1,41 @@
+import contextlib
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app import thread_pool
 from app.routers import kinematics, obstacles, parse, printing, robots, simulate, upload
+from app.thread_pool import MAX_WORKERS
+
+logger = logging.getLogger(__name__)
+
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manages app startup and shutdown.
+    - Startup: Initialize thread pool executor
+    - Shutdown: Clean shutdown of executor
+    """
+    # Startup
+    thread_pool.executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+    logger.info(f"Thread pool initialized with max_workers={MAX_WORKERS}")
+
+    yield
+
+    # Shutdown
+    if thread_pool.executor:
+        thread_pool.executor.shutdown(wait=True)
+        logger.info("Thread pool shut down successfully")
+
 
 app = FastAPI(
     title="ABB Robot Simulation Backend",
     description="FastAPI + PyBullet backend for ABB robot simulation",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 # Enable CORS for frontend

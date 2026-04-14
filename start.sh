@@ -75,6 +75,13 @@ prereq_check() {
 
 prereq_check
 
+if [ "${1:-}" = "--prod" ]; then
+  echo -e "${CYAN}Production mode: starting with Gunicorn${NC}"
+  cd "$ROOT/backend"
+  source venv/bin/activate
+  exec gunicorn app.main:app -c gunicorn.conf.py
+fi
+
 if [ "${1:-}" = "--check" ]; then
   echo "Prerequisite check complete."
   exit 0

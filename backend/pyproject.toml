@@ -4,6 +4,9 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+markers = [
+    "benchmark: marks tests as timing benchmarks (not using pytest-benchmark library)",
+]
 
 [tool.ruff]
 line-length = 100

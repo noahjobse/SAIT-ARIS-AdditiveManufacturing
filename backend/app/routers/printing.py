@@ -2,10 +2,13 @@
 POST /api/print/upload  — accept and validate STL file
 POST /api/print/slice   — slice STL → RAPID AST → IK trajectory with extrusion data
 """
+import asyncio
+import functools
 import logging
 import math
 import os
 import tempfile
+import threading
 import time
 import uuid
 
@@ -19,6 +22,7 @@ from app.schemas.simulate import (
     TCPPose,
     TrajectoryWaypoint,
 )
+from app.thread_pool import executor, pybullet_lock
 from app.trajectory.generator import TrajectoryError, TrajectoryGenerator
 
 router = APIRouter()
@@ -29,6 +33,7 @@ _generator = TrajectoryGenerator(_solver)
 
 # In-memory store: file_id → temp path
 _uploads: dict[str, str] = {}
+_uploads_lock = threading.Lock()
 
 MAX_STL_SIZE = 50 * 1024 * 1024  # 50 MB
 
@@ -82,22 +87,23 @@ async def upload_stl(file: UploadFile = File(...)):
     with open(tmp_path, "wb") as f:
         f.write(content)
 
-    _uploads[file_id] = tmp_path
+    with _uploads_lock:
+        _uploads[file_id] = tmp_path
     logger.info("Stored STL upload %s (%d bytes) at %s", file_id, len(content), tmp_path)
 
     return {"file_id": file_id, "filename": file.filename, "size_bytes": len(content)}
 
 
-@router.post("/api/print/slice", response_model=PrintSimulateResponse)
-async def slice_and_simulate(request: SliceRequest):
-    """Full pipeline: STL → trimesh slice → RAPID AST → IK trajectory."""
-    if request.robot_id not in ("irb4600", "irb2600", "irb6700"):
-        raise HTTPException(400, f"Unknown robot_id: {request.robot_id!r}")
+# ---------------------------------------------------------------------------
+# Sync helper (runs in thread pool)
+# ---------------------------------------------------------------------------
 
-    stl_path = _uploads.get(request.file_id)
-    if not stl_path or not os.path.exists(stl_path):
-        raise HTTPException(404, f"STL file not found for file_id: {request.file_id}")
+def _run_slice_sync(request: SliceRequest, stl_path: str) -> PrintSimulateResponse:
+    """
+    CPU-bound slice + IK work — executed in a thread pool via run_in_executor.
 
+    Raises HTTPException for known error cases so the executor propagates it.
+    """
     # ── Step 1: Slice STL into move commands ──
     slice_start = time.monotonic()
     try:
@@ -176,6 +182,31 @@ async def slice_and_simulate(request: SliceRequest):
             slice_time_ms=round(slice_ms, 1),
         ),
     )
+
+
+@router.post("/api/print/slice", response_model=PrintSimulateResponse)
+async def slice_and_simulate(request: SliceRequest):
+    """Full pipeline: STL → trimesh slice → RAPID AST → IK trajectory."""
+    if request.robot_id not in ("irb4600", "irb2600", "irb6700"):
+        raise HTTPException(400, f"Unknown robot_id: {request.robot_id!r}")
+
+    with _uploads_lock:
+        stl_path = _uploads.get(request.file_id)
+    if not stl_path or not os.path.exists(stl_path):
+        raise HTTPException(404, f"STL file not found for file_id: {request.file_id}")
+
+    loop = asyncio.get_event_loop()
+    async with pybullet_lock:
+        try:
+            result = await loop.run_in_executor(
+                executor, functools.partial(_run_slice_sync, request, stl_path)
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Unexpected error during slice and simulate")
+            raise HTTPException(500, f"Slice and simulate failed: {e}")
+    return result
 
 
 def _interpolate_extrusion(

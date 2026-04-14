@@ -1,5 +1,6 @@
 """Forward and inverse kinematics solver using PyBullet."""
 import logging
+import threading
 from collections import OrderedDict
 
 import numpy as np
@@ -36,6 +37,7 @@ class KinematicsSolver:
         """
         self.loader = RobotLoader(headless=headless)
         self._ik_cache: OrderedDict[tuple, list[float]] = OrderedDict()
+        self._cache_lock = threading.Lock()
 
     def disconnect(self):
         """Disconnect from PyBullet."""
@@ -118,9 +120,10 @@ class KinematicsSolver:
         """
         # Check IK cache
         cache_key = _ik_cache_key(robot_id, target_position, target_orientation)
-        if cache_key in self._ik_cache:
-            self._ik_cache.move_to_end(cache_key)
-            return {"joint_angles": list(self._ik_cache[cache_key])}
+        with self._cache_lock:
+            if cache_key in self._ik_cache:
+                self._ik_cache.move_to_end(cache_key)
+                return {"joint_angles": list(self._ik_cache[cache_key])}
 
         if not self.loader.is_loaded(robot_id):
             self.loader.load_robot(robot_id)
@@ -193,9 +196,10 @@ class KinematicsSolver:
         result = list(joint_angles[:num_joints])
 
         # Store in LRU cache
-        self._ik_cache[cache_key] = result
-        if len(self._ik_cache) > IK_CACHE_MAX:
-            self._ik_cache.popitem(last=False)
+        with self._cache_lock:
+            self._ik_cache[cache_key] = result
+            if len(self._ik_cache) > IK_CACHE_MAX:
+                self._ik_cache.popitem(last=False)
 
         return {"joint_angles": result}
 

@@ -13,3 +13,5 @@ services:
       - /app/frontend/node_modules
     environment:
       - PYTHONUNBUFFERED=1
+      - PYBULLET_THREADS=4
+      - WEB_WORKERS=2
